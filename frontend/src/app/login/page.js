@@ -41,8 +41,8 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center w-14 h-14 bg-indigo-600 rounded-xl mb-4 shadow-lg shadow-indigo-200">
             <ClipboardList className="w-7 h-7 text-white" strokeWidth={2} />
           </div>
-          <h1 className="text-2xl font-semibold text-slate-900">TaskFlow</h1>
-          <p className="text-slate-500 text-sm mt-1">Gestion de tareas empresarial</p>
+          <h1 className="text-2xl font-semibold text-slate-900">Meridian Control</h1>
+          <p className="text-slate-500 text-sm mt-1">Sistema de gestión de tareas</p>
         </div>
 
         {/* Formulario */}

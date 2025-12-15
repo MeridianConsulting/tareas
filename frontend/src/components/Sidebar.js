@@ -112,7 +112,7 @@ export default function Sidebar({ user, isOpen, onToggle }) {
               <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
                 <ClipboardList className="w-4.5 h-4.5 text-white" strokeWidth={2} />
               </div>
-              <span className="font-semibold text-base tracking-tight">TaskFlow</span>
+              <span className="font-semibold text-base tracking-tight">Meridian Control</span>
             </div>
           )}
           <button 
