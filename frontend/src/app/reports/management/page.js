@@ -136,8 +136,8 @@ export default function ManagementDashboard() {
     <Layout>
       <div className="p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto overflow-hidden">
         <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-slate-900">Dashboard Gerencial</h1>
-          <p className="text-slate-500 mt-0.5 text-sm">Vision general del estado de las tareas por area</p>
+          <h1 className="text-2xl font-semibold text-slate-900">Dashboard General</h1>
+          <p className="text-slate-500 mt-0.5 text-sm">Vision consolidada del estado de todas las tareas</p>
         </div>
 
         {/* KPIs de Completitud */}

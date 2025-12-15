@@ -79,8 +79,8 @@ export default function Dashboard() {
         {/* Header con boton de nueva tarea */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-2xl font-semibold text-slate-900">Mis tareas</h1>
-            <p className="text-slate-500 mt-0.5 text-sm">Gestiona y da seguimiento a tus actividades</p>
+            <h1 className="text-2xl font-semibold text-slate-900">Todas las Tareas</h1>
+            <p className="text-slate-500 mt-0.5 text-sm">Vista general de todas las tareas del sistema</p>
           </div>
           <button
             onClick={() => setShowTaskModal(true)}

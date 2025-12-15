@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { logout } from '../lib/auth';
 import TaskModal from './TaskModal';
 import { 
-  LayoutDashboard, 
+  ListTodo, 
   Calendar, 
   BarChart3, 
   Building2, 
@@ -17,7 +17,9 @@ import {
   ChevronRight, 
   LogOut,
   ClipboardList,
-  Table2
+  Table2,
+  PieChart,
+  Layers
 } from 'lucide-react';
 
 export default function Sidebar({ user, isOpen, onToggle }) {
@@ -29,8 +31,8 @@ export default function Sidebar({ user, isOpen, onToggle }) {
   const menuItems = [
     { 
       href: '/dashboard', 
-      label: 'Dashboard', 
-      icon: LayoutDashboard
+      label: 'Todas las Tareas', 
+      icon: ListTodo
     },
     { 
       href: '/my-tasks', 
@@ -42,16 +44,21 @@ export default function Sidebar({ user, isOpen, onToggle }) {
   if (user?.role === 'admin' || user?.role === 'gerencia' || user?.role === 'lider_area') {
     menuItems.push({ 
       href: '/reports/daily', 
-      label: 'Reportes diarios', 
+      label: 'Reportes Diarios', 
       icon: Calendar
+    });
+    menuItems.push({ 
+      href: '/reports/areas', 
+      label: 'Dashboard por Area', 
+      icon: Layers
     });
   }
 
   if (user?.role === 'admin' || user?.role === 'gerencia') {
     menuItems.push({ 
       href: '/reports/management', 
-      label: 'Dashboard gerencial', 
-      icon: BarChart3
+      label: 'Dashboard General', 
+      icon: PieChart
     });
   }
 
@@ -127,7 +134,7 @@ export default function Sidebar({ user, isOpen, onToggle }) {
         </div>
 
         {/* Navegacion */}
-        <nav className={`flex-1 ${isOpen ? 'px-3' : 'px-2'} pb-4`}>
+        <nav className={`flex-1 ${isOpen ? 'px-3' : 'px-2'} pb-4 overflow-y-auto`}>
           {isOpen && (
             <p className="px-3 py-2 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
               Menu
