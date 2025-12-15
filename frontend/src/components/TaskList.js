@@ -109,28 +109,28 @@ export default function TaskList({ tasks, onRefresh }) {
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
         {/* Vista de tabla para escritorio */}
         <div className="hidden lg:block overflow-x-auto">
-          <table className="min-w-full">
+          <table className="w-full table-fixed">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50/80">
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                <th className="w-[28%] px-4 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                   Tarea
                 </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                <th className="w-[15%] px-4 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                   Responsable
                 </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                <th className="w-[10%] px-4 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                   Prioridad
                 </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                <th className="w-[12%] px-4 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                   Estado
                 </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                <th className="w-[12%] px-4 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                   Progreso
                 </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                <th className="w-[11%] px-4 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                   Vencimiento
                 </th>
-                <th className="px-6 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                <th className="w-[12%] px-4 py-3.5 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
                   Acciones
                 </th>
               </tr>
@@ -150,72 +150,70 @@ export default function TaskList({ tasks, onRefresh }) {
                     className="hover:bg-slate-50/80 cursor-pointer transition-colors duration-150 group"
                     onClick={() => handleEditTask(t)}
                   >
-                    <td className="px-6 py-4">
-                      <div className="flex items-start gap-3">
-                        <div className={`w-9 h-9 ${typeConfig.bg} rounded-lg flex items-center justify-center flex-shrink-0`} title={t.type}>
-                          <TypeIcon className={`w-4.5 h-4.5 ${typeConfig.color}`} strokeWidth={1.75} />
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`w-8 h-8 ${typeConfig.bg} rounded-lg flex items-center justify-center flex-shrink-0`} title={t.type}>
+                          <TypeIcon className={`w-4 h-4 ${typeConfig.color}`} strokeWidth={1.75} />
                         </div>
-                        <div className="min-w-0">
-                          <p className="font-medium text-slate-900 group-hover:text-indigo-600 transition-colors truncate">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-slate-900 group-hover:text-indigo-600 transition-colors truncate text-sm">
                             {t.title}
                           </p>
-                          <p className="text-sm text-slate-500 truncate">{t.area_name || 'Sin area'}</p>
+                          <p className="text-xs text-slate-500 truncate">{t.area_name || 'Sin area'}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 bg-gradient-to-br from-slate-700 to-slate-900 rounded-full flex items-center justify-center text-white text-xs font-medium flex-shrink-0">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-7 h-7 bg-slate-700 rounded-full flex items-center justify-center text-white text-xs font-medium flex-shrink-0">
                           {t.responsible_name?.charAt(0).toUpperCase() || '?'}
                         </div>
                         <span className="text-sm text-slate-700 truncate">{t.responsible_name || 'Sin asignar'}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border ${priorityConfig.bg} ${priorityConfig.text} ${priorityConfig.border}`}>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border ${priorityConfig.bg} ${priorityConfig.text} ${priorityConfig.border}`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${priorityConfig.dot}`}></span>
                         {t.priority}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}>
-                        <StatusIcon className="w-3.5 h-3.5" strokeWidth={2} />
-                        {t.status}
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium border whitespace-nowrap ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}>
+                        <StatusIcon className="w-3 h-3 flex-shrink-0" strokeWidth={2} />
+                        <span className="truncate">{t.status}</span>
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="w-28">
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full rounded-full transition-all duration-300 ${
-                                t.progress_percent >= 100 ? 'bg-emerald-500' :
-                                t.progress_percent >= 50 ? 'bg-blue-500' : 'bg-amber-500'
-                              }`}
-                              style={{ width: `${t.progress_percent || 0}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-xs font-medium text-slate-600 w-8 text-right tabular-nums">{t.progress_percent || 0}%</span>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-300 ${
+                              t.progress_percent >= 100 ? 'bg-emerald-500' :
+                              t.progress_percent >= 50 ? 'bg-blue-500' : 'bg-amber-500'
+                            }`}
+                            style={{ width: `${t.progress_percent || 0}%` }}
+                          ></div>
                         </div>
+                        <span className="text-xs font-medium text-slate-600 tabular-nums">{t.progress_percent || 0}%</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3">
                       {t.due_date ? (
-                        <div className={`flex items-center gap-1.5 text-sm ${isOverdue ? 'text-rose-600 font-medium' : 'text-slate-600'}`}>
-                          {isOverdue && <AlertCircle className="w-4 h-4" strokeWidth={2} />}
-                          <Calendar className={`w-3.5 h-3.5 ${isOverdue ? 'text-rose-500' : 'text-slate-400'}`} strokeWidth={1.75} />
-                          {new Date(t.due_date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                        <div className={`flex items-center gap-1 text-xs ${isOverdue ? 'text-rose-600 font-medium' : 'text-slate-600'}`}>
+                          {isOverdue && <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={2} />}
+                          <Calendar className={`w-3 h-3 flex-shrink-0 ${isOverdue ? 'text-rose-500' : 'text-slate-400'}`} strokeWidth={1.75} />
+                          <span className="whitespace-nowrap">{new Date(t.due_date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</span>
                         </div>
                       ) : (
-                        <span className="text-sm text-slate-400">Sin fecha</span>
+                        <span className="text-xs text-slate-400">Sin fecha</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-4 py-3 text-right">
                       <button
                         onClick={(e) => handleEditTask(t, e)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1"
                       >
-                        <Pencil className="w-4 h-4" strokeWidth={1.75} />
+                        <Pencil className="w-3.5 h-3.5" strokeWidth={1.75} />
                         Editar
                       </button>
                     </td>
@@ -243,11 +241,11 @@ export default function TaskList({ tasks, onRefresh }) {
                 onClick={() => handleEditTask(t)}
               >
                 <div className="flex items-start justify-between gap-3 mb-3">
-                  <div className="flex items-start gap-3 min-w-0">
+                  <div className="flex items-start gap-3 min-w-0 flex-1">
                     <div className={`w-9 h-9 ${typeConfig.bg} rounded-lg flex items-center justify-center flex-shrink-0`}>
                       <TypeIcon className={`w-4.5 h-4.5 ${typeConfig.color}`} strokeWidth={1.75} />
                     </div>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="font-medium text-slate-900 truncate">{t.title}</p>
                       <p className="text-sm text-slate-500 truncate">{t.area_name}</p>
                     </div>
@@ -258,13 +256,13 @@ export default function TaskList({ tasks, onRefresh }) {
                 </div>
                 
                 <div className="flex items-center justify-between text-sm mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-gradient-to-br from-slate-700 to-slate-900 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <div className="w-6 h-6 bg-slate-700 rounded-full flex items-center justify-center text-white text-xs font-medium flex-shrink-0">
                       {t.responsible_name?.charAt(0).toUpperCase()}
                     </div>
                     <span className="text-slate-600 truncate">{t.responsible_name}</span>
                   </div>
-                  <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium border ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}>
+                  <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium border flex-shrink-0 ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border}`}>
                     <StatusIcon className="w-3 h-3" strokeWidth={2} />
                     {t.status}
                   </span>
@@ -284,7 +282,7 @@ export default function TaskList({ tasks, onRefresh }) {
                   </div>
                   <span className="text-xs font-medium text-slate-500 tabular-nums">{t.progress_percent || 0}%</span>
                   {t.due_date && (
-                    <div className={`flex items-center gap-1 text-xs ${isOverdue ? 'text-rose-600 font-medium' : 'text-slate-500'}`}>
+                    <div className={`flex items-center gap-1 text-xs flex-shrink-0 ${isOverdue ? 'text-rose-600 font-medium' : 'text-slate-500'}`}>
                       {isOverdue && <AlertCircle className="w-3.5 h-3.5" strokeWidth={2} />}
                       {new Date(t.due_date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
                     </div>

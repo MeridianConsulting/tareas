@@ -16,7 +16,8 @@ import {
   ChevronLeft, 
   ChevronRight, 
   LogOut,
-  ClipboardList
+  ClipboardList,
+  Table2
 } from 'lucide-react';
 
 export default function Sidebar({ user, isOpen, onToggle }) {
@@ -30,6 +31,11 @@ export default function Sidebar({ user, isOpen, onToggle }) {
       href: '/dashboard', 
       label: 'Dashboard', 
       icon: LayoutDashboard
+    },
+    { 
+      href: '/my-tasks', 
+      label: 'Mis Tareas', 
+      icon: Table2
     },
   ];
 

@@ -57,9 +57,9 @@ export default function Layout({ children }) {
   }
 
   return (
-    <div className="flex h-screen bg-slate-100">
+    <div className="flex h-screen bg-slate-100 overflow-hidden">
       <Sidebar user={user} isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden">
         {children}
       </main>
     </div>

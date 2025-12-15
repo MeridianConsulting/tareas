@@ -1,0 +1,452 @@
+// components/TasksSpreadsheet.js
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import { apiRequest } from '../lib/api';
+import { 
+  Plus, 
+  Save, 
+  Trash2, 
+  Loader2,
+  Check,
+  X,
+  AlertCircle
+} from 'lucide-react';
+
+export default function TasksSpreadsheet({ userId, onTasksChange }) {
+  const [tasks, setTasks] = useState([]);
+  const [areas, setAreas] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [editingCell, setEditingCell] = useState(null);
+  const [pendingChanges, setPendingChanges] = useState({});
+  const [newRows, setNewRows] = useState([]);
+  const inputRef = useRef(null);
+
+  const tipos = ['Clave', 'Operativa', 'Mejora', 'Obligatoria'];
+  const prioridades = ['Alta', 'Media', 'Baja'];
+  const estados = ['No iniciada', 'En progreso', 'En revision', 'Completada', 'En riesgo'];
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    if (editingCell && inputRef.current) {
+      inputRef.current.focus();
+      if (inputRef.current.select) {
+        inputRef.current.select();
+      }
+    }
+  }, [editingCell]);
+
+  async function loadData() {
+    try {
+      // Obtener usuario actual
+      const meData = await apiRequest('/auth/me');
+      const user = meData.data;
+      setCurrentUser(user);
+
+      const [tasksData, areasData, usersData] = await Promise.all([
+        apiRequest('/tasks'),
+        apiRequest('/areas'),
+        apiRequest('/users'),
+      ]);
+      
+      // Filtrar solo las tareas del usuario actual (donde es responsable)
+      const allTasks = tasksData.data || [];
+      const myTasks = allTasks.filter(t => t.responsible_id == user.id);
+      
+      setTasks(myTasks);
+      setAreas(areasData.data || []);
+      setUsers(usersData.data || []);
+    } catch (e) {
+      console.error('Error loading data:', e);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function addNewRow() {
+    const newRow = {
+      _tempId: Date.now(),
+      _isNew: true,
+      title: '',
+      description: '',
+      type: 'Operativa',
+      priority: 'Media',
+      status: 'No iniciada',
+      progress_percent: 0,
+      area_id: currentUser?.area_id || areas[0]?.id || '',
+      responsible_id: currentUser?.id || '',
+      start_date: new Date().toISOString().split('T')[0],
+      due_date: '',
+    };
+    setNewRows([...newRows, newRow]);
+  }
+
+  function updateCell(taskId, field, value, isNew = false) {
+    if (isNew) {
+      setNewRows(newRows.map(row => 
+        row._tempId === taskId ? { ...row, [field]: value } : row
+      ));
+    } else {
+      setPendingChanges(prev => ({
+        ...prev,
+        [taskId]: {
+          ...prev[taskId],
+          [field]: value
+        }
+      }));
+      setTasks(tasks.map(t => 
+        t.id === taskId ? { ...t, [field]: value } : t
+      ));
+    }
+  }
+
+  function removeNewRow(tempId) {
+    setNewRows(newRows.filter(row => row._tempId !== tempId));
+  }
+
+  async function saveNewRow(row) {
+    if (!row.title.trim()) {
+      alert('El titulo es obligatorio');
+      return;
+    }
+    if (!row.area_id) {
+      alert('El area es obligatoria');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const { _tempId, _isNew, ...taskData } = row;
+      // Asegurar que el responsable sea el usuario actual
+      taskData.responsible_id = currentUser?.id;
+      
+      await apiRequest('/tasks', {
+        method: 'POST',
+        body: JSON.stringify(taskData),
+      });
+      setNewRows(newRows.filter(r => r._tempId !== row._tempId));
+      await loadData();
+      if (onTasksChange) onTasksChange();
+    } catch (e) {
+      alert('Error al guardar: ' + e.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function saveChanges(taskId) {
+    if (!pendingChanges[taskId]) return;
+    
+    setSaving(true);
+    try {
+      const task = tasks.find(t => t.id === taskId);
+      await apiRequest(`/tasks/${taskId}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          ...task,
+          ...pendingChanges[taskId]
+        }),
+      });
+      setPendingChanges(prev => {
+        const { [taskId]: _, ...rest } = prev;
+        return rest;
+      });
+      if (onTasksChange) onTasksChange();
+    } catch (e) {
+      alert('Error al guardar: ' + e.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function deleteTask(taskId) {
+    if (!confirm('¿Eliminar esta tarea?')) return;
+    
+    try {
+      await apiRequest(`/tasks/${taskId}`, { method: 'DELETE' });
+      setTasks(tasks.filter(t => t.id !== taskId));
+      if (onTasksChange) onTasksChange();
+    } catch (e) {
+      alert('Error al eliminar: ' + e.message);
+    }
+  }
+
+  function handleKeyDown(e, taskId, field, isNew) {
+    if (e.key === 'Enter') {
+      setEditingCell(null);
+      if (isNew) {
+        // Mover al siguiente campo o guardar
+      } else if (pendingChanges[taskId]) {
+        saveChanges(taskId);
+      }
+    } else if (e.key === 'Escape') {
+      setEditingCell(null);
+    }
+  }
+
+  function renderCell(task, field, isNew = false) {
+    const taskId = isNew ? task._tempId : task.id;
+    const isEditing = editingCell?.id === taskId && editingCell?.field === field;
+    const value = task[field];
+    const hasChanges = !isNew && pendingChanges[taskId]?.[field] !== undefined;
+
+    const cellClass = `px-3 py-2 border-r border-slate-200 text-sm ${
+      hasChanges ? 'bg-amber-50' : isNew ? 'bg-emerald-50/30' : 'bg-white'
+    } ${isEditing ? 'ring-2 ring-inset ring-indigo-500' : ''} hover:bg-slate-50`;
+
+    // Campos de seleccion
+    if (['type', 'priority', 'status', 'area_id'].includes(field)) {
+      let options = [];
+
+      if (field === 'type') options = tipos.map(t => ({ value: t, label: t }));
+      else if (field === 'priority') options = prioridades.map(p => ({ value: p, label: p }));
+      else if (field === 'status') options = estados.map(s => ({ value: s, label: s }));
+      else if (field === 'area_id') {
+        options = areas.map(a => ({ value: a.id, label: a.name }));
+      }
+
+      return (
+        <td className={cellClass}>
+          <select
+            value={value || ''}
+            onChange={(e) => updateCell(taskId, field, e.target.value, isNew)}
+            className="w-full bg-transparent border-0 text-sm focus:outline-none focus:ring-0 p-0 cursor-pointer"
+          >
+            {field === 'area_id' && <option value="">Seleccionar</option>}
+            {options.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </td>
+      );
+    }
+
+    // Campo de progreso
+    if (field === 'progress_percent') {
+      return (
+        <td className={cellClass}>
+          <div className="flex items-center gap-2">
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="5"
+              value={value || 0}
+              onChange={(e) => updateCell(taskId, field, parseInt(e.target.value), isNew)}
+              className="flex-1 h-1.5 accent-indigo-600"
+            />
+            <span className="text-xs font-semibold text-slate-700 w-10 text-right tabular-nums">{value || 0}%</span>
+          </div>
+        </td>
+      );
+    }
+
+    // Campos de fecha
+    if (['start_date', 'due_date'].includes(field)) {
+      return (
+        <td className={cellClass}>
+          <input
+            type="date"
+            value={value || ''}
+            onChange={(e) => updateCell(taskId, field, e.target.value, isNew)}
+            className="w-full bg-transparent border-0 text-sm focus:outline-none focus:ring-0 p-0"
+          />
+        </td>
+      );
+    }
+
+    // Campos de texto (titulo, descripcion)
+    if (isEditing) {
+      return (
+        <td className={cellClass}>
+          <input
+            ref={inputRef}
+            type="text"
+            value={value || ''}
+            onChange={(e) => updateCell(taskId, field, e.target.value, isNew)}
+            onBlur={() => setEditingCell(null)}
+            onKeyDown={(e) => handleKeyDown(e, taskId, field, isNew)}
+            className="w-full bg-transparent border-0 text-sm focus:outline-none focus:ring-0 p-0"
+          />
+        </td>
+      );
+    }
+
+    return (
+      <td 
+        className={`${cellClass} cursor-text`}
+        onClick={() => setEditingCell({ id: taskId, field })}
+      >
+        <span className={`block truncate ${!value ? 'text-slate-400 italic text-xs' : ''}`}>
+          {value || (field === 'title' ? 'Clic para escribir...' : '-')}
+        </span>
+      </td>
+    );
+  }
+
+  function renderRow(task, isNew = false) {
+    const taskId = isNew ? task._tempId : task.id;
+    const hasChanges = !isNew && Object.keys(pendingChanges[taskId] || {}).length > 0;
+
+    return (
+      <tr key={taskId} className="group border-b border-slate-100 last:border-b-0">
+        {renderCell(task, 'title', isNew)}
+        {renderCell(task, 'type', isNew)}
+        {renderCell(task, 'priority', isNew)}
+        {renderCell(task, 'status', isNew)}
+        {renderCell(task, 'area_id', isNew)}
+        {renderCell(task, 'progress_percent', isNew)}
+        {renderCell(task, 'start_date', isNew)}
+        {renderCell(task, 'due_date', isNew)}
+        <td className="px-2 py-2 text-center bg-slate-50/50">
+          <div className="flex items-center justify-center gap-1">
+            {isNew ? (
+              <>
+                <button
+                  onClick={() => saveNewRow(task)}
+                  disabled={saving || !task.title}
+                  className="p-1.5 text-emerald-600 hover:bg-emerald-100 rounded-md disabled:opacity-50 transition-colors"
+                  title="Guardar"
+                >
+                  <Check className="w-4 h-4" strokeWidth={2.5} />
+                </button>
+                <button
+                  onClick={() => removeNewRow(task._tempId)}
+                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
+                  title="Cancelar"
+                >
+                  <X className="w-4 h-4" strokeWidth={2} />
+                </button>
+              </>
+            ) : (
+              <>
+                {hasChanges && (
+                  <button
+                    onClick={() => saveChanges(taskId)}
+                    disabled={saving}
+                    className="p-1.5 text-emerald-600 hover:bg-emerald-100 rounded-md disabled:opacity-50 transition-colors"
+                    title="Guardar cambios"
+                  >
+                    <Save className="w-4 h-4" strokeWidth={2} />
+                  </button>
+                )}
+                <button
+                  onClick={() => deleteTask(taskId)}
+                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md opacity-0 group-hover:opacity-100 transition-all"
+                  title="Eliminar"
+                >
+                  <Trash2 className="w-4 h-4" strokeWidth={2} />
+                </button>
+              </>
+            )}
+          </div>
+        </td>
+      </tr>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-48 bg-white rounded-xl border border-slate-200">
+        <Loader2 className="h-8 w-8 text-indigo-600 animate-spin" strokeWidth={1.75} />
+      </div>
+    );
+  }
+
+  const hasPendingChanges = Object.keys(pendingChanges).length > 0;
+
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+      {/* Toolbar compacto */}
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100">
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-slate-600">{tasks.length} tareas</span>
+          {hasPendingChanges && (
+            <span className="flex items-center gap-1 text-xs text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
+              <AlertCircle className="w-3 h-3" />
+              Sin guardar
+            </span>
+          )}
+        </div>
+        <button
+          onClick={addNewRow}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+        >
+          <Plus className="w-4 h-4" strokeWidth={2.5} />
+          Nueva tarea
+        </button>
+      </div>
+
+      {/* Tabla tipo Excel */}
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse" style={{ minWidth: '900px' }}>
+          <thead>
+            <tr className="bg-slate-700 text-white">
+              <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider border-r border-slate-600" style={{ width: '25%' }}>
+                Titulo
+              </th>
+              <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider border-r border-slate-600" style={{ width: '10%' }}>
+                Tipo
+              </th>
+              <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider border-r border-slate-600" style={{ width: '8%' }}>
+                Prioridad
+              </th>
+              <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider border-r border-slate-600" style={{ width: '12%' }}>
+                Estado
+              </th>
+              <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider border-r border-slate-600" style={{ width: '15%' }}>
+                Area
+              </th>
+              <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider border-r border-slate-600" style={{ width: '12%' }}>
+                Progreso
+              </th>
+              <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider border-r border-slate-600" style={{ width: '9%' }}>
+                Inicio
+              </th>
+              <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider border-r border-slate-600" style={{ width: '9%' }}>
+                Vence
+              </th>
+              <th className="px-3 py-2.5 text-center text-xs font-semibold uppercase tracking-wider" style={{ width: '70px' }}>
+                
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {/* Filas nuevas primero */}
+            {newRows.map(row => renderRow(row, true))}
+            
+            {/* Tareas existentes */}
+            {tasks.map(task => renderRow(task, false))}
+            
+            {/* Fila para agregar si no hay nada */}
+            {tasks.length === 0 && newRows.length === 0 && (
+              <tr>
+                <td colSpan={9} className="px-4 py-8 text-center bg-slate-50">
+                  <p className="text-sm text-slate-500 mb-2">No tienes tareas asignadas</p>
+                  <button
+                    onClick={addNewRow}
+                    className="inline-flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Crear tu primera tarea
+                  </button>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Footer minimalista */}
+      <div className="px-4 py-2 border-t border-slate-100 bg-slate-50/50 text-xs text-slate-500">
+        Clic en celda para editar · Enter para confirmar · Esc para cancelar
+      </div>
+    </div>
+  );
+}
