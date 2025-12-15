@@ -11,6 +11,7 @@
   "dependencies": {
     "@nivo/core": "^0.99.0",
     "@nivo/pie": "^0.99.0",
+    "jspdf": "^3.0.4",
     "lucide-react": "^0.561.0",
     "next": "16.0.10",
     "react": "19.2.1",

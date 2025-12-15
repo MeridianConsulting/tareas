@@ -19,7 +19,8 @@ import {
   ClipboardList,
   Table2,
   PieChart,
-  Layers
+  Layers,
+  FileDown
 } from 'lucide-react';
 
 export default function Sidebar({ user, isOpen, onToggle }) {
@@ -51,6 +52,11 @@ export default function Sidebar({ user, isOpen, onToggle }) {
       href: '/reports/areas', 
       label: 'Dashboard por Area', 
       icon: Layers
+    });
+    menuItems.push({ 
+      href: '/reports/download', 
+      label: 'Descargar Reportes', 
+      icon: FileDown
     });
   }
 
