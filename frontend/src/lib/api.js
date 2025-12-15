@@ -103,8 +103,24 @@ export async function apiRequest(url, options = {}) {
   
   if (!res.ok) {
     const error = await res.json().catch(() => ({ error: { message: 'Error desconocido' } }));
-    const errorMessage = error.error?.message || `Error ${res.status}: ${res.statusText}`;
-    console.error('API Error:', errorMessage, error);
+    let errorMessage = error.error?.message || `Error ${res.status}: ${res.statusText}`;
+    
+    // Traducir mensajes comunes de error a español
+    const errorTranslations = {
+      'Invalid credentials': 'Credenciales inválidas. Verifica tu correo y contraseña.',
+      'Unauthorized': 'No autorizado. Por favor, inicia sesión nuevamente.',
+      'Forbidden': 'No tienes permisos para realizar esta acción.',
+      'Not found': 'Recurso no encontrado.',
+      'Internal server error': 'Error del servidor. Por favor, intenta más tarde.'
+    };
+    
+    errorMessage = errorTranslations[errorMessage] || errorMessage;
+    
+    // Solo mostrar en consola en desarrollo
+    if (process.env.NODE_ENV === 'development') {
+      console.error('API Error:', errorMessage);
+    }
+    
     throw new Error(errorMessage);
   }
   

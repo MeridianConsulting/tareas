@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { login } from '../../lib/auth';
 import { apiRequest } from '../../lib/api';
-import { Loader2, ClipboardList, Mail, Lock, AlertCircle } from 'lucide-react';
+import { Loader2, Mail, Lock, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,6 +13,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -27,19 +28,24 @@ export default function LoginPage() {
       login(data.data.access_token);
       router.push('/dashboard');
     } catch (e) {
-      setError(e.message || 'Error de autenticacion');
+      // El mensaje ya viene traducido desde apiRequest
+      setError(e.message || 'Error de autenticación. Por favor, verifica tus credenciales.');
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-50 to-slate-100">
       <div className="w-full max-w-md px-4">
         {/* Logo y titulo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-indigo-600 rounded-xl mb-4 shadow-lg shadow-indigo-200">
-            <ClipboardList className="w-7 h-7 text-white" strokeWidth={2} />
+          <div className="flex justify-center mb-4">
+            <img
+              src="/logo_meridian.png"
+              alt="Meridian Consulting"
+              className="h-16 w-auto max-w-[320px] object-contain"
+            />
           </div>
           <h1 className="text-2xl font-semibold text-slate-900">Meridian Control</h1>
           <p className="text-slate-500 text-sm mt-1">Sistema de gestión de tareas</p>
@@ -48,14 +54,14 @@ export default function LoginPage() {
         {/* Formulario */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
           <div className="mb-6">
-            <h2 className="text-xl font-semibold text-slate-900">Iniciar sesion</h2>
+            <h2 className="text-xl font-semibold text-slate-900">Iniciar sesión</h2>
             <p className="text-slate-500 text-sm mt-1">Ingresa tus credenciales para acceder</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                Correo electronico
+                Correo electrónico
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -66,28 +72,53 @@ export default function LoginPage() {
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   required
-                  className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow placeholder:text-slate-400"
+                  className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-blue-700 transition-shadow placeholder:text-slate-400"
                   placeholder="usuario@empresa.com"
                 />
               </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                Contrasena
+                Contraseña
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-slate-400" strokeWidth={1.75} />
                 </div>
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   required
-                  className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow placeholder:text-slate-400"
-                  placeholder="Tu contrasena"
+                  className="w-full pl-10 pr-10 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-blue-700 transition-shadow placeholder:text-slate-400"
+                  placeholder="Tu contraseña"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(v => !v)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
               </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 text-sm text-slate-600">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 rounded border-slate-300 text-blue-700 focus:ring-blue-700"
+                />
+                Recordarme
+              </label>
+
+              <a
+                href="/forgot-password"
+                className="text-sm font-medium text-blue-700 hover:text-blue-800"
+              >
+                ¿Olvidaste tu contraseña?
+              </a>
             </div>
 
             {error && (
@@ -100,23 +131,23 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 shadow-sm"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-offset-2 shadow-sm"
             >
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
-                  Iniciando sesion...
+                  Iniciando sesión...
                 </>
               ) : (
-                'Iniciar sesion'
+                'Iniciar sesión'
               )}
             </button>
           </form>
         </div>
 
         {/* Footer */}
-        <p className="text-center text-xs text-slate-500 mt-6">
-          Sistema de gestion de tareas
+        <p className="text-center text-xs text-slate-400 mt-6">
+          © {new Date().getFullYear()} Meridian Consulting
         </p>
       </div>
     </div>
