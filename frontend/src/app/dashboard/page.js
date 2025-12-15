@@ -1,11 +1,12 @@
 // app/dashboard/page.js
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Layout from '../../components/Layout';
 import TaskList from '../../components/TaskList';
 import TaskModal from '../../components/TaskModal';
+import DateRangeFilter from '../../components/DateRangeFilter';
 import { apiRequest } from '../../lib/api';
 import { 
   Plus, 
@@ -14,26 +15,41 @@ import {
   CheckCircle2, 
   AlertTriangle,
   Filter,
-  Loader2
+  Loader2,
+  RefreshCw
 } from 'lucide-react';
 
 export default function Dashboard() {
   const router = useRouter();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [filters, setFilters] = useState({
     status: '',
     priority: '',
     type: '',
   });
+  // Inicializar con la fecha de hoy
+  const today = new Date().toISOString().split('T')[0];
+  const [dateFrom, setDateFrom] = useState(today);
+  const [dateTo, setDateTo] = useState(today);
+  const [currentPeriod, setCurrentPeriod] = useState('today');
 
-  async function loadTasks() {
+  const loadTasks = useCallback(async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
+    
     try {
       const queryParams = new URLSearchParams();
       if (filters.status) queryParams.append('status', filters.status);
       if (filters.priority) queryParams.append('priority', filters.priority);
       if (filters.type) queryParams.append('type', filters.type);
+      if (dateFrom) queryParams.append('date_from', dateFrom);
+      if (dateTo) queryParams.append('date_to', dateTo);
       
       const queryString = queryParams.toString();
       const url = `/tasks${queryString ? `?${queryString}` : ''}`;
@@ -43,17 +59,42 @@ export default function Dashboard() {
       console.error('Error loading tasks:', e);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  }
+  }, [filters, dateFrom, dateTo]);
 
   useEffect(() => {
     loadTasks();
-  }, [filters]);
+  }, [filters, dateFrom, dateTo, loadTasks]);
+
+  const handleDateChange = (from, to, period) => {
+    setDateFrom(from || '');
+    setDateTo(to || '');
+    setCurrentPeriod(period);
+  };
+
+  const handleRefresh = () => {
+    loadTasks(true);
+  };
 
   function handleTaskSaved() {
-    loadTasks();
+    loadTasks(true);
     setShowTaskModal(false);
   }
+
+  const getPeriodLabel = () => {
+    const labels = {
+      'today': 'de hoy',
+      'week': 'de esta semana',
+      'month': 'de este mes',
+      'quarter': 'de este trimestre',
+      'semester': 'de este semestre',
+      'year': 'de este año',
+      'all': '',
+      'custom': 'del rango seleccionado'
+    };
+    return labels[currentPeriod] || '';
+  };
 
   // Estadisticas rapidas
   const stats = {
@@ -77,18 +118,34 @@ export default function Dashboard() {
     <Layout>
       <div className="p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto overflow-hidden">
         {/* Header con boton de nueva tarea */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-semibold text-slate-900">Todas las Tareas</h1>
-            <p className="text-slate-500 mt-0.5 text-sm">Vista general de todas las tareas del sistema</p>
+            <p className="text-slate-500 mt-0.5 text-sm">
+              Vista general de las tareas {getPeriodLabel()}
+            </p>
           </div>
-          <button
-            onClick={() => setShowTaskModal(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-          >
-            <Plus className="w-5 h-5" strokeWidth={2} />
-            Nueva tarea
-          </button>
+          <div className="flex items-center gap-3">
+            <DateRangeFilter 
+              onChange={handleDateChange}
+              defaultPeriod="today"
+            />
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
+              title="Actualizar datos"
+            >
+              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+            </button>
+            <button
+              onClick={() => setShowTaskModal(true)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            >
+              <Plus className="w-5 h-5" strokeWidth={2} />
+              Nueva tarea
+            </button>
+          </div>
         </div>
 
         {/* Estadisticas rapidas */}

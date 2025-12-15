@@ -65,6 +65,28 @@ class TaskRepository
       $params[':responsible_id'] = $filters['responsible_id'];
     }
 
+    // Filtros de fecha
+    if (isset($filters['date_from'])) {
+      $sql .= " AND DATE(t.created_at) >= :date_from";
+      $params[':date_from'] = $filters['date_from'];
+    }
+
+    if (isset($filters['date_to'])) {
+      $sql .= " AND DATE(t.created_at) <= :date_to";
+      $params[':date_to'] = $filters['date_to'];
+    }
+
+    // Filtro por fecha de vencimiento
+    if (isset($filters['due_from'])) {
+      $sql .= " AND DATE(t.due_date) >= :due_from";
+      $params[':due_from'] = $filters['due_from'];
+    }
+
+    if (isset($filters['due_to'])) {
+      $sql .= " AND DATE(t.due_date) <= :due_to";
+      $params[':due_to'] = $filters['due_to'];
+    }
+
     $sql .= " ORDER BY t.updated_at DESC";
 
     try {

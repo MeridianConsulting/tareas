@@ -1,10 +1,11 @@
 // app/reports/areas/page.js
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Layout from '../../../components/Layout';
+import DateRangeFilter from '../../../components/DateRangeFilter';
 import { apiRequest } from '../../../lib/api';
 import { 
   Building2,
@@ -16,7 +17,8 @@ import {
   Activity,
   TrendingUp,
   Users,
-  ChevronDown
+  ChevronDown,
+  RefreshCw
 } from 'lucide-react';
 
 // Importar Pie chart dinámicamente
@@ -31,9 +33,15 @@ export default function AreasDashboard() {
   const [allTasks, setAllTasks] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [user, setUser] = useState(null);
   const [selectedArea, setSelectedArea] = useState(null);
   const [expandedAreas, setExpandedAreas] = useState({});
+  // Inicializar con la fecha de hoy
+  const today = new Date().toISOString().split('T')[0];
+  const [dateFrom, setDateFrom] = useState(today);
+  const [dateTo, setDateTo] = useState(today);
+  const [currentPeriod, setCurrentPeriod] = useState('today');
 
   useEffect(() => {
     async function loadUser() {
@@ -51,27 +59,53 @@ export default function AreasDashboard() {
     loadUser();
   }, [router]);
 
-  useEffect(() => {
+  const loadData = useCallback(async (from, to, isRefresh = false) => {
     if (!user) return;
     
-    async function loadData() {
-      try {
-        const [areasData, tasksData, usersData] = await Promise.all([
-          apiRequest('/areas'),
-          apiRequest('/tasks'),
-          apiRequest('/users')
-        ]);
-        setAreas(areasData.data || []);
-        setAllTasks(tasksData.data || []);
-        setUsers(usersData.data || []);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
     }
-    loadData();
+    
+    try {
+      const taskParams = new URLSearchParams();
+      if (from) taskParams.append('date_from', from);
+      if (to) taskParams.append('date_to', to);
+      
+      const tasksUrl = `/tasks${taskParams.toString() ? '?' + taskParams.toString() : ''}`;
+      
+      const [areasData, tasksData, usersData] = await Promise.all([
+        apiRequest('/areas'),
+        apiRequest(tasksUrl),
+        apiRequest('/users')
+      ]);
+      setAreas(areasData.data || []);
+      setAllTasks(tasksData.data || []);
+      setUsers(usersData.data || []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      loadData(dateFrom, dateTo);
+    }
+  }, [user, dateFrom, dateTo, loadData]);
+
+  const handleDateChange = (from, to, period) => {
+    setDateFrom(from || '');
+    setDateTo(to || '');
+    setCurrentPeriod(period);
+  };
+
+  const handleRefresh = () => {
+    loadData(dateFrom, dateTo, true);
+  };
 
   // Obtener datos de un área específica
   function getAreaData(areaId) {
@@ -160,12 +194,44 @@ export default function AreasDashboard() {
     );
   }
 
+  const getPeriodLabel = () => {
+    const labels = {
+      'today': 'de hoy',
+      'week': 'de esta semana',
+      'month': 'de este mes',
+      'quarter': 'de este trimestre',
+      'semester': 'de este semestre',
+      'year': 'de este año',
+      'all': '',
+      'custom': 'del rango seleccionado'
+    };
+    return labels[currentPeriod] || '';
+  };
+
   return (
     <Layout>
       <div className="p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto overflow-hidden">
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-slate-900">Dashboard por Area</h1>
-          <p className="text-slate-500 mt-0.5 text-sm">KPIs y graficos individuales para cada area</p>
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold text-slate-900">Dashboard por Area</h1>
+            <p className="text-slate-500 mt-0.5 text-sm">KPIs y graficos {getPeriodLabel()} para cada area</p>
+          </div>
+          
+          {/* Filtros de fecha */}
+          <div className="flex items-center gap-3">
+            <DateRangeFilter 
+              onChange={handleDateChange}
+              defaultPeriod="today"
+            />
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
+              title="Actualizar datos"
+            >
+              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
         </div>
 
         {/* Grid de áreas */}

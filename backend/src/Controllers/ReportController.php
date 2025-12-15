@@ -30,7 +30,10 @@ class ReportController
 
   public function management(Request $request)
   {
-    $report = $this->reportService->getManagementReport();
+    $dateFrom = $request->getQuery('date_from');
+    $dateTo = $request->getQuery('date_to');
+    
+    $report = $this->reportService->getManagementReport($dateFrom, $dateTo);
 
     return Response::json([
       'data' => $report

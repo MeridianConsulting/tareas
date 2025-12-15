@@ -1,10 +1,11 @@
 // app/reports/management/page.js
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Layout from '../../../components/Layout';
+import DateRangeFilter from '../../../components/DateRangeFilter';
 import { apiRequest } from '../../../lib/api';
 import { 
   ClipboardList, 
@@ -14,7 +15,8 @@ import {
   Loader2,
   TrendingUp,
   Target,
-  Activity
+  Activity,
+  RefreshCw
 } from 'lucide-react';
 
 // Importar Pie chart dinámicamente para evitar SSR issues
@@ -28,7 +30,13 @@ export default function ManagementDashboard() {
   const [dashboard, setDashboard] = useState(null);
   const [allTasks, setAllTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [user, setUser] = useState(null);
+  // Inicializar con la fecha de hoy
+  const today = new Date().toISOString().split('T')[0];
+  const [dateFrom, setDateFrom] = useState(today);
+  const [dateTo, setDateTo] = useState(today);
+  const [currentPeriod, setCurrentPeriod] = useState('today');
 
   useEffect(() => {
     async function loadUser() {
@@ -46,25 +54,61 @@ export default function ManagementDashboard() {
     loadUser();
   }, [router]);
 
-  useEffect(() => {
+  const loadDashboard = useCallback(async (from, to, isRefresh = false) => {
     if (!user) return;
     
-    async function loadDashboard() {
-      try {
-        const [reportData, tasksData] = await Promise.all([
-          apiRequest('/reports/management'),
-          apiRequest('/tasks')
-        ]);
-        setDashboard(reportData.data);
-        setAllTasks(tasksData.data || []);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
     }
-    loadDashboard();
+    
+    try {
+      // Construir query params
+      const reportParams = new URLSearchParams();
+      const taskParams = new URLSearchParams();
+      
+      if (from) {
+        reportParams.append('date_from', from);
+        taskParams.append('date_from', from);
+      }
+      if (to) {
+        reportParams.append('date_to', to);
+        taskParams.append('date_to', to);
+      }
+
+      const reportUrl = `/reports/management${reportParams.toString() ? '?' + reportParams.toString() : ''}`;
+      const tasksUrl = `/tasks${taskParams.toString() ? '?' + taskParams.toString() : ''}`;
+      
+      const [reportData, tasksData] = await Promise.all([
+        apiRequest(reportUrl),
+        apiRequest(tasksUrl)
+      ]);
+      setDashboard(reportData.data);
+      setAllTasks(tasksData.data || []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      loadDashboard(dateFrom, dateTo);
+    }
+  }, [user, dateFrom, dateTo, loadDashboard]);
+
+  const handleDateChange = (from, to, period) => {
+    setDateFrom(from || '');
+    setDateTo(to || '');
+    setCurrentPeriod(period);
+  };
+
+  const handleRefresh = () => {
+    loadDashboard(dateFrom, dateTo, true);
+  };
 
   // Calcular datos para gráficos
   const getTypeChartData = () => {
@@ -132,12 +176,46 @@ export default function ManagementDashboard() {
     );
   }
 
+  const getPeriodLabel = () => {
+    const labels = {
+      'today': 'de hoy',
+      'week': 'de esta semana',
+      'month': 'de este mes',
+      'quarter': 'de este trimestre',
+      'semester': 'de este semestre',
+      'year': 'de este año',
+      'all': '',
+      'custom': 'del rango seleccionado'
+    };
+    return labels[currentPeriod] || '';
+  };
+
   return (
     <Layout>
       <div className="p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto overflow-hidden">
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-slate-900">Dashboard General</h1>
-          <p className="text-slate-500 mt-0.5 text-sm">Vision consolidada del estado de todas las tareas</p>
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold text-slate-900">Dashboard General</h1>
+            <p className="text-slate-500 mt-0.5 text-sm">
+              Vision consolidada del estado de las tareas {getPeriodLabel()}
+            </p>
+          </div>
+          
+          {/* Filtros de fecha */}
+          <div className="flex items-center gap-3">
+            <DateRangeFilter 
+              onChange={handleDateChange}
+              defaultPeriod="today"
+            />
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
+              title="Actualizar datos"
+            >
+              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
         </div>
 
         {/* KPIs de Completitud */}

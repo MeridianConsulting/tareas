@@ -36,6 +36,10 @@ class TaskController
         'type' => $request->getQuery('type'),
         'area_id' => $request->getQuery('area_id') ? (int)$request->getQuery('area_id') : null,
         'responsible_id' => $request->getQuery('responsible_id') ? (int)$request->getQuery('responsible_id') : null,
+        'date_from' => $request->getQuery('date_from'),
+        'date_to' => $request->getQuery('date_to'),
+        'due_from' => $request->getQuery('due_from'),
+        'due_to' => $request->getQuery('due_to'),
       ];
 
       // Eliminar filtros vacíos
