@@ -1,5 +1,5 @@
 // lib/api.js
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost/api/v1';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost/tareas/backend/public/api/v1';
 
 let accessToken = null;
 let refreshPromise = null; // Lock para evitar múltiples refreshes simultáneos
