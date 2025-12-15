@@ -4,8 +4,9 @@
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Sidebar from './Sidebar';
+import NotificationBell from './NotificationBell';
 import { apiRequest, bootstrapAuth, getAccessToken } from '../lib/api';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Menu } from 'lucide-react';
 
 export default function Layout({ children }) {
   const router = useRouter();
@@ -59,9 +60,40 @@ export default function Layout({ children }) {
   return (
     <div className="flex h-screen bg-slate-100 overflow-hidden">
       <Sidebar user={user} isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
-      <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden">
-        {children}
-      </main>
+      <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+        {/* Header con campana de notificaciones */}
+        <header className="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 flex-shrink-0">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors lg:hidden"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          
+          <div className="flex-1" />
+          
+          <div className="flex items-center gap-3">
+            <NotificationBell />
+            
+            {user && (
+              <div className="hidden sm:flex items-center gap-2 pl-3 border-l border-slate-200">
+                <div className="w-8 h-8 bg-slate-700 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                  {user.name?.charAt(0).toUpperCase()}
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-medium text-slate-900">{user.name}</p>
+                  <p className="text-xs text-slate-500 capitalize">{user.role?.replace('_', ' ')}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </header>
+        
+        {/* Contenido principal */}
+        <main className="flex-1 overflow-y-auto overflow-x-hidden">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

@@ -5,6 +5,7 @@ use App\Controllers\TaskController;
 use App\Controllers\UserController;
 use App\Controllers\AreaController;
 use App\Controllers\ReportController;
+use App\Controllers\TaskAssignmentController;
 use App\Middleware\CorsMiddleware;
 use App\Middleware\JwtAuthMiddleware;
 use App\Middleware\RoleMiddleware;
@@ -55,6 +56,18 @@ return [
       // Reports
       ['GET', '/api/v1/reports/daily', [ReportController::class, 'daily']],
       ['GET', '/api/v1/reports/management', [ReportController::class, 'management'], [RoleMiddleware::class => ['admin', 'gerencia']]],
+
+      // Task Assignments (cualquier usuario puede asignar)
+      ['GET', '/api/v1/assignments/my', [TaskAssignmentController::class, 'myAssignments']],
+      ['GET', '/api/v1/assignments/sent', [TaskAssignmentController::class, 'sentByMe']],
+      ['GET', '/api/v1/assignments/unread-count', [TaskAssignmentController::class, 'unreadCount']],
+      ['POST', '/api/v1/assignments', [TaskAssignmentController::class, 'store']],
+      ['PUT', '/api/v1/assignments/{id}/read', [TaskAssignmentController::class, 'markAsRead']],
+      ['PUT', '/api/v1/assignments/mark-all-read', [TaskAssignmentController::class, 'markAllAsRead']],
+      ['DELETE', '/api/v1/assignments/{id}', [TaskAssignmentController::class, 'destroy']],
+
+      // Users list for assignments (todos pueden ver usuarios para asignar)
+      ['GET', '/api/v1/users/list', [UserController::class, 'listAll']],
     ],
   ],
 ];

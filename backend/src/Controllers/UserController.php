@@ -107,5 +107,26 @@ class UserController
       ], 400);
     }
   }
+
+  // Lista de usuarios para asignaciones (accesible por todos)
+  public function listAll(Request $request)
+  {
+    $users = $this->userService->list(['is_active' => 1]);
+    
+    // Retornar solo datos básicos para asignaciones
+    $simplified = array_map(function($user) {
+      return [
+        'id' => $user['id'],
+        'name' => $user['name'],
+        'email' => $user['email'],
+        'role_name' => $user['role_name'] ?? null,
+        'area_name' => $user['area_name'] ?? null,
+      ];
+    }, $users);
+
+    return Response::json([
+      'data' => $simplified
+    ]);
+  }
 }
 

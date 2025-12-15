@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { logout } from '../lib/auth';
 import TaskModal from './TaskModal';
+import NotificationBell from './NotificationBell';
 import { 
   ListTodo, 
   Calendar, 
@@ -20,7 +21,9 @@ import {
   Table2,
   PieChart,
   Layers,
-  FileDown
+  FileDown,
+  Bell,
+  Send
 } from 'lucide-react';
 
 export default function Sidebar({ user, isOpen, onToggle }) {
@@ -39,6 +42,11 @@ export default function Sidebar({ user, isOpen, onToggle }) {
       href: '/my-tasks', 
       label: 'Mis Tareas', 
       icon: Table2
+    },
+    { 
+      href: '/assignments', 
+      label: 'Asignaciones', 
+      icon: Send
     },
   ];
 

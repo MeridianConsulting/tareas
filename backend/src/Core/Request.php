@@ -157,5 +157,16 @@ class Request
   {
     return $this->attributes[$key] ?? $default;
   }
+
+  public function getUserId(): ?int
+  {
+    $userContext = $this->getAttribute('userContext');
+    return $userContext['id'] ?? null;
+  }
+
+  public function getUser(): ?array
+  {
+    return $this->getAttribute('userContext');
+  }
 }
 
