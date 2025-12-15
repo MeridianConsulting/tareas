@@ -56,6 +56,9 @@ return [
       // Reports
       ['GET', '/api/v1/reports/daily', [ReportController::class, 'daily']],
       ['GET', '/api/v1/reports/management', [ReportController::class, 'management'], [RoleMiddleware::class => ['admin', 'gerencia']]],
+      ['GET', '/api/v1/reports/weekly-evolution', [ReportController::class, 'weeklyEvolution'], [RoleMiddleware::class => ['admin', 'gerencia']]],
+      ['GET', '/api/v1/reports/quarterly', [ReportController::class, 'quarterlyCompliance'], [RoleMiddleware::class => ['admin', 'gerencia']]],
+      ['GET', '/api/v1/reports/advanced-stats', [ReportController::class, 'advancedStats'], [RoleMiddleware::class => ['admin', 'gerencia']]],
 
       // Task Assignments (cualquier usuario puede asignar)
       ['GET', '/api/v1/assignments/my', [TaskAssignmentController::class, 'myAssignments']],

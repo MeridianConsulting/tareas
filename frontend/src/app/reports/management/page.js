@@ -16,11 +16,26 @@ import {
   TrendingUp,
   Target,
   Activity,
-  RefreshCw
+  RefreshCw,
+  BarChart3,
+  LineChart,
+  Trophy,
+  Calendar,
+  Flag
 } from 'lucide-react';
 
-// Importar Pie chart dinámicamente para evitar SSR issues
+// Importar gráficos dinámicamente para evitar SSR issues
 const ResponsivePie = dynamic(() => import('@nivo/pie').then(m => m.ResponsivePie), { 
+  ssr: false,
+  loading: () => <div className="flex items-center justify-center h-full"><Loader2 className="w-6 h-6 animate-spin text-slate-400" /></div>
+});
+
+const ResponsiveLine = dynamic(() => import('@nivo/line').then(m => m.ResponsiveLine), { 
+  ssr: false,
+  loading: () => <div className="flex items-center justify-center h-full"><Loader2 className="w-6 h-6 animate-spin text-slate-400" /></div>
+});
+
+const ResponsiveBar = dynamic(() => import('@nivo/bar').then(m => m.ResponsiveBar), { 
   ssr: false,
   loading: () => <div className="flex items-center justify-center h-full"><Loader2 className="w-6 h-6 animate-spin text-slate-400" /></div>
 });
@@ -29,6 +44,9 @@ export default function ManagementDashboard() {
   const router = useRouter();
   const [dashboard, setDashboard] = useState(null);
   const [allTasks, setAllTasks] = useState([]);
+  const [weeklyData, setWeeklyData] = useState([]);
+  const [quarterlyData, setQuarterlyData] = useState([]);
+  const [advancedStats, setAdvancedStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [user, setUser] = useState(null);
@@ -80,12 +98,20 @@ export default function ManagementDashboard() {
       const reportUrl = `/reports/management${reportParams.toString() ? '?' + reportParams.toString() : ''}`;
       const tasksUrl = `/tasks${taskParams.toString() ? '?' + taskParams.toString() : ''}`;
       
-      const [reportData, tasksData] = await Promise.all([
+      // Cargar datos principales y datos avanzados en paralelo
+      const [reportData, tasksData, weeklyRes, quarterlyRes, advancedRes] = await Promise.all([
         apiRequest(reportUrl),
-        apiRequest(tasksUrl)
+        apiRequest(tasksUrl),
+        apiRequest('/reports/weekly-evolution'),
+        apiRequest('/reports/quarterly'),
+        apiRequest('/reports/advanced-stats')
       ]);
+      
       setDashboard(reportData.data);
       setAllTasks(tasksData.data || []);
+      setWeeklyData(weeklyRes.data || []);
+      setQuarterlyData(quarterlyRes.data || []);
+      setAdvancedStats(advancedRes.data || null);
     } catch (e) {
       console.error(e);
     } finally {
@@ -144,6 +170,57 @@ export default function ManagementDashboard() {
       label: status,
       value: count,
       color: colors[status] || '#64748b'
+    }));
+  };
+
+  // Preparar datos para gráfico de líneas (evolución semanal)
+  const getLineChartData = () => {
+    if (!weeklyData || weeklyData.length === 0) return [];
+    
+    return [
+      {
+        id: 'Creadas',
+        color: '#3b82f6',
+        data: weeklyData.map(w => ({ x: w.week, y: w.created }))
+      },
+      {
+        id: 'Completadas',
+        color: '#10b981',
+        data: weeklyData.map(w => ({ x: w.week, y: w.completed }))
+      },
+      {
+        id: 'Vencidas',
+        color: '#ef4444',
+        data: weeklyData.map(w => ({ x: w.week, y: w.overdue }))
+      }
+    ];
+  };
+
+  // Preparar datos para gráfico de barras (trimestral)
+  const getBarChartData = () => {
+    if (!quarterlyData || quarterlyData.length === 0) return [];
+    
+    return quarterlyData.map(q => ({
+      quarter: q.label,
+      'Completadas': q.completed,
+      'Total': q.total - q.completed,
+      'Cumplimiento': q.compliance_rate
+    }));
+  };
+
+  // Preparar datos para gráfico de prioridades
+  const getPriorityChartData = () => {
+    if (!advancedStats?.by_priority) return [];
+    const colors = {
+      'Alta': '#ef4444',
+      'Media': '#f59e0b',
+      'Baja': '#10b981'
+    };
+    return advancedStats.by_priority.map(item => ({
+      id: item.priority,
+      label: item.priority,
+      value: item.count,
+      color: colors[item.priority] || '#64748b'
     }));
   };
 
@@ -464,7 +541,7 @@ export default function ManagementDashboard() {
         </div>
 
         {/* Tabla resumen por area */}
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden mb-6">
           <div className="px-5 py-4 border-b border-slate-200">
             <h2 className="text-base font-semibold text-slate-900">Detalle por Area</h2>
           </div>
@@ -520,6 +597,266 @@ export default function ManagementDashboard() {
             </table>
           </div>
         </div>
+
+        {/* ============================================ */}
+        {/* SECCIÓN DE INDICADORES AVANZADOS */}
+        {/* ============================================ */}
+
+        {/* Gráfico de Evolución Semanal */}
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden mb-6">
+          <div className="px-5 py-4 border-b border-slate-200">
+            <div className="flex items-center gap-2">
+              <LineChart className="w-5 h-5 text-blue-600" />
+              <div>
+                <h2 className="text-base font-semibold text-slate-900">Evolucion Semanal</h2>
+                <p className="text-xs text-slate-500 mt-0.5">Tendencia de tareas en las ultimas 12 semanas</p>
+              </div>
+            </div>
+          </div>
+          <div className="p-4" style={{ height: '350px' }}>
+            {getLineChartData().length > 0 && getLineChartData()[0].data.length > 0 ? (
+              <ResponsiveLine
+                data={getLineChartData()}
+                margin={{ top: 20, right: 110, bottom: 50, left: 60 }}
+                xScale={{ type: 'point' }}
+                yScale={{ type: 'linear', min: 0, max: 'auto', stacked: false }}
+                axisTop={null}
+                axisRight={null}
+                axisBottom={{
+                  tickSize: 5,
+                  tickPadding: 5,
+                  tickRotation: -45,
+                  legend: 'Semana',
+                  legendOffset: 40,
+                  legendPosition: 'middle'
+                }}
+                axisLeft={{
+                  tickSize: 5,
+                  tickPadding: 5,
+                  legend: 'Cantidad',
+                  legendOffset: -50,
+                  legendPosition: 'middle'
+                }}
+                colors={['#3b82f6', '#10b981', '#ef4444']}
+                pointSize={8}
+                pointColor={{ theme: 'background' }}
+                pointBorderWidth={2}
+                pointBorderColor={{ from: 'serieColor' }}
+                pointLabelYOffset={-12}
+                useMesh={true}
+                legends={[
+                  {
+                    anchor: 'right',
+                    direction: 'column',
+                    justify: false,
+                    translateX: 100,
+                    translateY: 0,
+                    itemsSpacing: 8,
+                    itemDirection: 'left-to-right',
+                    itemWidth: 80,
+                    itemHeight: 20,
+                    symbolSize: 12,
+                    symbolShape: 'circle'
+                  }
+                ]}
+                enableArea={true}
+                areaOpacity={0.1}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full text-slate-400">
+                Sin datos de evolucion disponibles
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Gráfico de Cumplimiento Trimestral */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-200">
+              <div className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-violet-600" />
+                <div>
+                  <h2 className="text-base font-semibold text-slate-900">Cumplimiento Trimestral</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">Comparativa por trimestre del año actual</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-4" style={{ height: '300px' }}>
+              {getBarChartData().length > 0 ? (
+                <ResponsiveBar
+                  data={getBarChartData()}
+                  keys={['Completadas', 'Total']}
+                  indexBy="quarter"
+                  margin={{ top: 20, right: 20, bottom: 50, left: 60 }}
+                  padding={0.3}
+                  groupMode="stacked"
+                  colors={['#10b981', '#e2e8f0']}
+                  borderRadius={4}
+                  axisTop={null}
+                  axisRight={null}
+                  axisBottom={{
+                    tickSize: 5,
+                    tickPadding: 5,
+                    legend: 'Trimestre',
+                    legendPosition: 'middle',
+                    legendOffset: 40
+                  }}
+                  axisLeft={{
+                    tickSize: 5,
+                    tickPadding: 5,
+                    legend: 'Tareas',
+                    legendPosition: 'middle',
+                    legendOffset: -50
+                  }}
+                  labelSkipWidth={12}
+                  labelSkipHeight={12}
+                  labelTextColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full text-slate-400">
+                  Sin datos trimestrales disponibles
+                </div>
+              )}
+            </div>
+            {/* Tarjetas de cumplimiento por trimestre */}
+            <div className="px-5 pb-5">
+              <div className="grid grid-cols-4 gap-2">
+                {quarterlyData.map(q => (
+                  <div key={q.quarter} className="text-center p-2 bg-slate-50 rounded-lg">
+                    <p className="text-xs text-slate-500">{q.label}</p>
+                    <p className={`text-lg font-bold ${
+                      q.compliance_rate >= 80 ? 'text-emerald-600' :
+                      q.compliance_rate >= 50 ? 'text-blue-600' :
+                      q.compliance_rate >= 25 ? 'text-amber-600' : 'text-rose-600'
+                    }`}>
+                      {q.compliance_rate}%
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Distribución por Prioridad */}
+          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-200">
+              <div className="flex items-center gap-2">
+                <Flag className="w-5 h-5 text-amber-600" />
+                <div>
+                  <h2 className="text-base font-semibold text-slate-900">Distribucion por Prioridad</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">Clasificacion segun nivel de urgencia</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-4" style={{ height: '300px' }}>
+              {getPriorityChartData().length > 0 ? (
+                <ResponsivePie
+                  data={getPriorityChartData()}
+                  margin={{ top: 20, right: 100, bottom: 20, left: 20 }}
+                  innerRadius={0.5}
+                  padAngle={2}
+                  cornerRadius={4}
+                  activeOuterRadiusOffset={8}
+                  colors={{ datum: 'data.color' }}
+                  borderWidth={1}
+                  borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
+                  arcLinkLabelsSkipAngle={10}
+                  arcLinkLabelsTextColor="#334155"
+                  arcLinkLabelsThickness={2}
+                  arcLinkLabelsColor={{ from: 'color' }}
+                  arcLabelsSkipAngle={10}
+                  arcLabelsTextColor="#ffffff"
+                  legends={[
+                    {
+                      anchor: 'right',
+                      direction: 'column',
+                      justify: false,
+                      translateX: 80,
+                      translateY: 0,
+                      itemsSpacing: 8,
+                      itemWidth: 60,
+                      itemHeight: 18,
+                      itemTextColor: '#64748b',
+                      symbolSize: 12,
+                      symbolShape: 'circle'
+                    }
+                  ]}
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full text-slate-400">
+                  Sin datos disponibles
+                </div>
+              )}
+            </div>
+            {/* KPI de tareas próximas a vencer */}
+            <div className="px-5 pb-5">
+              <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg border border-amber-200">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-amber-600" />
+                  <span className="text-sm text-amber-800">Proximas a vencer (7 dias)</span>
+                </div>
+                <span className="text-xl font-bold text-amber-700">{advancedStats?.upcoming_due || 0}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Top Usuarios por Productividad */}
+        {advancedStats?.top_users && advancedStats.top_users.length > 0 && (
+          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-200">
+              <div className="flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-amber-500" />
+                <div>
+                  <h2 className="text-base font-semibold text-slate-900">Top Usuarios por Productividad</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">Ranking basado en tareas completadas</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-5">
+              <div className="space-y-3">
+                {advancedStats.top_users.slice(0, 5).map((user, index) => (
+                  <div key={user.id} className="flex items-center gap-4 p-3 bg-slate-50 rounded-lg">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm ${
+                      index === 0 ? 'bg-amber-500' :
+                      index === 1 ? 'bg-slate-400' :
+                      index === 2 ? 'bg-amber-700' : 'bg-slate-300'
+                    }`}>
+                      {index + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-900 truncate">{user.name}</p>
+                      <p className="text-xs text-slate-500">{user.completed} de {user.total_tasks} tareas completadas</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <p className="text-xs text-slate-500">Cumplimiento</p>
+                        <p className={`text-lg font-bold ${
+                          user.completion_rate >= 80 ? 'text-emerald-600' :
+                          user.completion_rate >= 50 ? 'text-blue-600' : 'text-amber-600'
+                        }`}>
+                          {user.completion_rate}%
+                        </p>
+                      </div>
+                      <div className="w-20">
+                        <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full rounded-full ${
+                              user.completion_rate >= 80 ? 'bg-emerald-500' :
+                              user.completion_rate >= 50 ? 'bg-blue-500' : 'bg-amber-500'
+                            }`}
+                            style={{ width: `${user.completion_rate}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );

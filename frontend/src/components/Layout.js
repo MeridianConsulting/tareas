@@ -91,7 +91,7 @@ export default function Layout({ children }) {
         
         {/* Contenido principal */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden">
-          {children}
+        {children}
         </main>
       </div>
     </div>

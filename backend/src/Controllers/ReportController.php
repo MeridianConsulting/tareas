@@ -39,5 +39,32 @@ class ReportController
       'data' => $report
     ]);
   }
+
+  public function weeklyEvolution(Request $request)
+  {
+    $data = $this->reportService->getWeeklyEvolution();
+
+    return Response::json([
+      'data' => $data
+    ]);
+  }
+
+  public function quarterlyCompliance(Request $request)
+  {
+    $data = $this->reportService->getQuarterlyCompliance();
+
+    return Response::json([
+      'data' => $data
+    ]);
+  }
+
+  public function advancedStats(Request $request)
+  {
+    $data = $this->reportService->getAdvancedStats();
+
+    return Response::json([
+      'data' => $data
+    ]);
+  }
 }
 
