@@ -382,103 +382,273 @@ export default function ManagementDashboard() {
           </div>
         </div>
 
-        {/* Graficos de Pie */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Distribucion por Tipo */}
-          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-            <div className="px-5 py-4 border-b border-slate-200">
-              <h2 className="text-base font-semibold text-slate-900">Distribucion por Tipo</h2>
-              <p className="text-xs text-slate-500 mt-0.5">Clasificacion de tareas segun categoria</p>
-            </div>
-            <div className="p-4" style={{ height: '300px' }}>
-              {getTypeChartData().length > 0 ? (
-                <ResponsivePie
-                  data={getTypeChartData()}
-                  margin={{ top: 20, right: 120, bottom: 20, left: 20 }}
-                  innerRadius={0.5}
-                  padAngle={2}
-                  cornerRadius={4}
-                  activeOuterRadiusOffset={8}
-                  colors={{ datum: 'data.color' }}
-                  borderWidth={1}
-                  borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
-                  arcLinkLabelsSkipAngle={10}
-                  arcLinkLabelsTextColor="#334155"
-                  arcLinkLabelsThickness={2}
-                  arcLinkLabelsColor={{ from: 'color' }}
-                  arcLabelsSkipAngle={10}
-                  arcLabelsTextColor="#ffffff"
-                  legends={[
-                    {
-                      anchor: 'right',
-                      direction: 'column',
-                      justify: false,
-                      translateX: 100,
-                      translateY: 0,
-                      itemsSpacing: 8,
-                      itemWidth: 80,
-                      itemHeight: 18,
-                      itemTextColor: '#64748b',
-                      itemDirection: 'left-to-right',
-                      symbolSize: 12,
-                      symbolShape: 'circle'
-                    }
-                  ]}
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full text-slate-400">
-                  Sin datos disponibles
-                </div>
-              )}
+        {/* ============================================ */}
+        {/* SECCIÓN UNIFICADA DE GRÁFICAS */}
+        {/* ============================================ */}
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden mb-6">
+          <div className="px-5 py-4 border-b border-slate-200">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-indigo-600" />
+              <div>
+                <h2 className="text-base font-semibold text-slate-900">Analisis Grafico</h2>
+                <p className="text-xs text-slate-500 mt-0.5">Visualizacion de metricas y tendencias</p>
+              </div>
             </div>
           </div>
-
-          {/* Distribucion por Estado */}
-          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-            <div className="px-5 py-4 border-b border-slate-200">
-              <h2 className="text-base font-semibold text-slate-900">Distribucion por Estado</h2>
-              <p className="text-xs text-slate-500 mt-0.5">Estado actual de todas las tareas</p>
+          
+          <div className="p-5 space-y-6">
+            {/* Gráfico de Evolución Semanal - Ancho completo */}
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <LineChart className="w-4 h-4 text-blue-600" />
+                <h3 className="text-sm font-semibold text-slate-800">Evolucion Semanal</h3>
+                <span className="text-xs text-slate-500">Ultimas 12 semanas</span>
+              </div>
+              <div className="bg-slate-50 rounded-lg p-4" style={{ height: '280px' }}>
+                {getLineChartData().length > 0 && getLineChartData()[0].data.length > 0 ? (
+                  <ResponsiveLine
+                    data={getLineChartData()}
+                    margin={{ top: 20, right: 110, bottom: 40, left: 50 }}
+                    xScale={{ type: 'point' }}
+                    yScale={{ type: 'linear', min: 0, max: 'auto', stacked: false }}
+                    axisTop={null}
+                    axisRight={null}
+                    axisBottom={{
+                      tickSize: 5,
+                      tickPadding: 5,
+                      tickRotation: -45
+                    }}
+                    axisLeft={{
+                      tickSize: 5,
+                      tickPadding: 5
+                    }}
+                    colors={['#3b82f6', '#10b981', '#ef4444']}
+                    pointSize={6}
+                    pointColor={{ theme: 'background' }}
+                    pointBorderWidth={2}
+                    pointBorderColor={{ from: 'serieColor' }}
+                    useMesh={true}
+                    legends={[
+                      {
+                        anchor: 'right',
+                        direction: 'column',
+                        justify: false,
+                        translateX: 100,
+                        translateY: 0,
+                        itemsSpacing: 6,
+                        itemDirection: 'left-to-right',
+                        itemWidth: 80,
+                        itemHeight: 18,
+                        symbolSize: 10,
+                        symbolShape: 'circle'
+                      }
+                    ]}
+                    enableArea={true}
+                    areaOpacity={0.1}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-slate-400">
+                    Sin datos de evolucion disponibles
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="p-4" style={{ height: '300px' }}>
-              {getStatusChartData().length > 0 ? (
-                <ResponsivePie
-                  data={getStatusChartData()}
-                  margin={{ top: 20, right: 120, bottom: 20, left: 20 }}
-                  innerRadius={0.5}
-                  padAngle={2}
-                  cornerRadius={4}
-                  activeOuterRadiusOffset={8}
-                  colors={{ datum: 'data.color' }}
-                  borderWidth={1}
-                  borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
-                  arcLinkLabelsSkipAngle={10}
-                  arcLinkLabelsTextColor="#334155"
-                  arcLinkLabelsThickness={2}
-                  arcLinkLabelsColor={{ from: 'color' }}
-                  arcLabelsSkipAngle={10}
-                  arcLabelsTextColor="#ffffff"
-                  legends={[
-                    {
-                      anchor: 'right',
-                      direction: 'column',
-                      justify: false,
-                      translateX: 100,
-                      translateY: 0,
-                      itemsSpacing: 8,
-                      itemWidth: 90,
-                      itemHeight: 18,
-                      itemTextColor: '#64748b',
-                      itemDirection: 'left-to-right',
-                      symbolSize: 12,
-                      symbolShape: 'circle'
-                    }
-                  ]}
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full text-slate-400">
-                  Sin datos disponibles
+
+            {/* Grid 2x2 de gráficas */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* Distribución por Tipo */}
+              <div>
+                <h3 className="text-sm font-semibold text-slate-800 mb-3">Por Tipo</h3>
+                <div className="bg-slate-50 rounded-lg p-3" style={{ height: '220px' }}>
+                  {getTypeChartData().length > 0 ? (
+                    <ResponsivePie
+                      data={getTypeChartData()}
+                      margin={{ top: 15, right: 80, bottom: 15, left: 15 }}
+                      innerRadius={0.5}
+                      padAngle={2}
+                      cornerRadius={3}
+                      activeOuterRadiusOffset={6}
+                      colors={{ datum: 'data.color' }}
+                      borderWidth={1}
+                      borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
+                      arcLinkLabelsSkipAngle={15}
+                      arcLinkLabelsTextColor="#334155"
+                      arcLinkLabelsThickness={1.5}
+                      arcLinkLabelsColor={{ from: 'color' }}
+                      arcLabelsSkipAngle={15}
+                      arcLabelsTextColor="#ffffff"
+                      legends={[
+                        {
+                          anchor: 'right',
+                          direction: 'column',
+                          translateX: 70,
+                          translateY: 0,
+                          itemsSpacing: 4,
+                          itemWidth: 60,
+                          itemHeight: 16,
+                          itemTextColor: '#64748b',
+                          symbolSize: 10,
+                          symbolShape: 'circle'
+                        }
+                      ]}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-slate-400 text-sm">
+                      Sin datos
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
+
+              {/* Distribución por Estado */}
+              <div>
+                <h3 className="text-sm font-semibold text-slate-800 mb-3">Por Estado</h3>
+                <div className="bg-slate-50 rounded-lg p-3" style={{ height: '220px' }}>
+                  {getStatusChartData().length > 0 ? (
+                    <ResponsivePie
+                      data={getStatusChartData()}
+                      margin={{ top: 15, right: 80, bottom: 15, left: 15 }}
+                      innerRadius={0.5}
+                      padAngle={2}
+                      cornerRadius={3}
+                      activeOuterRadiusOffset={6}
+                      colors={{ datum: 'data.color' }}
+                      borderWidth={1}
+                      borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
+                      arcLinkLabelsSkipAngle={15}
+                      arcLinkLabelsTextColor="#334155"
+                      arcLinkLabelsThickness={1.5}
+                      arcLinkLabelsColor={{ from: 'color' }}
+                      arcLabelsSkipAngle={15}
+                      arcLabelsTextColor="#ffffff"
+                      legends={[
+                        {
+                          anchor: 'right',
+                          direction: 'column',
+                          translateX: 70,
+                          translateY: 0,
+                          itemsSpacing: 4,
+                          itemWidth: 70,
+                          itemHeight: 16,
+                          itemTextColor: '#64748b',
+                          symbolSize: 10,
+                          symbolShape: 'circle'
+                        }
+                      ]}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-slate-400 text-sm">
+                      Sin datos
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Distribución por Prioridad */}
+              <div>
+                <h3 className="text-sm font-semibold text-slate-800 mb-3">Por Prioridad</h3>
+                <div className="bg-slate-50 rounded-lg p-3" style={{ height: '220px' }}>
+                  {getPriorityChartData().length > 0 ? (
+                    <ResponsivePie
+                      data={getPriorityChartData()}
+                      margin={{ top: 15, right: 80, bottom: 15, left: 15 }}
+                      innerRadius={0.5}
+                      padAngle={2}
+                      cornerRadius={3}
+                      activeOuterRadiusOffset={6}
+                      colors={{ datum: 'data.color' }}
+                      borderWidth={1}
+                      borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
+                      arcLinkLabelsSkipAngle={15}
+                      arcLinkLabelsTextColor="#334155"
+                      arcLinkLabelsThickness={1.5}
+                      arcLinkLabelsColor={{ from: 'color' }}
+                      arcLabelsSkipAngle={15}
+                      arcLabelsTextColor="#ffffff"
+                      legends={[
+                        {
+                          anchor: 'right',
+                          direction: 'column',
+                          translateX: 70,
+                          translateY: 0,
+                          itemsSpacing: 4,
+                          itemWidth: 60,
+                          itemHeight: 16,
+                          itemTextColor: '#64748b',
+                          symbolSize: 10,
+                          symbolShape: 'circle'
+                        }
+                      ]}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-slate-400 text-sm">
+                      Sin datos
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Cumplimiento Trimestral */}
+              <div>
+                <h3 className="text-sm font-semibold text-slate-800 mb-3">Cumplimiento Trimestral</h3>
+                <div className="bg-slate-50 rounded-lg p-3" style={{ height: '220px' }}>
+                  {getBarChartData().length > 0 ? (
+                    <ResponsiveBar
+                      data={getBarChartData()}
+                      keys={['Completadas', 'Total']}
+                      indexBy="quarter"
+                      margin={{ top: 15, right: 15, bottom: 35, left: 45 }}
+                      padding={0.3}
+                      groupMode="stacked"
+                      colors={['#10b981', '#e2e8f0']}
+                      borderRadius={3}
+                      axisTop={null}
+                      axisRight={null}
+                      axisBottom={{
+                        tickSize: 5,
+                        tickPadding: 5
+                      }}
+                      axisLeft={{
+                        tickSize: 5,
+                        tickPadding: 5
+                      }}
+                      labelSkipWidth={12}
+                      labelSkipHeight={12}
+                      labelTextColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-slate-400 text-sm">
+                      Sin datos
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Indicadores complementarios */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2">
+              {quarterlyData.map(q => (
+                <div key={q.quarter} className="text-center p-3 bg-slate-50 rounded-lg">
+                  <p className="text-xs text-slate-500 mb-1">{q.label}</p>
+                  <p className={`text-xl font-bold ${
+                    q.compliance_rate >= 80 ? 'text-emerald-600' :
+                    q.compliance_rate >= 50 ? 'text-blue-600' :
+                    q.compliance_rate >= 25 ? 'text-amber-600' : 'text-rose-600'
+                  }`}>
+                    {q.compliance_rate}%
+                  </p>
+                  <p className="text-xs text-slate-400">{q.completed}/{q.total}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* KPI de próximas a vencer */}
+            <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg border border-amber-200">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-amber-600" />
+                <span className="text-sm text-amber-800">Tareas proximas a vencer (7 dias)</span>
+              </div>
+              <span className="text-xl font-bold text-amber-700">{advancedStats?.upcoming_due || 0}</span>
             </div>
           </div>
         </div>
@@ -595,210 +765,6 @@ export default function ManagementDashboard() {
                 })}
               </tbody>
             </table>
-          </div>
-        </div>
-
-        {/* ============================================ */}
-        {/* SECCIÓN DE INDICADORES AVANZADOS */}
-        {/* ============================================ */}
-
-        {/* Gráfico de Evolución Semanal */}
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden mb-6">
-          <div className="px-5 py-4 border-b border-slate-200">
-            <div className="flex items-center gap-2">
-              <LineChart className="w-5 h-5 text-blue-600" />
-              <div>
-                <h2 className="text-base font-semibold text-slate-900">Evolucion Semanal</h2>
-                <p className="text-xs text-slate-500 mt-0.5">Tendencia de tareas en las ultimas 12 semanas</p>
-              </div>
-            </div>
-          </div>
-          <div className="p-4" style={{ height: '350px' }}>
-            {getLineChartData().length > 0 && getLineChartData()[0].data.length > 0 ? (
-              <ResponsiveLine
-                data={getLineChartData()}
-                margin={{ top: 20, right: 110, bottom: 50, left: 60 }}
-                xScale={{ type: 'point' }}
-                yScale={{ type: 'linear', min: 0, max: 'auto', stacked: false }}
-                axisTop={null}
-                axisRight={null}
-                axisBottom={{
-                  tickSize: 5,
-                  tickPadding: 5,
-                  tickRotation: -45,
-                  legend: 'Semana',
-                  legendOffset: 40,
-                  legendPosition: 'middle'
-                }}
-                axisLeft={{
-                  tickSize: 5,
-                  tickPadding: 5,
-                  legend: 'Cantidad',
-                  legendOffset: -50,
-                  legendPosition: 'middle'
-                }}
-                colors={['#3b82f6', '#10b981', '#ef4444']}
-                pointSize={8}
-                pointColor={{ theme: 'background' }}
-                pointBorderWidth={2}
-                pointBorderColor={{ from: 'serieColor' }}
-                pointLabelYOffset={-12}
-                useMesh={true}
-                legends={[
-                  {
-                    anchor: 'right',
-                    direction: 'column',
-                    justify: false,
-                    translateX: 100,
-                    translateY: 0,
-                    itemsSpacing: 8,
-                    itemDirection: 'left-to-right',
-                    itemWidth: 80,
-                    itemHeight: 20,
-                    symbolSize: 12,
-                    symbolShape: 'circle'
-                  }
-                ]}
-                enableArea={true}
-                areaOpacity={0.1}
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full text-slate-400">
-                Sin datos de evolucion disponibles
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Gráfico de Cumplimiento Trimestral */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-            <div className="px-5 py-4 border-b border-slate-200">
-              <div className="flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-violet-600" />
-                <div>
-                  <h2 className="text-base font-semibold text-slate-900">Cumplimiento Trimestral</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">Comparativa por trimestre del año actual</p>
-                </div>
-              </div>
-            </div>
-            <div className="p-4" style={{ height: '300px' }}>
-              {getBarChartData().length > 0 ? (
-                <ResponsiveBar
-                  data={getBarChartData()}
-                  keys={['Completadas', 'Total']}
-                  indexBy="quarter"
-                  margin={{ top: 20, right: 20, bottom: 50, left: 60 }}
-                  padding={0.3}
-                  groupMode="stacked"
-                  colors={['#10b981', '#e2e8f0']}
-                  borderRadius={4}
-                  axisTop={null}
-                  axisRight={null}
-                  axisBottom={{
-                    tickSize: 5,
-                    tickPadding: 5,
-                    legend: 'Trimestre',
-                    legendPosition: 'middle',
-                    legendOffset: 40
-                  }}
-                  axisLeft={{
-                    tickSize: 5,
-                    tickPadding: 5,
-                    legend: 'Tareas',
-                    legendPosition: 'middle',
-                    legendOffset: -50
-                  }}
-                  labelSkipWidth={12}
-                  labelSkipHeight={12}
-                  labelTextColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full text-slate-400">
-                  Sin datos trimestrales disponibles
-                </div>
-              )}
-            </div>
-            {/* Tarjetas de cumplimiento por trimestre */}
-            <div className="px-5 pb-5">
-              <div className="grid grid-cols-4 gap-2">
-                {quarterlyData.map(q => (
-                  <div key={q.quarter} className="text-center p-2 bg-slate-50 rounded-lg">
-                    <p className="text-xs text-slate-500">{q.label}</p>
-                    <p className={`text-lg font-bold ${
-                      q.compliance_rate >= 80 ? 'text-emerald-600' :
-                      q.compliance_rate >= 50 ? 'text-blue-600' :
-                      q.compliance_rate >= 25 ? 'text-amber-600' : 'text-rose-600'
-                    }`}>
-                      {q.compliance_rate}%
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Distribución por Prioridad */}
-          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-            <div className="px-5 py-4 border-b border-slate-200">
-              <div className="flex items-center gap-2">
-                <Flag className="w-5 h-5 text-amber-600" />
-                <div>
-                  <h2 className="text-base font-semibold text-slate-900">Distribucion por Prioridad</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">Clasificacion segun nivel de urgencia</p>
-                </div>
-              </div>
-            </div>
-            <div className="p-4" style={{ height: '300px' }}>
-              {getPriorityChartData().length > 0 ? (
-                <ResponsivePie
-                  data={getPriorityChartData()}
-                  margin={{ top: 20, right: 100, bottom: 20, left: 20 }}
-                  innerRadius={0.5}
-                  padAngle={2}
-                  cornerRadius={4}
-                  activeOuterRadiusOffset={8}
-                  colors={{ datum: 'data.color' }}
-                  borderWidth={1}
-                  borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
-                  arcLinkLabelsSkipAngle={10}
-                  arcLinkLabelsTextColor="#334155"
-                  arcLinkLabelsThickness={2}
-                  arcLinkLabelsColor={{ from: 'color' }}
-                  arcLabelsSkipAngle={10}
-                  arcLabelsTextColor="#ffffff"
-                  legends={[
-                    {
-                      anchor: 'right',
-                      direction: 'column',
-                      justify: false,
-                      translateX: 80,
-                      translateY: 0,
-                      itemsSpacing: 8,
-                      itemWidth: 60,
-                      itemHeight: 18,
-                      itemTextColor: '#64748b',
-                      symbolSize: 12,
-                      symbolShape: 'circle'
-                    }
-                  ]}
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full text-slate-400">
-                  Sin datos disponibles
-                </div>
-              )}
-            </div>
-            {/* KPI de tareas próximas a vencer */}
-            <div className="px-5 pb-5">
-              <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg border border-amber-200">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-amber-600" />
-                  <span className="text-sm text-amber-800">Proximas a vencer (7 dias)</span>
-                </div>
-                <span className="text-xl font-bold text-amber-700">{advancedStats?.upcoming_due || 0}</span>
-              </div>
-            </div>
           </div>
         </div>
 
