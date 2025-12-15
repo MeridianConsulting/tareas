@@ -19,7 +19,8 @@ import {
   ClipboardList,
   FileText,
   Eye,
-  Download
+  Download,
+  FileSpreadsheet
 } from 'lucide-react';
 
 export default function ReportsDownload() {
@@ -27,6 +28,7 @@ export default function ReportsDownload() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [generatingExcel, setGeneratingExcel] = useState(false);
   const [areas, setAreas] = useState([]);
   const [allTasks, setAllTasks] = useState([]);
   const [users, setUsers] = useState([]);
@@ -616,6 +618,413 @@ export default function ReportsDownload() {
     }
   };
 
+  // Generar Excel usando ExcelJS
+  const generateExcel = async () => {
+    setGeneratingExcel(true);
+    
+    try {
+      const ExcelJS = (await import('exceljs')).default;
+      const { saveAs } = await import('file-saver');
+      
+      const data = reportType === 'general' ? getGeneralData() : getAreaData(selectedAreaId);
+      const title = reportType === 'general' ? 'Reporte General de Tareas' : `Reporte de ${data.area?.name || 'Area'}`;
+      
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = user?.name || 'Sistema';
+      workbook.created = new Date();
+      
+      // Colores
+      const primaryColor = '4F46E5';
+      const greenColor = '059669';
+      const blueColor = '2563EB';
+      const roseColor = 'E11D48';
+      const amberColor = 'D97706';
+      const slateColor = '64748B';
+      const lightGray = 'F8FAFC';
+      const headerGray = 'F1F5F9';
+
+      // ==========================================
+      // HOJA 1: RESUMEN
+      // ==========================================
+      const summarySheet = workbook.addWorksheet('Resumen', {
+        properties: { tabColor: { argb: primaryColor } }
+      });
+      
+      // Configurar anchos de columna
+      summarySheet.columns = [
+        { width: 25 }, { width: 18 }, { width: 18 }, { width: 18 }, { width: 18 }, { width: 18 }
+      ];
+
+      // Título principal
+      summarySheet.mergeCells('A1:F1');
+      const titleCell = summarySheet.getCell('A1');
+      titleCell.value = title;
+      titleCell.font = { size: 20, bold: true, color: { argb: 'FFFFFF' } };
+      titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: primaryColor } };
+      titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+      summarySheet.getRow(1).height = 35;
+
+      // Subtítulo
+      summarySheet.mergeCells('A2:F2');
+      const subtitleCell = summarySheet.getCell('A2');
+      subtitleCell.value = `Sistema de Gestión de Tareas | Período: ${getPeriodLabel()} | Generado: ${new Date().toLocaleDateString('es-ES')}`;
+      subtitleCell.font = { size: 10, color: { argb: slateColor } };
+      subtitleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: headerGray } };
+      subtitleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+      summarySheet.getRow(2).height = 25;
+
+      // Espacio
+      summarySheet.getRow(3).height = 10;
+
+      // KPIs principales
+      summarySheet.mergeCells('A4:F4');
+      const kpiTitleCell = summarySheet.getCell('A4');
+      kpiTitleCell.value = '📊 INDICADORES CLAVE DE RENDIMIENTO';
+      kpiTitleCell.font = { size: 12, bold: true, color: { argb: '1E293B' } };
+      summarySheet.getRow(4).height = 25;
+
+      // Fila de KPIs
+      const kpiLabels = ['Tasa Completitud', 'Progreso Promedio', 'En Ejecución', 'En Riesgo', 'Vencidas'];
+      const kpiValues = [`${data.completionRate}%`, `${data.avgProgress}%`, data.inProgress, data.atRisk, data.overdue];
+      const kpiColors = [greenColor, blueColor, '7C3AED', roseColor, amberColor];
+
+      summarySheet.getRow(5).values = ['', ...kpiLabels];
+      summarySheet.getRow(5).font = { bold: true, size: 10, color: { argb: 'FFFFFF' } };
+      summarySheet.getRow(5).alignment = { horizontal: 'center', vertical: 'middle' };
+      summarySheet.getRow(5).height = 22;
+      
+      for (let i = 2; i <= 6; i++) {
+        const cell = summarySheet.getCell(5, i);
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: kpiColors[i - 2] } };
+        cell.border = {
+          top: { style: 'thin', color: { argb: kpiColors[i - 2] } },
+          left: { style: 'thin', color: { argb: kpiColors[i - 2] } },
+          bottom: { style: 'thin', color: { argb: kpiColors[i - 2] } },
+          right: { style: 'thin', color: { argb: kpiColors[i - 2] } }
+        };
+      }
+
+      summarySheet.getRow(6).values = ['', ...kpiValues];
+      summarySheet.getRow(6).font = { bold: true, size: 16 };
+      summarySheet.getRow(6).alignment = { horizontal: 'center', vertical: 'middle' };
+      summarySheet.getRow(6).height = 30;
+      
+      for (let i = 2; i <= 6; i++) {
+        const cell = summarySheet.getCell(6, i);
+        cell.font = { bold: true, size: 16, color: { argb: kpiColors[i - 2] } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF' } };
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'E2E8F0' } },
+          left: { style: 'thin', color: { argb: 'E2E8F0' } },
+          bottom: { style: 'thin', color: { argb: 'E2E8F0' } },
+          right: { style: 'thin', color: { argb: 'E2E8F0' } }
+        };
+      }
+
+      // Espacio
+      summarySheet.getRow(7).height = 15;
+
+      // Estadísticas detalladas
+      summarySheet.mergeCells('A8:F8');
+      const statsTitleCell = summarySheet.getCell('A8');
+      statsTitleCell.value = '📈 ESTADÍSTICAS DETALLADAS';
+      statsTitleCell.font = { size: 12, bold: true, color: { argb: '1E293B' } };
+      summarySheet.getRow(8).height = 25;
+
+      const statsData = [
+        ['Total de Tareas', data.total, '', 'Completadas', data.completed, `${data.completionRate}%`],
+        ['En Progreso', data.inProgress, `${data.total > 0 ? Math.round((data.inProgress / data.total) * 100) : 0}%`, 'No Iniciadas', data.notStarted, `${data.total > 0 ? Math.round((data.notStarted / data.total) * 100) : 0}%`],
+        ['En Riesgo', data.atRisk, `${data.total > 0 ? Math.round((data.atRisk / data.total) * 100) : 0}%`, 'Vencidas', data.overdue, `${data.total > 0 ? Math.round((data.overdue / data.total) * 100) : 0}%`],
+      ];
+
+      statsData.forEach((row, i) => {
+        const rowNum = 9 + i;
+        summarySheet.getRow(rowNum).values = ['', ...row];
+        summarySheet.getRow(rowNum).height = 22;
+        
+        // Estilo para celdas
+        for (let j = 2; j <= 7; j++) {
+          const cell = summarySheet.getCell(rowNum, j);
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: i % 2 === 0 ? lightGray : 'FFFFFF' } };
+          cell.border = {
+            top: { style: 'thin', color: { argb: 'E2E8F0' } },
+            left: { style: 'thin', color: { argb: 'E2E8F0' } },
+            bottom: { style: 'thin', color: { argb: 'E2E8F0' } },
+            right: { style: 'thin', color: { argb: 'E2E8F0' } }
+          };
+          if (j === 2 || j === 5) cell.font = { bold: true, color: { argb: '1E293B' } };
+          if (j === 3 || j === 6) cell.font = { bold: true, color: { argb: greenColor } };
+          if (j === 4 || j === 7) cell.font = { color: { argb: slateColor } };
+        }
+      });
+
+      // Espacio
+      summarySheet.getRow(12).height = 15;
+
+      // Distribución por Tipo
+      summarySheet.mergeCells('A13:C13');
+      const typeTitleCell = summarySheet.getCell('A13');
+      typeTitleCell.value = '🏷️ DISTRIBUCIÓN POR TIPO';
+      typeTitleCell.font = { size: 11, bold: true, color: { argb: '1E293B' } };
+
+      summarySheet.getRow(14).values = ['', 'Tipo', 'Cantidad', '%'];
+      summarySheet.getRow(14).font = { bold: true, color: { argb: 'FFFFFF' } };
+      for (let j = 2; j <= 4; j++) {
+        const cell = summarySheet.getCell(14, j);
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: primaryColor } };
+        cell.alignment = { horizontal: 'center' };
+      }
+
+      const typeColorMap = { 'Clave': amberColor, 'Operativa': blueColor, 'Mejora': greenColor, 'Obligatoria': roseColor };
+      data.typeData.forEach((item, i) => {
+        const rowNum = 15 + i;
+        const pct = data.total > 0 ? Math.round((item.count / data.total) * 100) : 0;
+        summarySheet.getRow(rowNum).values = ['', item.type, item.count, `${pct}%`];
+        
+        const typeCell = summarySheet.getCell(rowNum, 2);
+        typeCell.font = { bold: true, color: { argb: typeColorMap[item.type] || slateColor } };
+        
+        for (let j = 2; j <= 4; j++) {
+          const cell = summarySheet.getCell(rowNum, j);
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: i % 2 === 0 ? lightGray : 'FFFFFF' } };
+          cell.border = { bottom: { style: 'thin', color: { argb: 'E2E8F0' } } };
+          if (j > 2) cell.alignment = { horizontal: 'center' };
+        }
+      });
+
+      // Distribución por Estado (columna derecha)
+      summarySheet.mergeCells('D13:F13');
+      const statusTitleCell = summarySheet.getCell('D13');
+      statusTitleCell.value = '📋 DISTRIBUCIÓN POR ESTADO';
+      statusTitleCell.font = { size: 11, bold: true, color: { argb: '1E293B' } };
+
+      for (let j = 5; j <= 7; j++) {
+        const cell = summarySheet.getCell(14, j);
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: primaryColor } };
+        cell.font = { bold: true, color: { argb: 'FFFFFF' } };
+        cell.alignment = { horizontal: 'center' };
+      }
+      summarySheet.getCell(14, 5).value = 'Estado';
+      summarySheet.getCell(14, 6).value = 'Cantidad';
+      summarySheet.getCell(14, 7).value = '%';
+
+      const statusColorMap = { 'Completada': greenColor, 'En progreso': blueColor, 'En riesgo': roseColor, 'No iniciada': slateColor };
+      data.statusData.forEach((item, i) => {
+        const rowNum = 15 + i;
+        const pct = data.total > 0 ? Math.round((item.count / data.total) * 100) : 0;
+        
+        summarySheet.getCell(rowNum, 5).value = item.status;
+        summarySheet.getCell(rowNum, 6).value = item.count;
+        summarySheet.getCell(rowNum, 7).value = `${pct}%`;
+        
+        const statusCell = summarySheet.getCell(rowNum, 5);
+        statusCell.font = { bold: true, color: { argb: statusColorMap[item.status] || slateColor } };
+        
+        for (let j = 5; j <= 7; j++) {
+          const cell = summarySheet.getCell(rowNum, j);
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: i % 2 === 0 ? lightGray : 'FFFFFF' } };
+          cell.border = { bottom: { style: 'thin', color: { argb: 'E2E8F0' } } };
+          if (j > 5) cell.alignment = { horizontal: 'center' };
+        }
+      });
+
+      // ==========================================
+      // HOJA 2: RESUMEN POR ÁREAS (solo general)
+      // ==========================================
+      if (reportType === 'general' && dashboard?.by_area) {
+        const areasSheet = workbook.addWorksheet('Por Áreas', {
+          properties: { tabColor: { argb: greenColor } }
+        });
+        
+        areasSheet.columns = [
+          { width: 30 }, { width: 12 }, { width: 14 }, { width: 14 }, { width: 12 }, { width: 14 }, { width: 14 }
+        ];
+
+        // Título
+        areasSheet.mergeCells('A1:G1');
+        const areasTitleCell = areasSheet.getCell('A1');
+        areasTitleCell.value = '📊 RESUMEN POR ÁREAS';
+        areasTitleCell.font = { size: 18, bold: true, color: { argb: 'FFFFFF' } };
+        areasTitleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: greenColor } };
+        areasTitleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+        areasSheet.getRow(1).height = 35;
+
+        // Headers
+        areasSheet.getRow(3).values = ['Área', 'Total', 'Completadas', 'En Progreso', 'En Riesgo', 'Vencidas', '% Completitud'];
+        areasSheet.getRow(3).font = { bold: true, color: { argb: 'FFFFFF' } };
+        areasSheet.getRow(3).height = 25;
+        
+        for (let j = 1; j <= 7; j++) {
+          const cell = areasSheet.getCell(3, j);
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: primaryColor } };
+          cell.alignment = { horizontal: 'center', vertical: 'middle' };
+          cell.border = {
+            top: { style: 'thin', color: { argb: primaryColor } },
+            left: { style: 'thin', color: { argb: primaryColor } },
+            bottom: { style: 'thin', color: { argb: primaryColor } },
+            right: { style: 'thin', color: { argb: primaryColor } }
+          };
+        }
+
+        dashboard.by_area.filter(a => a.total_tasks > 0).forEach((area, i) => {
+          const rowNum = 4 + i;
+          const pct = area.total_tasks > 0 ? Math.round((area.completed / area.total_tasks) * 100) : 0;
+          const inProgress = area.total_tasks - area.completed - area.at_risk;
+          
+          areasSheet.getRow(rowNum).values = [
+            area.area_name,
+            area.total_tasks,
+            area.completed,
+            Math.max(0, inProgress),
+            area.at_risk,
+            area.overdue,
+            `${pct}%`
+          ];
+          
+          areasSheet.getRow(rowNum).height = 22;
+          
+          for (let j = 1; j <= 7; j++) {
+            const cell = areasSheet.getCell(rowNum, j);
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: i % 2 === 0 ? lightGray : 'FFFFFF' } };
+            cell.border = {
+              top: { style: 'thin', color: { argb: 'E2E8F0' } },
+              left: { style: 'thin', color: { argb: 'E2E8F0' } },
+              bottom: { style: 'thin', color: { argb: 'E2E8F0' } },
+              right: { style: 'thin', color: { argb: 'E2E8F0' } }
+            };
+            if (j > 1) cell.alignment = { horizontal: 'center' };
+          }
+          
+          // Colores especiales
+          areasSheet.getCell(rowNum, 3).font = { color: { argb: greenColor }, bold: true };
+          areasSheet.getCell(rowNum, 5).font = { color: { argb: roseColor }, bold: true };
+          areasSheet.getCell(rowNum, 6).font = { color: { argb: amberColor }, bold: true };
+          
+          const pctCell = areasSheet.getCell(rowNum, 7);
+          pctCell.font = { 
+            bold: true, 
+            color: { argb: pct >= 80 ? greenColor : pct >= 50 ? blueColor : amberColor } 
+          };
+        });
+      }
+
+      // ==========================================
+      // HOJA 3: DETALLE DE TAREAS
+      // ==========================================
+      const tasksSheet = workbook.addWorksheet('Detalle Tareas', {
+        properties: { tabColor: { argb: blueColor } }
+      });
+      
+      tasksSheet.columns = [
+        { width: 8 },
+        { width: 40 },
+        { width: 20 },
+        { width: 14 },
+        { width: 12 },
+        { width: 14 },
+        { width: 12 },
+        { width: 14 },
+        { width: 14 }
+      ];
+
+      // Título
+      tasksSheet.mergeCells('A1:I1');
+      const tasksTitleCell = tasksSheet.getCell('A1');
+      tasksTitleCell.value = '📋 DETALLE DE TAREAS';
+      tasksTitleCell.font = { size: 18, bold: true, color: { argb: 'FFFFFF' } };
+      tasksTitleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: blueColor } };
+      tasksTitleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+      tasksSheet.getRow(1).height = 35;
+
+      // Info
+      tasksSheet.mergeCells('A2:I2');
+      const tasksInfoCell = tasksSheet.getCell('A2');
+      tasksInfoCell.value = `Total: ${data.tasks.length} tareas | Período: ${getPeriodLabel()}`;
+      tasksInfoCell.font = { size: 10, color: { argb: slateColor } };
+      tasksInfoCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: headerGray } };
+      tasksInfoCell.alignment = { horizontal: 'center' };
+
+      // Headers
+      tasksSheet.getRow(4).values = ['#', 'Título', 'Área', 'Tipo', 'Prioridad', 'Estado', 'Progreso', 'F. Inicio', 'F. Vence'];
+      tasksSheet.getRow(4).font = { bold: true, color: { argb: 'FFFFFF' } };
+      tasksSheet.getRow(4).height = 25;
+      
+      for (let j = 1; j <= 9; j++) {
+        const cell = tasksSheet.getCell(4, j);
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: primaryColor } };
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        cell.border = {
+          top: { style: 'thin', color: { argb: primaryColor } },
+          left: { style: 'thin', color: { argb: primaryColor } },
+          bottom: { style: 'thin', color: { argb: primaryColor } },
+          right: { style: 'thin', color: { argb: primaryColor } }
+        };
+      }
+
+      // Datos de tareas
+      data.tasks.forEach((task, i) => {
+        const rowNum = 5 + i;
+        
+        tasksSheet.getRow(rowNum).values = [
+          i + 1,
+          task.title,
+          task.area_name || '-',
+          task.type,
+          task.priority || 'Media',
+          task.status,
+          `${task.progress_percent}%`,
+          task.start_date ? new Date(task.start_date).toLocaleDateString('es-ES') : '-',
+          task.due_date ? new Date(task.due_date).toLocaleDateString('es-ES') : '-'
+        ];
+        
+        tasksSheet.getRow(rowNum).height = 20;
+        
+        for (let j = 1; j <= 9; j++) {
+          const cell = tasksSheet.getCell(rowNum, j);
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: i % 2 === 0 ? lightGray : 'FFFFFF' } };
+          cell.border = {
+            top: { style: 'thin', color: { argb: 'E2E8F0' } },
+            left: { style: 'thin', color: { argb: 'E2E8F0' } },
+            bottom: { style: 'thin', color: { argb: 'E2E8F0' } },
+            right: { style: 'thin', color: { argb: 'E2E8F0' } }
+          };
+          if (j !== 2 && j !== 3) cell.alignment = { horizontal: 'center' };
+        }
+        
+        // Colores por tipo
+        const typeCell = tasksSheet.getCell(rowNum, 4);
+        typeCell.font = { bold: true, color: { argb: typeColorMap[task.type] || slateColor } };
+        
+        // Colores por estado
+        const statusCell = tasksSheet.getCell(rowNum, 6);
+        statusCell.font = { bold: true, color: { argb: statusColorMap[task.status] || slateColor } };
+        
+        // Color de progreso
+        const progressCell = tasksSheet.getCell(rowNum, 7);
+        const prog = task.progress_percent;
+        progressCell.font = { 
+          bold: true, 
+          color: { argb: prog >= 80 ? greenColor : prog >= 50 ? blueColor : prog > 0 ? amberColor : slateColor } 
+        };
+      });
+
+      // Generar archivo
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      
+      const fileName = reportType === 'general' 
+        ? `Reporte_General_${dateFrom}_${dateTo}.xlsx`
+        : `Reporte_${data.area?.name || 'Area'}_${dateFrom}_${dateTo}.xlsx`;
+      
+      saveAs(blob, fileName);
+    } catch (error) {
+      console.error('Error generando Excel:', error);
+      alert('Error al generar el Excel. Por favor intente de nuevo.');
+    } finally {
+      setGeneratingExcel(false);
+    }
+  };
+
   const data = reportType === 'general' ? getGeneralData() : (selectedAreaId ? getAreaData(selectedAreaId) : null);
 
   if (loading && !user) {
@@ -701,11 +1110,11 @@ export default function ReportsDownload() {
             </div>
 
             {/* Botones de acción */}
-            <div className="flex items-end gap-2">
+            <div className="flex items-end gap-2 flex-wrap">
               <button
                 onClick={() => setShowPreview(true)}
                 disabled={loading || (reportType === 'area' && !selectedAreaId)}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-100 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-100 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Eye className="w-4 h-4" />
                 Vista Previa
@@ -713,14 +1122,26 @@ export default function ReportsDownload() {
               <button
                 onClick={generatePDF}
                 disabled={generating || loading || (reportType === 'area' && !selectedAreaId)}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {generating ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <Download className="w-4 h-4" />
                 )}
-                {generating ? 'Generando...' : 'Descargar PDF'}
+                {generating ? 'Generando...' : 'PDF'}
+              </button>
+              <button
+                onClick={generateExcel}
+                disabled={generatingExcel || loading || (reportType === 'area' && !selectedAreaId)}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {generatingExcel ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <FileSpreadsheet className="w-4 h-4" />
+                )}
+                {generatingExcel ? 'Generando...' : 'Excel'}
               </button>
             </div>
           </div>
