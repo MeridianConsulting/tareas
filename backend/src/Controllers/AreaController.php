@@ -74,5 +74,22 @@ class AreaController
       'data' => AreaResource::toArray($area)
     ]);
   }
+
+  public function destroy(Request $request, string $id)
+  {
+    try {
+      $this->areaService->delete((int)$id);
+      return Response::json([
+        'message' => 'Area eliminada correctamente'
+      ]);
+    } catch (\Exception $e) {
+      return Response::json([
+        'error' => [
+          'code' => 'DELETE_ERROR',
+          'message' => $e->getMessage()
+        ]
+      ], 400);
+    }
+  }
 }
 

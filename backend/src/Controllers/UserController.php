@@ -90,5 +90,22 @@ class UserController
       'data' => $roles
     ]);
   }
+
+  public function destroy(Request $request, string $id)
+  {
+    try {
+      $this->userService->delete((int)$id);
+      return Response::json([
+        'message' => 'Usuario eliminado correctamente'
+      ]);
+    } catch (\Exception $e) {
+      return Response::json([
+        'error' => [
+          'code' => 'DELETE_ERROR',
+          'message' => $e->getMessage()
+        ]
+      ], 400);
+    }
+  }
 }
 

@@ -120,5 +120,18 @@ class UserRepository
 
     return $stmt->execute($params);
   }
+
+  public function delete(int $id): bool
+  {
+    $stmt = $this->db->prepare("DELETE FROM users WHERE id = :id");
+    return $stmt->execute([':id' => $id]);
+  }
+
+  public function hasTasks(int $id): bool
+  {
+    $stmt = $this->db->prepare("SELECT COUNT(*) FROM tasks WHERE responsible_id = :id OR created_by = :id2");
+    $stmt->execute([':id' => $id, ':id2' => $id]);
+    return (int)$stmt->fetchColumn() > 0;
+  }
 }
 

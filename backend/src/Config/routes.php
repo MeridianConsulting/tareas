@@ -41,11 +41,13 @@ return [
       ['GET', '/api/v1/areas', [AreaController::class, 'index']],
       ['POST', '/api/v1/areas', [AreaController::class, 'store'], [RoleMiddleware::class => ['admin']]],
       ['PUT', '/api/v1/areas/{id}', [AreaController::class, 'update'], [RoleMiddleware::class => ['admin']]],
+      ['DELETE', '/api/v1/areas/{id}', [AreaController::class, 'destroy'], [RoleMiddleware::class => ['admin']]],
 
       // Admin - Users
       ['GET', '/api/v1/users', [UserController::class, 'index'], [RoleMiddleware::class => ['admin']]],
       ['POST', '/api/v1/users', [UserController::class, 'store'], [RoleMiddleware::class => ['admin']]],
       ['PUT', '/api/v1/users/{id}', [UserController::class, 'update'], [RoleMiddleware::class => ['admin']]],
+      ['DELETE', '/api/v1/users/{id}', [UserController::class, 'destroy'], [RoleMiddleware::class => ['admin']]],
 
       // Roles (para formularios)
       ['GET', '/api/v1/roles', [UserController::class, 'roles']],

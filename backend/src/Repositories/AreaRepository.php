@@ -68,5 +68,25 @@ class AreaRepository
 
     return $stmt->execute($params);
   }
+
+  public function delete(int $id): bool
+  {
+    $stmt = $this->db->prepare("DELETE FROM areas WHERE id = :id");
+    return $stmt->execute([':id' => $id]);
+  }
+
+  public function hasUsers(int $id): bool
+  {
+    $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE area_id = :id");
+    $stmt->execute([':id' => $id]);
+    return (int)$stmt->fetchColumn() > 0;
+  }
+
+  public function hasTasks(int $id): bool
+  {
+    $stmt = $this->db->prepare("SELECT COUNT(*) FROM tasks WHERE area_id = :id");
+    $stmt->execute([':id' => $id]);
+    return (int)$stmt->fetchColumn() > 0;
+  }
 }
 

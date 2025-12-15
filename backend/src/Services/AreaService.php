@@ -34,5 +34,26 @@ class AreaService
     $this->areaRepository->update($id, $data);
     return $this->areaRepository->findById($id);
   }
+
+  public function delete(int $id): bool
+  {
+    // Verificar que el área existe
+    $area = $this->areaRepository->findById($id);
+    if (!$area) {
+      throw new \Exception('Area no encontrada');
+    }
+
+    // Verificar si tiene usuarios asociados
+    if ($this->areaRepository->hasUsers($id)) {
+      throw new \Exception('No se puede eliminar el área porque tiene usuarios asignados');
+    }
+
+    // Verificar si tiene tareas asociadas
+    if ($this->areaRepository->hasTasks($id)) {
+      throw new \Exception('No se puede eliminar el área porque tiene tareas asociadas');
+    }
+
+    return $this->areaRepository->delete($id);
+  }
 }
 

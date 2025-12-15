@@ -44,5 +44,21 @@ class UserService
     $this->userRepository->update($id, $data);
     return $this->userRepository->findById($id);
   }
+
+  public function delete(int $id): bool
+  {
+    // Verificar que el usuario existe
+    $user = $this->userRepository->findById($id);
+    if (!$user) {
+      throw new \Exception('Usuario no encontrado');
+    }
+
+    // Verificar si tiene tareas asociadas
+    if ($this->userRepository->hasTasks($id)) {
+      throw new \Exception('No se puede eliminar el usuario porque tiene tareas asociadas');
+    }
+
+    return $this->userRepository->delete($id);
+  }
 }
 
