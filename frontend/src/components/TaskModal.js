@@ -3,6 +3,16 @@
 
 import { useState, useEffect } from 'react';
 import { apiRequest } from '../lib/api';
+import { 
+  X, 
+  Key, 
+  Settings, 
+  TrendingUp, 
+  FileText,
+  ChevronRight,
+  ChevronLeft,
+  Loader2
+} from 'lucide-react';
 
 export default function TaskModal({ isOpen, onClose, task, onSave }) {
   const [formData, setFormData] = useState({
@@ -99,24 +109,60 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
 
   if (!isOpen) return null;
 
-  const typeIcons = {
-    'Clave': { icon: '🔑', color: 'bg-amber-500', desc: 'Tarea estratégica de alto impacto' },
-    'Operativa': { icon: '⚙️', color: 'bg-blue-500', desc: 'Tarea del día a día' },
-    'Mejora': { icon: '📈', color: 'bg-emerald-500', desc: 'Iniciativa de mejora continua' },
-    'Obligatoria': { icon: '📋', color: 'bg-red-500', desc: 'Requerimiento o normativa' },
+  const typeConfig = {
+    'Clave': { 
+      icon: Key, 
+      color: 'bg-amber-500', 
+      lightBg: 'bg-amber-50',
+      lightColor: 'text-amber-600',
+      desc: 'Tarea estrategica de alto impacto' 
+    },
+    'Operativa': { 
+      icon: Settings, 
+      color: 'bg-blue-500', 
+      lightBg: 'bg-blue-50',
+      lightColor: 'text-blue-600',
+      desc: 'Tarea del dia a dia' 
+    },
+    'Mejora': { 
+      icon: TrendingUp, 
+      color: 'bg-emerald-500', 
+      lightBg: 'bg-emerald-50',
+      lightColor: 'text-emerald-600',
+      desc: 'Iniciativa de mejora continua' 
+    },
+    'Obligatoria': { 
+      icon: FileText, 
+      color: 'bg-rose-500', 
+      lightBg: 'bg-rose-50',
+      lightColor: 'text-rose-600',
+      desc: 'Requerimiento o normativa' 
+    },
   };
 
   const priorityConfig = {
-    'Alta': { color: 'bg-red-500 hover:bg-red-600', ring: 'ring-red-300' },
-    'Media': { color: 'bg-amber-500 hover:bg-amber-600', ring: 'ring-amber-300' },
-    'Baja': { color: 'bg-emerald-500 hover:bg-emerald-600', ring: 'ring-emerald-300' },
+    'Alta': { 
+      color: 'bg-rose-500 hover:bg-rose-600', 
+      ring: 'ring-rose-200',
+      selected: 'ring-4 ring-rose-200 scale-[1.02]'
+    },
+    'Media': { 
+      color: 'bg-amber-500 hover:bg-amber-600', 
+      ring: 'ring-amber-200',
+      selected: 'ring-4 ring-amber-200 scale-[1.02]'
+    },
+    'Baja': { 
+      color: 'bg-emerald-500 hover:bg-emerald-600', 
+      ring: 'ring-emerald-200',
+      selected: 'ring-4 ring-emerald-200 scale-[1.02]'
+    },
   };
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Overlay */}
       <div 
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
       
@@ -124,47 +170,45 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
       <div className="flex min-h-full items-center justify-center p-4">
         <div className="relative w-full max-w-2xl transform rounded-2xl bg-white shadow-2xl transition-all">
           {/* Header */}
-          <div className="relative overflow-hidden rounded-t-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 px-6 py-5">
-            <div className="absolute inset-0 bg-grid-white/10"></div>
+          <div className="relative overflow-hidden rounded-t-2xl bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 px-6 py-5">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(99,102,241,0.1),transparent_50%)]"></div>
             <div className="relative flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold text-white">
+                <h2 className="text-xl font-semibold text-white">
                   {task ? 'Editar Tarea' : 'Nueva Tarea'}
                 </h2>
-                <p className="mt-1 text-sm text-indigo-200">
+                <p className="mt-1 text-sm text-slate-300">
                   {task ? 'Modifica los detalles de la tarea' : 'Crea una nueva tarea para tu equipo'}
                 </p>
               </div>
               <button
                 onClick={onClose}
-                className="rounded-lg p-2 text-white/80 hover:bg-white/10 hover:text-white transition"
+                className="rounded-lg p-2 text-slate-400 hover:bg-white/10 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/20"
               >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X className="h-5 w-5" strokeWidth={1.75} />
               </button>
             </div>
             
             {/* Tabs */}
-            <div className="relative mt-4 flex space-x-1 rounded-lg bg-white/10 p-1">
+            <div className="relative mt-5 flex rounded-lg bg-slate-900/40 p-1">
               <button
                 type="button"
                 onClick={() => setActiveTab('basic')}
-                className={`flex-1 rounded-md py-2 text-sm font-medium transition ${
+                className={`flex-1 rounded-md py-2 text-sm font-medium transition-all ${
                   activeTab === 'basic' 
-                    ? 'bg-white text-indigo-700 shadow' 
-                    : 'text-white hover:bg-white/10'
+                    ? 'bg-white text-slate-800 shadow-sm' 
+                    : 'text-slate-300 hover:text-white hover:bg-white/5'
                 }`}
               >
-                Información básica
+                Informacion basica
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab('details')}
-                className={`flex-1 rounded-md py-2 text-sm font-medium transition ${
+                className={`flex-1 rounded-md py-2 text-sm font-medium transition-all ${
                   activeTab === 'details' 
-                    ? 'bg-white text-indigo-700 shadow' 
-                    : 'text-white hover:bg-white/10'
+                    ? 'bg-white text-slate-800 shadow-sm' 
+                    : 'text-slate-300 hover:text-white hover:bg-white/5'
                 }`}
               >
                 Detalles y fechas
@@ -175,75 +219,78 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
           {/* Content */}
           {loadingData ? (
             <div className="flex items-center justify-center py-20">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
+              <Loader2 className="h-8 w-8 text-slate-400 animate-spin" strokeWidth={1.75} />
             </div>
           ) : (
             <form onSubmit={handleSubmit}>
-              <div className="px-6 py-5">
+              <div className="px-6 py-6">
                 {activeTab === 'basic' && (
-                  <div className="space-y-5">
-                    {/* Título */}
+                  <div className="space-y-6">
+                    {/* Titulo */}
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Título de la tarea *
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Titulo de la tarea <span className="text-rose-500">*</span>
                       </label>
                       <input
                         type="text"
                         value={formData.title}
                         onChange={e => setFormData({ ...formData, title: e.target.value })}
                         required
-                        placeholder="Ej: Revisar documentación del proyecto"
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition placeholder:text-gray-400"
+                        placeholder="Ej: Revisar documentacion del proyecto"
+                        className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow placeholder:text-slate-400"
                       />
                     </div>
 
-                    {/* Descripción */}
+                    {/* Descripcion */}
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Descripción
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Descripcion
                       </label>
                       <textarea
                         value={formData.description}
                         onChange={e => setFormData({ ...formData, description: e.target.value })}
                         rows={3}
                         placeholder="Describe los detalles de la tarea..."
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition resize-none placeholder:text-gray-400"
+                        className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow resize-none placeholder:text-slate-400"
                       />
                     </div>
 
                     {/* Tipo de tarea */}
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-3">
-                        Tipo de tarea *
+                      <label className="block text-sm font-medium text-slate-700 mb-3">
+                        Tipo de tarea <span className="text-rose-500">*</span>
                       </label>
                       <div className="grid grid-cols-2 gap-3">
-                        {Object.entries(typeIcons).map(([type, config]) => (
-                          <button
-                            key={type}
-                            type="button"
-                            onClick={() => setFormData({ ...formData, type })}
-                            className={`flex items-center gap-3 p-3 rounded-xl border-2 transition ${
-                              formData.type === type
-                                ? 'border-indigo-500 bg-indigo-50 ring-4 ring-indigo-100'
-                                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                            }`}
-                          >
-                            <span className={`w-10 h-10 ${config.color} rounded-lg flex items-center justify-center text-lg`}>
-                              {config.icon}
-                            </span>
-                            <div className="text-left">
-                              <p className="font-medium text-gray-900">{type}</p>
-                              <p className="text-xs text-gray-500">{config.desc}</p>
-                            </div>
-                          </button>
-                        ))}
+                        {Object.entries(typeConfig).map(([type, config]) => {
+                          const IconComponent = config.icon;
+                          return (
+                            <button
+                              key={type}
+                              type="button"
+                              onClick={() => setFormData({ ...formData, type })}
+                              className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${
+                                formData.type === type
+                                  ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-100'
+                                  : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                              }`}
+                            >
+                              <span className={`w-10 h-10 ${config.lightBg} rounded-lg flex items-center justify-center`}>
+                                <IconComponent className={`w-5 h-5 ${config.lightColor}`} strokeWidth={1.75} />
+                              </span>
+                              <div className="text-left">
+                                <p className="font-medium text-slate-900 text-sm">{type}</p>
+                                <p className="text-xs text-slate-500 leading-tight">{config.desc}</p>
+                              </div>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
 
                     {/* Prioridad */}
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-3">
-                        Prioridad *
+                      <label className="block text-sm font-medium text-slate-700 mb-3">
+                        Prioridad <span className="text-rose-500">*</span>
                       </label>
                       <div className="flex gap-3">
                         {Object.entries(priorityConfig).map(([priority, config]) => (
@@ -251,8 +298,10 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
                             key={priority}
                             type="button"
                             onClick={() => setFormData({ ...formData, priority })}
-                            className={`flex-1 py-3 px-4 rounded-xl font-medium text-white transition ${config.color} ${
-                              formData.priority === priority ? `ring-4 ${config.ring} scale-105` : 'opacity-70 hover:opacity-100'
+                            className={`flex-1 py-2.5 px-4 rounded-lg font-medium text-white text-sm transition-all ${config.color} ${
+                              formData.priority === priority 
+                                ? config.selected 
+                                : 'opacity-60 hover:opacity-90'
                             }`}
                           >
                             {priority}
@@ -264,20 +313,20 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
                 )}
 
                 {activeTab === 'details' && (
-                  <div className="space-y-5">
-                    {/* Área y Responsable */}
+                  <div className="space-y-6">
+                    {/* Area y Responsable */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Área *
+                        <label className="block text-sm font-medium text-slate-700 mb-2">
+                          Area <span className="text-rose-500">*</span>
                         </label>
                         <select
                           value={formData.area_id}
                           onChange={e => setFormData({ ...formData, area_id: e.target.value })}
                           required
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition bg-white"
+                          className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow bg-white"
                         >
-                          <option value="">Seleccionar área</option>
+                          <option value="">Seleccionar area</option>
                           {areas.map(area => (
                             <option key={area.id} value={area.id}>{area.name}</option>
                           ))}
@@ -285,14 +334,14 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Responsable *
+                        <label className="block text-sm font-medium text-slate-700 mb-2">
+                          Responsable <span className="text-rose-500">*</span>
                         </label>
                         <select
                           value={formData.responsible_id}
                           onChange={e => setFormData({ ...formData, responsible_id: e.target.value })}
                           required
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition bg-white"
+                          className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow bg-white"
                         >
                           <option value="">Seleccionar responsable</option>
                           {users.map(user => (
@@ -305,25 +354,25 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
                     {/* Estado y Progreso */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-slate-700 mb-2">
                           Estado
                         </label>
                         <select
                           value={formData.status}
                           onChange={e => setFormData({ ...formData, status: e.target.value })}
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition bg-white"
+                          className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow bg-white"
                         >
                           <option value="No iniciada">No iniciada</option>
                           <option value="En progreso">En progreso</option>
-                          <option value="En revisión">En revisión</option>
+                          <option value="En revision">En revision</option>
                           <option value="Completada">Completada</option>
                           <option value="En riesgo">En riesgo</option>
                         </select>
                       </div>
 
                       <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Progreso: {formData.progress_percent}%
+                        <label className="block text-sm font-medium text-slate-700 mb-2">
+                          Progreso: <span className="font-semibold text-indigo-600">{formData.progress_percent}%</span>
                         </label>
                         <input
                           type="range"
@@ -332,9 +381,9 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
                           step="5"
                           value={formData.progress_percent}
                           onChange={e => setFormData({ ...formData, progress_percent: parseInt(e.target.value) })}
-                          className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                          className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                         />
-                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <div className="flex justify-between text-xs text-slate-400 mt-1">
                           <span>0%</span>
                           <span>50%</span>
                           <span>100%</span>
@@ -345,37 +394,37 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
                     {/* Fechas */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-slate-700 mb-2">
                           Fecha de inicio
                         </label>
                         <input
                           type="date"
                           value={formData.start_date}
                           onChange={e => setFormData({ ...formData, start_date: e.target.value })}
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition"
+                          className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-slate-700 mb-2">
                           Fecha de vencimiento
                         </label>
                         <input
                           type="date"
                           value={formData.due_date}
                           onChange={e => setFormData({ ...formData, due_date: e.target.value })}
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition"
+                          className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow"
                         />
                       </div>
                     </div>
 
                     {/* Resumen visual */}
                     {(formData.start_date || formData.due_date) && (
-                      <div className="mt-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100">
-                        <p className="text-sm text-gray-600">
-                          <span className="font-medium text-indigo-700">Período: </span>
+                      <div className="mt-2 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <p className="text-sm text-slate-600">
+                          <span className="font-medium text-slate-700">Periodo: </span>
                           {formData.start_date ? new Date(formData.start_date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : 'Sin definir'}
-                          {' → '}
+                          <span className="mx-2 text-slate-400">→</span>
                           {formData.due_date ? new Date(formData.due_date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Sin definir'}
                         </p>
                       </div>
@@ -385,11 +434,11 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between gap-3 border-t border-gray-100 bg-gray-50 px-6 py-4 rounded-b-2xl">
+              <div className="flex items-center justify-between gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 rounded-b-2xl">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-5 py-2.5 text-gray-700 font-medium hover:bg-gray-200 rounded-xl transition"
+                  className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400"
                 >
                   Cancelar
                 </button>
@@ -398,9 +447,10 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
                     <button
                       type="button"
                       onClick={() => setActiveTab('details')}
-                      className="px-5 py-2.5 bg-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-300 transition"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
-                      Siguiente →
+                      Siguiente
+                      <ChevronRight className="w-4 h-4" strokeWidth={2} />
                     </button>
                   )}
                   {activeTab === 'details' && (
@@ -408,23 +458,21 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
                       <button
                         type="button"
                         onClick={() => setActiveTab('basic')}
-                        className="px-5 py-2.5 bg-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-300 transition"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       >
-                        ← Atrás
+                        <ChevronLeft className="w-4 h-4" strokeWidth={2} />
+                        Atras
                       </button>
                       <button
                         type="submit"
                         disabled={loading}
-                        className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition shadow-lg shadow-indigo-200"
+                        className="inline-flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 shadow-sm"
                       >
                         {loading ? (
-                          <span className="flex items-center gap-2">
-                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                            </svg>
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
                             Guardando...
-                          </span>
+                          </>
                         ) : (
                           task ? 'Actualizar tarea' : 'Crear tarea'
                         )}
@@ -440,4 +488,3 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
     </div>
   );
 }
-

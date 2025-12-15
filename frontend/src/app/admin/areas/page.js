@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Layout from '../../../components/Layout';
 import { apiRequest } from '../../../lib/api';
+import { Plus, X, Building2, Loader2 } from 'lucide-react';
 
 export default function AreasPage() {
   const router = useRouter();
@@ -55,11 +56,10 @@ export default function AreasPage() {
       });
       setShowForm(false);
       setFormData({ name: '', code: '', type: 'AREA' });
-      // Recargar áreas
       const data = await apiRequest('/areas');
       setAreas(data.data || []);
     } catch (e) {
-      alert('Error al crear área: ' + e.message);
+      alert('Error al crear area: ' + e.message);
     }
   }
 
@@ -67,7 +67,7 @@ export default function AreasPage() {
     return (
       <Layout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <Loader2 className="h-10 w-10 text-indigo-600 animate-spin" strokeWidth={1.75} />
         </div>
       </Layout>
     );
@@ -75,82 +75,141 @@ export default function AreasPage() {
 
   return (
     <Layout>
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Gestión de Áreas</h1>
+      <div className="p-6 lg:p-8 max-w-5xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-2xl font-semibold text-slate-900">Gestion de Areas</h1>
+            <p className="text-slate-500 mt-0.5 text-sm">Administra las areas y proyectos de la organizacion</p>
+          </div>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
+            className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+              showForm 
+                ? 'bg-slate-100 text-slate-700 hover:bg-slate-200 focus:ring-slate-400'
+                : 'bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500'
+            }`}
           >
-            {showForm ? 'Cancelar' : 'Nueva Área'}
+            {showForm ? (
+              <>
+                <X className="w-5 h-5" strokeWidth={2} />
+                Cancelar
+              </>
+            ) : (
+              <>
+                <Plus className="w-5 h-5" strokeWidth={2} />
+                Nueva Area
+              </>
+            )}
           </button>
         </div>
 
         {showForm && (
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h2 className="text-xl font-semibold mb-4">Crear Nueva Área</h2>
+          <div className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+            <h2 className="text-base font-semibold text-slate-900 mb-5">Crear Nueva Area</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1.5 uppercase tracking-wide">
+                    Nombre <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                    required
+                    placeholder="Ej: Recursos Humanos"
+                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow placeholder:text-slate-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1.5 uppercase tracking-wide">
+                    Codigo <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.code}
+                    onChange={e => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                    required
+                    placeholder="Ej: RRHH"
+                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow placeholder:text-slate-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1.5 uppercase tracking-wide">Tipo</label>
+                  <select
+                    value={formData.type}
+                    onChange={e => setFormData({ ...formData, type: e.target.value })}
+                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow bg-white"
+                  >
+                    <option value="AREA">Area</option>
+                    <option value="PROYECTO">Proyecto</option>
+                  </select>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Código</label>
-                <input
-                  type="text"
-                  value={formData.code}
-                  onChange={e => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-                <select
-                  value={formData.type}
-                  onChange={e => setFormData({ ...formData, type: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              <div className="flex justify-end pt-2">
+                <button
+                  type="submit"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
-                  <option value="AREA">Área</option>
-                  <option value="PROYECTO">Proyecto</option>
-                </select>
+                  <Plus className="w-4 h-4" strokeWidth={2} />
+                  Crear Area
+                </button>
               </div>
-              <button
-                type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
-              >
-                Crear
-              </button>
             </form>
           </div>
         )}
 
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Código</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
+            <table className="min-w-full">
+              <thead>
+                <tr className="border-b border-slate-200 bg-slate-50/80">
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">ID</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Nombre</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Codigo</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Tipo</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {areas.map(area => (
-                  <tr key={area.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-sm text-gray-900">{area.id}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{area.name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-500">{area.code}</td>
-                    <td className="px-6 py-4 text-sm text-gray-500">{area.type}</td>
+              <tbody className="divide-y divide-slate-100">
+                {areas.length > 0 ? (
+                  areas.map(area => (
+                    <tr key={area.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-5 py-3.5 text-sm text-slate-500 tabular-nums">{area.id}</td>
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
+                            <Building2 className="w-4 h-4 text-slate-500" strokeWidth={1.75} />
+                          </div>
+                          <span className="text-sm font-medium text-slate-900">{area.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <span className="inline-flex px-2 py-0.5 text-xs font-medium bg-slate-100 text-slate-700 rounded">
+                          {area.code}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded ${
+                          area.type === 'AREA' 
+                            ? 'bg-blue-50 text-blue-700' 
+                            : 'bg-violet-50 text-violet-700'
+                        }`}>
+                          {area.type === 'AREA' ? 'Area' : 'Proyecto'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" className="px-5 py-12 text-center">
+                      <div className="flex flex-col items-center">
+                        <Building2 className="w-10 h-10 text-slate-300 mb-3" strokeWidth={1.5} />
+                        <p className="text-sm font-medium text-slate-900 mb-1">No hay areas registradas</p>
+                        <p className="text-sm text-slate-500">Crea tu primera area para comenzar</p>
+                      </div>
+                    </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
@@ -159,4 +218,3 @@ export default function AreasPage() {
     </Layout>
   );
 }
-
