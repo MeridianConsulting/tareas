@@ -322,80 +322,156 @@ export default function ReportsDownload() {
 
       y += 28;
 
-      // === DISTRIBUCIÓN POR TIPO Y ESTADO ===
-      const halfWidth = (pageWidth - margin * 2 - 10) / 2;
-
-      // Por Tipo
-      doc.setTextColor(30, 41, 59);
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Distribucion por Tipo', margin, y);
-      
-      let typeY = y + 6;
+      // === GRÁFICAS DE PIE ===
       const typeColors = {
         'Clave': amberColor,
         'Operativa': blueColor,
         'Mejora': greenColor,
         'Obligatoria': roseColor
       };
+      const statusColors = {
+        'Completada': greenColor,
+        'En progreso': blueColor,
+        'En riesgo': roseColor,
+        'No iniciada': slateColor,
+        'En revision': [139, 92, 246]
+      };
 
-      data.typeData.forEach(item => {
-        const pct = data.total > 0 ? (item.count / data.total) * 100 : 0;
+      // Función para crear gráfico de pie en canvas
+      const createPieChart = (chartData, colors, size = 200) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = size * 2;
+        canvas.height = size * 2;
+        const ctx = canvas.getContext('2d');
         
-        doc.setTextColor(...slateColor);
+        const centerX = size;
+        const centerY = size;
+        const radius = size * 0.7;
+        const innerRadius = radius * 0.5;
+        
+        const total = chartData.reduce((sum, item) => sum + item.count, 0);
+        if (total === 0) return null;
+        
+        let startAngle = -Math.PI / 2;
+        
+        chartData.forEach(item => {
+          const sliceAngle = (item.count / total) * 2 * Math.PI;
+          const endAngle = startAngle + sliceAngle;
+          
+          const color = colors[item.type || item.status] || [100, 116, 139];
+          ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+          
+          ctx.beginPath();
+          ctx.moveTo(centerX + innerRadius * Math.cos(startAngle), centerY + innerRadius * Math.sin(startAngle));
+          ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+          ctx.arc(centerX, centerY, innerRadius, endAngle, startAngle, true);
+          ctx.closePath();
+          ctx.fill();
+          
+          // Borde blanco entre segmentos
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 3;
+          ctx.stroke();
+          
+          startAngle = endAngle;
+        });
+        
+        // Círculo central blanco con sombra
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, innerRadius - 2, 0, 2 * Math.PI);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        
+        // Texto central
+        ctx.fillStyle = '#1e293b';
+        ctx.font = 'bold 32px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(total.toString(), centerX, centerY - 10);
+        ctx.font = '16px Arial';
+        ctx.fillStyle = '#64748b';
+        ctx.fillText('Total', centerX, centerY + 15);
+        
+        return canvas.toDataURL('image/png');
+      };
+
+      // Crear gráficos
+      const typeChartData = data.typeData.map(item => ({ ...item, type: item.type }));
+      const statusChartData = data.statusData.map(item => ({ ...item, status: item.status }));
+      
+      const typeChartImg = createPieChart(typeChartData, typeColors);
+      const statusChartImg = createPieChart(statusChartData, statusColors);
+      
+      const halfWidth = (pageWidth - margin * 2 - 10) / 2;
+      const chartSize = 35;
+
+      // === DISTRIBUCIÓN POR TIPO ===
+      doc.setTextColor(30, 41, 59);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Distribucion por Tipo', margin, y);
+      
+      // Agregar gráfico de pie para tipos
+      if (typeChartImg) {
+        doc.addImage(typeChartImg, 'PNG', margin, y + 3, chartSize, chartSize);
+      }
+      
+      // Leyenda de tipos
+      let typeY = y + 8;
+      data.typeData.forEach(item => {
+        const pct = data.total > 0 ? Math.round((item.count / data.total) * 100) : 0;
+        const color = typeColors[item.type] || slateColor;
+        
+        // Cuadrado de color
+        doc.setFillColor(...color);
+        doc.rect(margin + chartSize + 5, typeY - 2, 3, 3, 'F');
+        
+        // Texto
+        doc.setTextColor(30, 41, 59);
         doc.setFontSize(8);
         doc.setFont('helvetica', 'normal');
-        doc.text(item.type, margin, typeY);
+        doc.text(`${item.type}`, margin + chartSize + 10, typeY);
         
-        doc.setFillColor(226, 232, 240);
-        doc.roundedRect(margin + 30, typeY - 3, 40, 4, 1, 1, 'F');
-        
-        doc.setFillColor(...(typeColors[item.type] || slateColor));
-        doc.roundedRect(margin + 30, typeY - 3, 40 * (pct / 100), 4, 1, 1, 'F');
-        
-        doc.setTextColor(30, 41, 59);
         doc.setFont('helvetica', 'bold');
-        doc.text(`${item.count}`, margin + 75, typeY);
+        doc.text(`${item.count} (${pct}%)`, margin + chartSize + 38, typeY);
         
-        typeY += 7;
+        typeY += 6;
       });
 
-      // Por Estado
+      // === DISTRIBUCIÓN POR ESTADO ===
       doc.setTextColor(30, 41, 59);
       doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
       doc.text('Distribucion por Estado', margin + halfWidth + 10, y);
       
-      let statusY = y + 6;
-      const statusColors = {
-        'Completada': greenColor,
-        'En progreso': blueColor,
-        'En riesgo': roseColor,
-        'No iniciada': slateColor
-      };
-
+      // Agregar gráfico de pie para estados
+      if (statusChartImg) {
+        doc.addImage(statusChartImg, 'PNG', margin + halfWidth + 10, y + 3, chartSize, chartSize);
+      }
+      
+      // Leyenda de estados
+      let statusY = y + 8;
       data.statusData.forEach(item => {
-        const pct = data.total > 0 ? (item.count / data.total) * 100 : 0;
+        const pct = data.total > 0 ? Math.round((item.count / data.total) * 100) : 0;
+        const color = statusColors[item.status] || slateColor;
         
-        doc.setTextColor(...slateColor);
+        // Cuadrado de color
+        doc.setFillColor(...color);
+        doc.rect(margin + halfWidth + chartSize + 15, statusY - 2, 3, 3, 'F');
+        
+        // Texto
+        doc.setTextColor(30, 41, 59);
         doc.setFontSize(8);
         doc.setFont('helvetica', 'normal');
-        doc.text(item.status, margin + halfWidth + 10, statusY);
+        doc.text(`${item.status}`, margin + halfWidth + chartSize + 20, statusY);
         
-        doc.setFillColor(226, 232, 240);
-        doc.roundedRect(margin + halfWidth + 45, statusY - 3, 40, 4, 1, 1, 'F');
-        
-        doc.setFillColor(...(statusColors[item.status] || slateColor));
-        doc.roundedRect(margin + halfWidth + 45, statusY - 3, 40 * (pct / 100), 4, 1, 1, 'F');
-        
-        doc.setTextColor(30, 41, 59);
         doc.setFont('helvetica', 'bold');
-        doc.text(`${item.count}`, margin + halfWidth + 90, statusY);
+        doc.text(`${item.count} (${pct}%)`, margin + halfWidth + chartSize + 55, statusY);
         
-        statusY += 7;
+        statusY += 6;
       });
 
-      y = Math.max(typeY, statusY) + 10;
+      y = Math.max(y + chartSize + 8, Math.max(typeY, statusY)) + 5;
 
       // === RESUMEN POR ÁREA (solo en reporte general) ===
       if (reportType === 'general' && dashboard?.by_area?.filter(a => a.total_tasks > 0).length > 0) {
