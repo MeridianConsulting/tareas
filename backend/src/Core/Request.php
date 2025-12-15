@@ -29,8 +29,36 @@ class Request
 
   private function parsePath(): string
   {
-    $path = $_SERVER['REQUEST_URI'] ?? '/';
-    $path = parse_url($path, PHP_URL_PATH);
+    $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
+    $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
+    
+    // Extraer solo el path de la URI (sin query string)
+    $path = parse_url($requestUri, PHP_URL_PATH);
+    
+    // Obtener el directorio base del script
+    // Si SCRIPT_NAME es /tareas/backend/public/index.php
+    // entonces scriptDir será /tareas/backend/public
+    $scriptDir = dirname($scriptName);
+    
+    // Normalizar paths
+    $scriptDir = rtrim($scriptDir, '/');
+    $path = rtrim($path, '/');
+    
+    // Si el path comienza con el scriptDir, eliminarlo
+    if ($scriptDir !== '' && $scriptDir !== '/' && strpos($path, $scriptDir) === 0) {
+      $path = substr($path, strlen($scriptDir));
+    }
+    
+    // Si el path está vacío, usar /
+    if ($path === '') {
+      $path = '/';
+    }
+    
+    // Asegurar que empiece con /
+    if ($path[0] !== '/') {
+      $path = '/' . $path;
+    }
+    
     return $path;
   }
 
@@ -50,12 +78,27 @@ class Request
   private function parseHeaders(): array
   {
     $headers = [];
+    
+    // Intentar usar apache_request_headers primero (más confiable para Authorization)
+    if (function_exists('apache_request_headers')) {
+      $apacheHeaders = apache_request_headers();
+      if ($apacheHeaders !== false) {
+        foreach ($apacheHeaders as $key => $value) {
+          $headers[$key] = $value;
+        }
+      }
+    }
+    
+    // Complementar con $_SERVER para headers que no estén
     foreach ($_SERVER as $key => $value) {
       if (strpos($key, 'HTTP_') === 0) {
         $header = str_replace(' ', '-', ucwords(str_replace('_', ' ', strtolower(substr($key, 5)))));
-        $headers[$header] = $value;
+        if (!isset($headers[$header])) {
+          $headers[$header] = $value;
+        }
       }
     }
+    
     return $headers;
   }
 

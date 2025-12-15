@@ -90,16 +90,22 @@ export async function apiRequest(url, options = {}) {
   if (res.status === 401) {
     try {
       const newToken = await refreshToken();
-      config.headers.Authorization = `Bearer ${newToken}`;
-      res = await fetch(`${API_URL}${url}`, config);
+      if (newToken) {
+        config.headers.Authorization = `Bearer ${newToken}`;
+        res = await fetch(`${API_URL}${url}`, config);
+      }
     } catch (error) {
-      throw error;
+      // Si el refresh falla, lanzar error
+      const errorData = await res.json().catch(() => ({ error: { message: 'Unauthorized' } }));
+      throw new Error(errorData.error?.message || 'Unauthorized');
     }
   }
   
   if (!res.ok) {
     const error = await res.json().catch(() => ({ error: { message: 'Error desconocido' } }));
-    throw new Error(error.error?.message || 'Error en la petición');
+    const errorMessage = error.error?.message || `Error ${res.status}: ${res.statusText}`;
+    console.error('API Error:', errorMessage, error);
+    throw new Error(errorMessage);
   }
   
   return res.json();

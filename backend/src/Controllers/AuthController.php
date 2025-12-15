@@ -120,21 +120,58 @@ class AuthController
 
   public function me(Request $request)
   {
-    $userContext = $request->getAttribute('userContext');
-    $user = $this->userRepository->findById($userContext['id']);
+    try {
+      $userContext = $request->getAttribute('userContext');
+      
+      if (!$userContext || !isset($userContext['id'])) {
+        error_log('AuthController::me - User context not found');
+        return Response::json([
+          'error' => [
+            'code' => 'UNAUTHORIZED',
+            'message' => 'User context not found'
+          ]
+        ], 401);
+      }
 
-    if (!$user) {
+      $userId = $userContext['id'];
+      error_log('AuthController::me - Looking for user ID: ' . $userId);
+      
+      $user = $this->userRepository->findById($userId);
+
+      if (!$user) {
+        error_log('AuthController::me - User not found with ID: ' . $userId);
+        return Response::json([
+          'error' => [
+            'code' => 'NOT_FOUND',
+            'message' => 'User not found'
+          ]
+        ], 404);
+      }
+
+      error_log('AuthController::me - User found: ' . $user['email']);
+      
+      $userData = UserResource::toArray($user);
+      
+      return Response::json([
+        'data' => $userData
+      ]);
+    } catch (\Exception $e) {
+      // Log del error para debugging
+      error_log('AuthController::me error: ' . $e->getMessage());
+      error_log('Stack trace: ' . $e->getTraceAsString());
+      
       return Response::json([
         'error' => [
-          'code' => 'NOT_FOUND',
-          'message' => 'User not found'
+          'code' => 'INTERNAL_ERROR',
+          'message' => APP_DEBUG ? $e->getMessage() : 'Internal server error',
+          'details' => APP_DEBUG ? [
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => explode("\n", $e->getTraceAsString()),
+          ] : null
         ]
-      ], 404);
+      ], 500);
     }
-
-    return Response::json([
-      'data' => UserResource::toArray($user)
-    ]);
   }
 
   public function logout(Request $request)

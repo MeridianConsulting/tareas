@@ -23,6 +23,23 @@ class Router
     $method = $request->getMethod();
     $path = $request->getPath();
 
+    // Manejar preflight OPTIONS antes de aplicar middlewares
+    // Esto asegura que CORS funcione incluso si no hay ruta definida
+    if ($method === 'OPTIONS') {
+      // Aplicar solo CORS middleware para OPTIONS
+      $result = $this->applyMiddleware($request, $this->globalMiddleware);
+      if ($result instanceof \App\Core\Response) {
+        return $result;
+      }
+      // Si el middleware no devolvió respuesta, devolver respuesta CORS básica
+      return Response::json([], 204)
+        ->header('Access-Control-Allow-Origin', CORS_ORIGIN)
+        ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH')
+        ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CSRF-Token, Accept')
+        ->header('Access-Control-Allow-Credentials', 'true')
+        ->header('Access-Control-Max-Age', '86400');
+    }
+
     // Aplicar middleware global
     $result = $this->applyMiddleware($request, $this->globalMiddleware);
     if ($result instanceof \App\Core\Response) {
@@ -60,11 +77,22 @@ class Router
       return $this->executeRoute($request, $route);
     }
 
-    // 404
+    // 404 - con información de debug
+    $debugInfo = [];
+    if (defined('APP_DEBUG') && APP_DEBUG) {
+      $debugInfo = [
+        'requested_path' => $path,
+        'requested_method' => $method,
+        'available_public_routes' => array_map(function($r) { return $r[0] . ' ' . $r[1]; }, $this->routes['public']),
+        'available_protected_routes' => array_map(function($r) { return $r[0] . ' ' . $r[1]; }, $this->routes['protected']),
+      ];
+    }
+    
     return Response::json([
       'error' => [
         'code' => 'NOT_FOUND',
-        'message' => 'Route not found'
+        'message' => 'Route not found',
+        'details' => $debugInfo
       ]
     ], 404);
   }
@@ -82,6 +110,13 @@ class Router
       // Convertir ruta con parámetros a regex
       $pattern = $this->pathToRegex($routePath);
       
+      // Debug temporal
+      if (defined('APP_DEBUG') && APP_DEBUG) {
+        error_log("Trying route: $routeMethod $routePath");
+        error_log("Pattern: $pattern");
+        error_log("Path to match: $path");
+      }
+      
       if (preg_match($pattern, $path, $matches)) {
         // Extraer parámetros
         array_shift($matches);
@@ -95,7 +130,10 @@ class Router
 
   private function pathToRegex(string $path): string
   {
-    $pattern = preg_replace('/\{(\w+)\}/', '([^/]+)', $path);
+    // Escapar caracteres especiales de regex excepto los que queremos usar
+    $pattern = preg_quote($path, '#');
+    // Reemplazar los parámetros {id} con grupos de captura
+    $pattern = preg_replace('/\\\{(\w+)\\\}/', '([^/]+)', $pattern);
     return '#^' . $pattern . '$#';
   }
 
@@ -122,7 +160,7 @@ class Router
     ], 500);
   }
 
-  private function applyMiddleware(Request $request, array $middlewares): Request
+  private function applyMiddleware(Request $request, array $middlewares): Request|Response
   {
     foreach ($middlewares as $middleware) {
       if (is_array($middleware)) {

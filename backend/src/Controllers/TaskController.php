@@ -18,26 +18,51 @@ class TaskController
 
   public function index(Request $request)
   {
-    $userContext = $request->getAttribute('userContext');
-    
-    $filters = [
-      'status' => $request->getQuery('status'),
-      'priority' => $request->getQuery('priority'),
-      'type' => $request->getQuery('type'),
-      'area_id' => $request->getQuery('area_id') ? (int)$request->getQuery('area_id') : null,
-      'responsible_id' => $request->getQuery('responsible_id') ? (int)$request->getQuery('responsible_id') : null,
-    ];
+    try {
+      $userContext = $request->getAttribute('userContext');
+      
+      if (!$userContext) {
+        return Response::json([
+          'error' => [
+            'code' => 'UNAUTHORIZED',
+            'message' => 'User context not found'
+          ]
+        ], 401);
+      }
+      
+      $filters = [
+        'status' => $request->getQuery('status'),
+        'priority' => $request->getQuery('priority'),
+        'type' => $request->getQuery('type'),
+        'area_id' => $request->getQuery('area_id') ? (int)$request->getQuery('area_id') : null,
+        'responsible_id' => $request->getQuery('responsible_id') ? (int)$request->getQuery('responsible_id') : null,
+      ];
 
-    // Eliminar filtros vacíos
-    $filters = array_filter($filters, function($value) {
-      return $value !== null && $value !== '';
-    });
+      // Eliminar filtros vacíos
+      $filters = array_filter($filters, function($value) {
+        return $value !== null && $value !== '';
+      });
 
-    $tasks = $this->taskService->list($filters, $userContext);
+      $tasks = $this->taskService->list($filters, $userContext);
 
-    return Response::json([
-      'data' => TaskResource::collection($tasks)
-    ]);
+      return Response::json([
+        'data' => TaskResource::collection($tasks)
+      ]);
+    } catch (\Exception $e) {
+      error_log('TaskController::index error: ' . $e->getMessage());
+      error_log('Stack trace: ' . $e->getTraceAsString());
+      
+      return Response::json([
+        'error' => [
+          'code' => 'INTERNAL_ERROR',
+          'message' => APP_DEBUG ? $e->getMessage() : 'Internal server error',
+          'details' => APP_DEBUG ? [
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+          ] : null
+        ]
+      ], 500);
+    }
   }
 
   public function show(Request $request, string $id)

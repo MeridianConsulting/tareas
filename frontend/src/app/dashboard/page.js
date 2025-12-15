@@ -11,28 +11,15 @@ export default function Dashboard() {
   const router = useRouter();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null);
   const [filters, setFilters] = useState({
     status: '',
     priority: '',
     type: '',
   });
 
-  useEffect(() => {
-    async function loadUser() {
-      try {
-        const data = await apiRequest('/auth/me');
-        setUser(data.data);
-      } catch (e) {
-        router.push('/login');
-      }
-    }
-    loadUser();
-  }, [router]);
+  // Removido: Layout ya carga el usuario, no es necesario duplicar
 
   useEffect(() => {
-    if (!user) return;
-    
     async function loadTasks() {
       try {
         const queryParams = new URLSearchParams();
@@ -45,13 +32,13 @@ export default function Dashboard() {
         const data = await apiRequest(url);
         setTasks(data.data || []);
       } catch (e) {
-        console.error(e);
+        console.error('Error loading tasks:', e);
       } finally {
         setLoading(false);
       }
     }
     loadTasks();
-  }, [user, filters]);
+  }, [filters]);
 
   if (loading) {
     return (
@@ -68,14 +55,12 @@ export default function Dashboard() {
       <div className="p-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-800">Mis tareas</h1>
-          {(user?.role === 'admin' || user?.role === 'gerencia' || user?.role === 'lider_area') && (
-            <button
-              onClick={() => router.push('/reports/daily')}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
-            >
-              Ver reportes
-            </button>
-          )}
+          <button
+            onClick={() => router.push('/reports/daily')}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
+          >
+            Ver reportes
+          </button>
         </div>
 
         {/* Filtros */}

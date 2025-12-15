@@ -14,10 +14,15 @@ class ExceptionHandler
   {
     $statusCode = 500;
     $message = 'Internal server error';
+    $details = null;
 
     if (APP_DEBUG) {
       $message = $exception->getMessage();
-      $trace = $exception->getTraceAsString();
+      $details = [
+        'file' => $exception->getFile(),
+        'line' => $exception->getLine(),
+        'trace' => explode("\n", $exception->getTraceAsString()),
+      ];
     }
 
     // Log error
@@ -31,14 +36,27 @@ class ExceptionHandler
       $exception->getTraceAsString()
     ));
 
-    $response = Response::json([
+    // Asegurar que los headers CORS estén establecidos antes de enviar la respuesta
+    $origin = $_SERVER['HTTP_ORIGIN'] ?? CORS_ORIGIN;
+    header("Access-Control-Allow-Origin: $origin");
+    header('Access-Control-Allow-Credentials: true');
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, PATCH');
+    header('Access-Control-Allow-Headers: Content-Type, Authorization, X-CSRF-Token, Accept');
+    header('Content-Type: application/json');
+
+    $errorResponse = [
       'error' => [
         'code' => 'INTERNAL_ERROR',
         'message' => $message,
       ]
-    ], $statusCode);
+    ];
+    
+    if ($details) {
+      $errorResponse['error']['details'] = $details;
+    }
 
-    $response->send();
+    http_response_code($statusCode);
+    echo json_encode($errorResponse);
     exit;
   }
 

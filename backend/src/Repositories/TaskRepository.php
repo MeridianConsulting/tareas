@@ -67,9 +67,16 @@ class TaskRepository
 
     $sql .= " ORDER BY t.updated_at DESC";
 
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute($params);
-    return $stmt->fetchAll();
+    try {
+      $stmt = $this->db->prepare($sql);
+      $stmt->execute($params);
+      return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    } catch (\PDOException $e) {
+      error_log('TaskRepository::findAll error: ' . $e->getMessage());
+      error_log('SQL: ' . $sql);
+      error_log('Params: ' . json_encode($params));
+      throw new \Exception('Database error: ' . $e->getMessage());
+    }
   }
 
   public function findById(int $id, array $userContext = []): ?array
@@ -97,11 +104,18 @@ class TaskRepository
       $params[':user_id'] = $userId;
     }
 
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute($params);
-    $task = $stmt->fetch();
+    try {
+      $stmt = $this->db->prepare($sql);
+      $stmt->execute($params);
+      $task = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-    return $task ?: null;
+      return $task ?: null;
+    } catch (\PDOException $e) {
+      error_log('TaskRepository::findById error: ' . $e->getMessage());
+      error_log('SQL: ' . $sql);
+      error_log('Params: ' . json_encode($params));
+      throw new \Exception('Database error: ' . $e->getMessage());
+    }
   }
 
   public function create(array $data): int

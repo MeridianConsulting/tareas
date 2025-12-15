@@ -23,24 +23,30 @@ class UserRepository
       WHERE u.email = :email
     ");
     $stmt->execute([':email' => $email]);
-    $user = $stmt->fetch();
+    $user = $stmt->fetch(\PDO::FETCH_ASSOC);
 
     return $user ?: null;
   }
 
   public function findById(int $id): ?array
   {
-    $stmt = $this->db->prepare("
-      SELECT u.*, r.name as role_name, a.name as area_name
-      FROM users u
-      LEFT JOIN roles r ON u.role_id = r.id
-      LEFT JOIN areas a ON u.area_id = a.id
-      WHERE u.id = :id
-    ");
-    $stmt->execute([':id' => $id]);
-    $user = $stmt->fetch();
+    try {
+      $stmt = $this->db->prepare("
+        SELECT u.*, r.name as role_name, a.name as area_name
+        FROM users u
+        LEFT JOIN roles r ON u.role_id = r.id
+        LEFT JOIN areas a ON u.area_id = a.id
+        WHERE u.id = :id
+      ");
+      $stmt->execute([':id' => $id]);
+      $user = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-    return $user ?: null;
+      return $user ?: null;
+    } catch (\PDOException $e) {
+      error_log('UserRepository::findById error: ' . $e->getMessage());
+      error_log('SQL: SELECT u.*, r.name as role_name, a.name as area_name FROM users u LEFT JOIN roles r ON u.role_id = r.id LEFT JOIN areas a ON u.area_id = a.id WHERE u.id = ' . $id);
+      throw new \Exception('Database error: ' . $e->getMessage());
+    }
   }
 
   public function findAll(array $filters = []): array
@@ -64,7 +70,7 @@ class UserRepository
 
     $stmt = $this->db->prepare($sql);
     $stmt->execute($params);
-    return $stmt->fetchAll();
+    return $stmt->fetchAll(\PDO::FETCH_ASSOC);
   }
 
   public function create(array $data): int

@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Sidebar from './Sidebar';
-import { apiRequest, bootstrapAuth } from '../lib/api';
+import { apiRequest, bootstrapAuth, getAccessToken } from '../lib/api';
 
 export default function Layout({ children }) {
   const router = useRouter();
@@ -21,13 +21,16 @@ export default function Layout({ children }) {
     
     async function bootstrap() {
       try {
-        // 1. Intentar obtener access token desde refresh cookie
-        await bootstrapAuth();
+        // 1. Si no hay token en memoria, intentar obtener desde refresh cookie
+        if (!getAccessToken()) {
+          await bootstrapAuth();
+        }
         
         // 2. Obtener información del usuario
         const data = await apiRequest('/auth/me');
         setUser(data.data);
       } catch (e) {
+        console.error('Bootstrap auth error:', e);
         router.push('/login');
       } finally {
         setIsBootstrapping(false);
