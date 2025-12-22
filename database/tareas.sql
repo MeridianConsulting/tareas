@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 22-12-2025 a las 16:46:15
+-- Tiempo de generación: 22-12-2025 a las 16:58:23
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 
@@ -69,6 +69,15 @@ CREATE TABLE `refresh_tokens` (
   `user_agent` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `refresh_tokens`
+--
+
+INSERT INTO `refresh_tokens` (`id`, `user_id`, `token_hash`, `expires_at`, `revoked_at`, `created_at`, `ip`, `user_agent`) VALUES
+(1, 32, 'e83eab1b6cf584e0466b1f2e903426dd95be406be26c4a45e6c11e97afd8596e', '2026-01-05 10:50:49', '2025-12-22 10:53:00', '2025-12-22 15:50:49', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(2, 32, '7f0b68ccf746d7f0c044cd693ea19889c2b133a3edf48e763fd098444601ceb8', '2026-01-05 10:53:00', '2025-12-22 10:54:40', '2025-12-22 15:53:00', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(3, 32, '6578f58aace1a764621b4c5eaa5a91a82db91c5eb5941d9fced0fa62d920a341', '2026-01-05 10:54:40', NULL, '2025-12-22 15:54:40', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36');
+
 -- --------------------------------------------------------
 
 --
@@ -114,6 +123,22 @@ CREATE TABLE `tasks` (
   `deleted_at` datetime DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `task_assignments`
+--
+
+CREATE TABLE `task_assignments` (
+  `id` int(11) NOT NULL,
+  `task_id` int(11) NOT NULL,
+  `assigned_by` int(11) NOT NULL,
+  `assigned_to` int(11) NOT NULL,
+  `message` text DEFAULT NULL,
+  `is_read` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -286,6 +311,17 @@ ALTER TABLE `tasks`
   ADD KEY `idx_tasks_area_updated` (`area_id`,`updated_at`);
 
 --
+-- Indices de la tabla `task_assignments`
+--
+ALTER TABLE `task_assignments`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_assigned_to` (`assigned_to`),
+  ADD KEY `idx_assigned_by` (`assigned_by`),
+  ADD KEY `idx_is_read` (`is_read`),
+  ADD KEY `idx_created_at` (`created_at`),
+  ADD KEY `fk_task_assignments_task` (`task_id`);
+
+--
 -- Indices de la tabla `task_comments`
 --
 ALTER TABLE `task_comments`
@@ -344,7 +380,7 @@ ALTER TABLE `areas`
 -- AUTO_INCREMENT de la tabla `refresh_tokens`
 --
 ALTER TABLE `refresh_tokens`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `roles`
@@ -356,6 +392,12 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT de la tabla `tasks`
 --
 ALTER TABLE `tasks`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `task_assignments`
+--
+ALTER TABLE `task_assignments`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -405,6 +447,14 @@ ALTER TABLE `tasks`
   ADD CONSTRAINT `fk_tasks_area` FOREIGN KEY (`area_id`) REFERENCES `areas` (`id`),
   ADD CONSTRAINT `fk_tasks_created_by` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`),
   ADD CONSTRAINT `fk_tasks_responsible` FOREIGN KEY (`responsible_id`) REFERENCES `users` (`id`);
+
+--
+-- Filtros para la tabla `task_assignments`
+--
+ALTER TABLE `task_assignments`
+  ADD CONSTRAINT `fk_task_assignments_assigned_by` FOREIGN KEY (`assigned_by`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_task_assignments_assigned_to` FOREIGN KEY (`assigned_to`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_task_assignments_task` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `task_comments`

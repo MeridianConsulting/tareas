@@ -1,20 +1,64 @@
 // lib/api.js
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost/tareas/backend/public/api/v1';
+const TOKEN_STORAGE_KEY = 'access_token';
 
 let accessToken = null;
 let refreshPromise = null; // Lock para evitar múltiples refreshes simultáneos
 
+// Inicializar token desde localStorage si existe
+if (typeof window !== 'undefined') {
+  try {
+    const storedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+    if (storedToken) {
+      accessToken = storedToken;
+    }
+  } catch (e) {
+    console.warn('Error al leer token de localStorage:', e);
+  }
+}
+
 export function setAccessToken(token) {
   accessToken = token;
+  // Guardar en localStorage para persistencia
+  if (typeof window !== 'undefined') {
+    try {
+      if (token) {
+        localStorage.setItem(TOKEN_STORAGE_KEY, token);
+      } else {
+        localStorage.removeItem(TOKEN_STORAGE_KEY);
+      }
+    } catch (e) {
+      console.warn('Error al guardar token en localStorage:', e);
+    }
+  }
 }
 
 export function getAccessToken() {
+  // Si no hay token en memoria, intentar obtenerlo de localStorage
+  if (!accessToken && typeof window !== 'undefined') {
+    try {
+      const storedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+      if (storedToken) {
+        accessToken = storedToken;
+      }
+    } catch (e) {
+      console.warn('Error al leer token de localStorage:', e);
+    }
+  }
   return accessToken;
 }
 
 export function clearAccessToken() {
   accessToken = null;
   refreshPromise = null;
+  // Eliminar de localStorage
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+    } catch (e) {
+      console.warn('Error al eliminar token de localStorage:', e);
+    }
+  }
 }
 
 async function refreshToken() {

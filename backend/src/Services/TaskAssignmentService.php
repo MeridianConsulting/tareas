@@ -21,8 +21,16 @@ class TaskAssignmentService
 
     public function getMyAssignments(int $userId, array $filters = []): array
     {
-        $filters['assigned_to'] = $userId;
-        return $this->assignmentRepository->findAll($filters);
+        try {
+            $filters['assigned_to'] = $userId;
+            return $this->assignmentRepository->findAll($filters);
+        } catch (\PDOException $e) {
+            // Si la tabla no existe, retornar array vacío
+            if (strpos($e->getMessage(), "doesn't exist") !== false) {
+                return [];
+            }
+            throw $e;
+        }
     }
 
     public function getAssignmentsSentByMe(int $userId, array $filters = []): array
@@ -88,7 +96,15 @@ class TaskAssignmentService
 
     public function countUnread(int $userId): int
     {
-        return $this->assignmentRepository->countUnread($userId);
+        try {
+            return $this->assignmentRepository->countUnread($userId);
+        } catch (\PDOException $e) {
+            // Si la tabla no existe, retornar 0 (no hay asignaciones sin leer)
+            if (strpos($e->getMessage(), "doesn't exist") !== false) {
+                return 0;
+            }
+            throw $e;
+        }
     }
 
     public function delete(int $id, int $userId): bool
