@@ -17,7 +17,6 @@ import {
   ChevronLeft, 
   ChevronRight, 
   LogOut,
-  ClipboardList,
   Table2,
   PieChart,
   Layers,
@@ -114,26 +113,34 @@ export default function Sidebar({ user, isOpen, onToggle }) {
     <>
       <aside className={`bg-slate-900 text-white transition-all duration-300 ease-in-out ${isOpen ? 'w-64' : 'w-[72px]'} flex flex-col`}>
         {/* Header */}
-        <div className={`h-16 flex items-center border-b border-slate-800 ${isOpen ? 'px-4 justify-between' : 'justify-center'}`}>
-          {isOpen && (
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-                <ClipboardList className="w-4.5 h-4.5 text-white" strokeWidth={2} />
+        <div className={`h-16 flex items-center border-b border-slate-800 ${isOpen ? 'px-4 justify-between' : 'px-2 justify-center'}`}>
+          {isOpen ? (
+            <>
+              <div className="flex items-center gap-2.5">
+                <img 
+                  src="/logo.png?v=2" 
+                  alt="Meridian Control" 
+                  className="w-8 h-8 object-contain"
+                />
+                <span className="font-semibold text-base tracking-tight">Meridian Control</span>
               </div>
-              <span className="font-semibold text-base tracking-tight">Meridian Control</span>
-            </div>
-          )}
-          <button 
-            onClick={onToggle} 
-            className={`p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-600 ${!isOpen ? 'mx-auto' : ''}`}
-            aria-label={isOpen ? 'Colapsar menu' : 'Expandir menu'}
-          >
-            {isOpen ? (
-              <ChevronLeft className="w-5 h-5" strokeWidth={1.75} />
-            ) : (
+              <button 
+                onClick={onToggle} 
+                className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-600"
+                aria-label="Colapsar menu"
+              >
+                <ChevronLeft className="w-5 h-5" strokeWidth={1.75} />
+              </button>
+            </>
+          ) : (
+            <button 
+              onClick={onToggle} 
+              className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-600"
+              aria-label="Expandir menu"
+            >
               <ChevronRight className="w-5 h-5" strokeWidth={1.75} />
-            )}
-          </button>
+            </button>
+          )}
         </div>
 
         {/* Boton Nueva Tarea */}

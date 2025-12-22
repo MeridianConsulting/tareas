@@ -14,6 +14,9 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "Sistema de Gestión de Tareas",
   description: "Sistema de gestión de tareas empresarial",
+  icons: {
+    icon: '/logo.ico',
+  },
 };
 
 export default function RootLayout({ children }) {
