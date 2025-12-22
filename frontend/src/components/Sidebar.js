@@ -148,7 +148,7 @@ export default function Sidebar({ user, isOpen, onToggle }) {
         </div>
 
         {/* Navegacion */}
-        <nav className={`flex-1 ${isOpen ? 'px-3' : 'px-2'} pb-4 overflow-y-auto`}>
+        <nav className={`flex-1 ${isOpen ? 'px-3' : 'px-2'} pb-4 overflow-y-auto sidebar-scroll`}>
           {isOpen && (
             <p className="px-3 py-2 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
               Menu
