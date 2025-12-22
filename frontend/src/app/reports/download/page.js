@@ -87,7 +87,7 @@ export default function ReportsDownload() {
       setUsers(usersData.data || []);
       setDashboard(reportData.data);
     } catch (e) {
-      console.error(e);
+      // Error loading data
     } finally {
       setLoading(false);
     }
@@ -611,7 +611,6 @@ export default function ReportsDownload() {
       
       doc.save(fileName);
     } catch (error) {
-      console.error('Error generando PDF:', error);
       alert('Error al generar el PDF. Por favor intente de nuevo.');
     } finally {
       setGenerating(false);
@@ -1018,7 +1017,6 @@ export default function ReportsDownload() {
       
       saveAs(blob, fileName);
     } catch (error) {
-      console.error('Error generando Excel:', error);
       alert('Error al generar el Excel. Por favor intente de nuevo.');
     } finally {
       setGeneratingExcel(false);

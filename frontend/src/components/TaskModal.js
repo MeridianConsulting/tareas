@@ -79,7 +79,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
         setAreas(areasData.data || []);
         setUsers(usersData.data || []);
       } catch (e) {
-        console.error(e);
+        // Error loading data
       } finally {
         setLoadingData(false);
       }

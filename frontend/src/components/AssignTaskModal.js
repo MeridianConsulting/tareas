@@ -89,7 +89,7 @@ export default function AssignTaskModal({ isOpen, onClose, onSuccess }) {
       setFilteredUsers(usersData.data || []);
       setAreas(areasData.data || []);
     } catch (e) {
-      console.error('Error loading data:', e);
+      // Error loading data
     } finally {
       setLoading(false);
     }

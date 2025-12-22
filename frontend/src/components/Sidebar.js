@@ -97,7 +97,7 @@ export default function Sidebar({ user, isOpen, onToggle }) {
         credentials: 'include',
       });
     } catch (e) {
-      console.error(e);
+      // Error on logout
     } finally {
       logout();
     }

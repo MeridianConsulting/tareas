@@ -113,7 +113,7 @@ export default function ManagementDashboard() {
       setQuarterlyData(quarterlyRes.data || []);
       setAdvancedStats(advancedRes.data || null);
     } catch (e) {
-      console.error(e);
+      // Error loading data
     } finally {
       setLoading(false);
       setRefreshing(false);

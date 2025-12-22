@@ -56,7 +56,7 @@ export default function Dashboard() {
       const data = await apiRequest(url);
       setTasks(data.data || []);
     } catch (e) {
-      console.error('Error loading tasks:', e);
+      // Error loading tasks
     } finally {
       setLoading(false);
       setRefreshing(false);

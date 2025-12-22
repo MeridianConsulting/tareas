@@ -148,9 +148,9 @@ class MailService
       }
     }
     
-    // En producción, si mail() falla, lanzar excepción para que se sepa
-    if (!$ok && !defined('APP_DEBUG')) {
-      error_log("WARNING: Native mail() failed for password reset OTP to {$toEmail}");
+    // En producción, si mail() falla, loguear sin información sensible
+    if (!$ok && (!defined('APP_DEBUG') || !APP_DEBUG)) {
+      error_log("WARNING: Native mail() failed for password reset OTP");
       // No lanzamos excepción para no romper el flujo, pero logueamos fuerte
     }
   }

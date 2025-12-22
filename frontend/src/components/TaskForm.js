@@ -48,7 +48,7 @@ export default function TaskForm({ task, onSave, onCancel }) {
         setAreas(areasData.data || []);
         setUsers(usersData.data || []);
       } catch (e) {
-        console.error(e);
+        // Error saving task
       }
     }
     loadData();

@@ -57,7 +57,7 @@ export default function AssignmentsPage() {
       const data = await apiRequest(endpoint);
       setAssignments(data.data || []);
     } catch (e) {
-      console.error('Error loading assignments:', e);
+      // Error loading assignments
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -77,7 +77,7 @@ export default function AssignmentsPage() {
         a.id === id ? { ...a, is_read: 1 } : a
       ));
     } catch (e) {
-      console.error('Error marking as read:', e);
+      // Error marking as read
     }
   };
 
@@ -86,7 +86,7 @@ export default function AssignmentsPage() {
       await apiRequest('/assignments/mark-all-read', { method: 'PUT' });
       setAssignments(prev => prev.map(a => ({ ...a, is_read: 1 })));
     } catch (e) {
-      console.error('Error marking all as read:', e);
+      // Error marking all as read
     }
   };
 

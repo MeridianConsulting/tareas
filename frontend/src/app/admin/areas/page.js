@@ -56,7 +56,7 @@ export default function AreasPage() {
       const data = await apiRequest('/areas');
       setAreas(data.data || []);
     } catch (e) {
-      console.error(e);
+      // Error loading data
     } finally {
       setLoading(false);
     }

@@ -34,7 +34,7 @@ export default function MyTasksPage() {
         atRisk: myTasks.filter(t => t.status === 'En riesgo').length,
       });
     } catch (e) {
-      console.error(e);
+      // Error loading tasks
     }
   }
 

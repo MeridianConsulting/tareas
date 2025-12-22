@@ -80,7 +80,7 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
       setAreas(areasData.data || []);
       setUsers(usersData.data || []);
     } catch (e) {
-      console.error('Error loading data:', e);
+      // Error loading data
     } finally {
       setLoading(false);
     }

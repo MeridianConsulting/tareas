@@ -32,7 +32,6 @@ export default function Layout({ children }) {
         const data = await apiRequest('/auth/me');
         setUser(data.data);
       } catch (e) {
-        console.error('Bootstrap auth error:', e);
         router.push('/login');
       } finally {
         setIsBootstrapping(false);

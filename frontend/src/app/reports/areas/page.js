@@ -84,7 +84,7 @@ export default function AreasDashboard() {
       setAllTasks(tasksData.data || []);
       setUsers(usersData.data || []);
     } catch (e) {
-      console.error(e);
+      // Error loading data
     } finally {
       setLoading(false);
       setRefreshing(false);

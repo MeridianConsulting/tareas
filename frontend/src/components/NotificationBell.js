@@ -28,7 +28,7 @@ export default function NotificationBell() {
       const data = await apiRequest('/assignments/unread-count');
       setUnreadCount(data.data?.count || 0);
     } catch (e) {
-      console.error('Error loading unread count:', e);
+      // Error loading unread count
     }
   }, []);
 
@@ -38,7 +38,7 @@ export default function NotificationBell() {
       const data = await apiRequest('/assignments/my?limit=10');
       setAssignments(data.data || []);
     } catch (e) {
-      console.error('Error loading assignments:', e);
+      // Error loading assignments
     } finally {
       setLoading(false);
     }
@@ -76,7 +76,7 @@ export default function NotificationBell() {
       ));
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (e) {
-      console.error('Error marking as read:', e);
+      // Error marking as read
     } finally {
       setMarkingRead(null);
     }
@@ -88,7 +88,7 @@ export default function NotificationBell() {
       setAssignments(prev => prev.map(a => ({ ...a, is_read: 1 })));
       setUnreadCount(0);
     } catch (e) {
-      console.error('Error marking all as read:', e);
+      // Error marking all as read
     }
   };
 

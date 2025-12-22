@@ -76,7 +76,7 @@ export default function UsersPage() {
       setAreas(areasData.data || []);
       setRoles(rolesData.data || []);
     } catch (e) {
-      console.error(e);
+      // Error loading data
     } finally {
       setLoading(false);
     }

@@ -42,7 +42,7 @@ export default function DailyReports() {
         const data = await apiRequest(`/reports/daily?date=${selectedDate}`);
         setReport(data.data);
       } catch (e) {
-        console.error(e);
+        // Error loading data
       } finally {
         setLoading(false);
       }

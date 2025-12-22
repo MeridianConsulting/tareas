@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
       accessToken = storedToken;
     }
   } catch (e) {
-    console.warn('Error al leer token de storage:', e);
+    // Error silencioso al leer token de storage
   }
 }
 
@@ -44,7 +44,7 @@ export function setAccessToken(token, rememberMe = false) {
         sessionStorage.removeItem(TOKEN_STORAGE_KEY);
       }
     } catch (e) {
-      console.warn('Error al guardar token en storage:', e);
+      // Error silencioso al guardar token en storage
     }
   }
 }
@@ -62,7 +62,7 @@ export function getAccessToken() {
         accessToken = storedToken;
       }
     } catch (e) {
-      console.warn('Error al leer token de storage:', e);
+      // Error silencioso al leer token de storage
     }
   }
   return accessToken;
@@ -77,7 +77,7 @@ export function clearAccessToken() {
       localStorage.removeItem(TOKEN_STORAGE_KEY);
       sessionStorage.removeItem(TOKEN_STORAGE_KEY);
     } catch (e) {
-      console.warn('Error al eliminar token de storage:', e);
+      // Error silencioso al eliminar token de storage
     }
   }
 }
@@ -183,15 +183,6 @@ export async function apiRequest(url, options = {}) {
     };
     
     errorMessage = errorTranslations[errorMessage] || errorMessage;
-    
-    // Mostrar error en consola siempre (para debugging)
-    console.error('API Error:', {
-      status: res.status,
-      statusText: res.statusText,
-      url: `${API_URL}${url}`,
-      error: error,
-      message: errorMessage,
-    });
     
     throw new Error(errorMessage);
   }
