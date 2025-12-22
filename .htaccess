@@ -1,0 +1,21 @@
+# Configuración básica para reconocimiento del dominio
+# No interfiere con backend ni frontend
+
+# Habilitar motor de reescritura (opcional, solo si necesitas redirecciones)
+# RewriteEngine On
+
+# Permitir acceso a archivos estáticos
+<FilesMatch "\.(jpg|jpeg|png|gif|ico|svg|css|js|pdf|txt|md)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>
+
+# Configuración de índices (opcional)
+DirectoryIndex index.html index.php
+
+# Prevenir listado de directorios
+Options -Indexes
+
+# Permitir que el backend maneje sus propias rutas
+# Las rutas /backend/* se manejan por el .htaccess en backend/public/
+

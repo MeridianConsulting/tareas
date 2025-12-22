@@ -1,0 +1,56 @@
+-- Inserción/actualización de empleados en `users`
+-- Contraseña por defecto: cédula (guardada en `password_hash` como texto)
+-- IMPORTANTE: para empleados sin correo en el Excel se generó un correo único: noemail+<cedula>@meridian.com.co
+START TRANSACTION;
+DELETE FROM `users` WHERE `email`='nan';
+INSERT INTO `users` (`name`, `email`, `password_hash`, `role_id`, `area_id`, `is_active`) VALUES
+('NORA GISELL MORENO MORENO', 'nmoreno@meridian.com.co', '52030991', 1, 2, 1),
+('WILLIAM AUGUSTO FRANCO CASTELLANOS', 'wfranco@meridian.com.co', '79613401', 1, 2, 1),
+('CESAR AUGUSTO URREGO AVENDAÑO', 'currego@meridian.com.co', '79490148', 1, 2, 1),
+('RUTH MUÑOZ CASTILLO', 'rmunoz@meridian.com.co', '52147279', 4, 2, 1),
+('ZANDRA PATRICIA MAYORGA GOMEZ', 'coordinadoracontable@meridian.com.co', '52005033', 4, 2, 1),
+('GUSTAVO ADOLFO GIRALDO CORREA', 'ggiraldo@meridian.com.co', '1053788938', 3, 2, 1),
+('AURA ALEJANDRA CONTRERAS TORRES', 'asistenteadministrativo1@meridian.com.co', '1014251428', 4, 2, 1),
+('MICHAEL STIVEN RUIZ CARO', 'soportehseqproyectos@meridian.com.co', '1007493802', 4, 2, 1),
+('LUIS MIGUEL GUEVARA MARLES', 'hseq@meridian.com.co', '1119211830', 3, 2, 1),
+('SANDRA MILENA FLOREZ PRADO', 'asistenteadministrativo2@meridian.com.co', '1014180459', 4, 2, 1),
+('ELOY GABRIEL GOMEZ REYES', 'coordinaciongestionhumana@meridian.com.co', '1020733194', 4, 2, 1),
+('DIANA MARCELA JACOBO MANCERA', 'soportehseq@meridian.com.co', '1031145571', 4, 2, 1),
+('LAURA DANIELA SEGURA MORERA', 'profesionalhseq@meridian.com.co', '1121936876', 4, 2, 1),
+('ANDRES CAMILO CARDENAS REYES', 'soporteit.nivel1@meridian.com.co', '1007627524', 4, 2, 1),
+('SONIA STEPHANIA FONSECA LOPEZ', 'asistentegestionhumana2@meridian.com.co', '1007647736', 4, 2, 1),
+('FABRYZCIO ANDRES ORTIZ GARCIA', 'noemail+1102580512@meridian.com.co', '1102580512', 4, 2, 1),
+('EYMER SANTIAGO MENDEZ HERRERA', 'noemail+1031649053@meridian.com.co', '1031649053', 4, 2, 1),
+('ELIANA IVETH ALARCON RONDON', 'proyectos6@meridian.com.co', '1032446831', 3, 2, 1),
+('KAREN JULIETH CARRANZA RODRIGUEZ', 'analistacontable@meridian.com.co', '1000931984', 4, 2, 1),
+('VIVIANA DEL PILAR ALFONSO AVENDAÑO', 'noemail+1022344726@meridian.com.co', '1022344726', 4, 2, 1),
+('KAROL DANIELA SALCEDO ROMERO', 'noemail+1024478397@meridian.com.co', '1024478397', 4, 2, 1),
+('RONALD VASQUEZ ZARATE', 'nominas@meridian.com.co', '79954907', 4, 2, 1),
+('DANIEL ANDRES JOYA SAAVEDRA', 'proyectos2@meridian.com.co', '1136888916', 4, 2, 1),
+('LUISA FERNANDA PACHECO RUBIO', 'asistentegestionhumana@meridian.com.co', '1000588440', 4, 2, 1),
+('MIGUEL LEONARDO MARTINEZ SOTO', 'lidergh@meridian.com.co', '1022347823', 1, 2, 1),
+('DIEGO ALEJANDRO BARRETO HERNANDEZ', 'auxiliarit@meridian.com.co', '1140916030', 4, 2, 1),
+('JORGE ARMANDO PACHECO COLLAZOS', 'asistentelogistica@meridian.com.co', '1010174163', 4, NULL, 1),
+('JESSICA ALEXANDRA ALAVA CHAVEZ', 'noemail+1010222610@meridian.com.co', '1010222610', 4, 2, 1),
+('ANA EBELIA GAMEZ FIGUEREDO', 'contador@meridian.com.co', '39949703', 4, 2, 1),
+('JOSE MATEO LOPEZ CIFUENTES', 'desarrolloit@meridian.com.co', '1011202252', 1, 2, 1),
+('LUISA MARIA MELO RODRÍGUEZ', 'noemail+1018516821@meridian.com.co', '1018516821', 4, 2, 1),
+('LADY LORENA VINCHERY SOLANO', 'noemail+1019136436@meridian.com.co', '1019136436', 4, 2, 1),
+('CRISTIAN ANDRES MURILLO', 'noemail+1033703338@meridian.com.co', '1033703338', 4, 2, 1),
+('DARWIN YAMID GARZON RODRIGUEZ', 'noemail+1070750164@meridian.com.co', '1070750164', 4, 2, 1),
+('PAOLA ADRIANA GIL CHIPATECUA', 'cordinadorproyectos@meridian.com', '52786386', 3, 2, 1),
+('JESSICA ASTRID MAYORGA BARRERA', 'noemail+1026301759@meridian.com.co', '1026301759', 4, 2, 1),
+('JUAN ESTEBAN LOPEZ OSORIO', 'noemail+1089599089@meridian.com.co', '1089599089', 4, 2, 1),
+('JOSHUA ELIAS MENA VARGAS', 'noemail+1091966621@meridian.com.co', '1091966621', 4, 2, 1),
+('LAURA KARINA GAMEZ GOMEZ', 'noemail+1000987240@meridian.com.co', '1000987240', 4, 2, 1),
+('JULIAN ANDRES MORALES SEGURA', 'noemail+1012395152@meridian.com.co', '1012395152', 4, 2, 1),
+('LADY JOHANNA AGUIRRE ROMERO', 'noemail+1024491663@meridian.com.co', '1024491663', 4, 2, 1),
+('ALISON VANESA GONZALEZ OROZCO', 'noemail+1105465424@meridian.com.co', '1105465424', 4, 2, 1)
+ON DUPLICATE KEY UPDATE
+  `name` = VALUES(`name`),
+  `password_hash` = VALUES(`password_hash`),
+  `role_id` = VALUES(`role_id`),
+  `area_id` = VALUES(`area_id`),
+  `is_active` = VALUES(`is_active`),
+  `updated_at` = CURRENT_TIMESTAMP();
+COMMIT;

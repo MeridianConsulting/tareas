@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 22-12-2025 a las 16:46:15
+-- Tiempo de generación: 15-12-2025 a las 14:45:07
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 
@@ -114,7 +114,7 @@ CREATE TABLE `tasks` (
   `deleted_at` datetime DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ;
 
 -- --------------------------------------------------------
 
@@ -179,54 +179,6 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Volcado de datos para la tabla `users`
---
-
-INSERT INTO `users` (`id`, `name`, `email`, `password_hash`, `role_id`, `area_id`, `is_active`, `created_at`, `updated_at`) VALUES
-(3, 'NORA GISELL MORENO MORENO', 'nmoreno@meridian.com.co', '52030991', 1, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(4, 'WILLIAM AUGUSTO FRANCO CASTELLANOS', 'wfranco@meridian.com.co', '79613401', 1, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(5, 'CESAR AUGUSTO URREGO AVENDAÑO', 'currego@meridian.com.co', '79490148', 1, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(6, 'RUTH MUÑOZ CASTILLO', 'rmunoz@meridian.com.co', '52147279', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(7, 'ZANDRA PATRICIA MAYORGA GOMEZ', 'coordinadoracontable@meridian.com.co', '52005033', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(8, 'GUSTAVO ADOLFO GIRALDO CORREA', 'ggiraldo@meridian.com.co', '1053788938', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(9, 'AURA ALEJANDRA CONTRERAS TORRES', 'asistenteadministrativo1@meridian.com.co', '1014251428', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(10, 'MICHAEL STIVEN RUIZ CARO', 'soportehseqproyectos@meridian.com.co', '1007493802', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(11, 'LUIS MIGUEL GUEVARA MARLES', 'hseq@meridian.com.co', '1119211830', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(12, 'SANDRA MILENA FLOREZ PRADO', 'asistenteadministrativo2@meridian.com.co', '1014180459', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(13, 'ELOY GABRIEL GOMEZ REYES', 'coordinaciongestionhumana@meridian.com.co', '1020733194', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(14, 'DIANA MARCELA JACOBO MANCERA', 'soportehseq@meridian.com.co', '1031145571', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(15, 'LAURA DANIELA SEGURA MORERA', 'profesionalhseq@meridian.com.co', '1121936876', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(16, 'ANDRES CAMILO CARDENAS REYES', 'soporteit.nivel1@meridian.com.co', '1007627524', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(17, 'SONIA STEPHANIA FONSECA LOPEZ', 'asistentegestionhumana2@meridian.com.co', '1007647736', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(18, 'FABRYZCIO ANDRES ORTIZ GARCIA', 'noemail+1102580512@meridian.com.co', '1102580512', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(19, 'EYMER SANTIAGO MENDEZ HERRERA', 'noemail+1031649053@meridian.com.co', '1031649053', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(20, 'ELIANA IVETH ALARCON RONDON', 'proyectos6@meridian.com.co', '1032446831', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(21, 'KAREN JULIETH CARRANZA RODRIGUEZ', 'analistacontable@meridian.com.co', '1000931984', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(22, 'VIVIANA DEL PILAR ALFONSO AVENDAÑO', 'noemail+1022344726@meridian.com.co', '1022344726', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(23, 'KAROL DANIELA SALCEDO ROMERO', 'noemail+1024478397@meridian.com.co', '1024478397', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(24, 'RONALD VASQUEZ ZARATE', 'nominas@meridian.com.co', '79954907', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(25, 'DANIEL ANDRES JOYA SAAVEDRA', 'proyectos2@meridian.com.co', '1136888916', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(26, 'LUISA FERNANDA PACHECO RUBIO', 'asistentegestionhumana@meridian.com.co', '1000588440', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(27, 'MIGUEL LEONARDO MARTINEZ SOTO', 'lidergh@meridian.com.co', '1022347823', 1, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(28, 'DIEGO ALEJANDRO BARRETO HERNANDEZ', 'auxiliarit@meridian.com.co', '1140916030', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(29, 'JORGE ARMANDO PACHECO COLLAZOS', 'asistentelogistica@meridian.com.co', '1010174163', 4, NULL, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(30, 'JESSICA ALEXANDRA ALAVA CHAVEZ', 'noemail+1010222610@meridian.com.co', '1010222610', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(31, 'ANA EBELIA GAMEZ FIGUEREDO', 'contador@meridian.com.co', '39949703', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(32, 'JOSE MATEO LOPEZ CIFUENTES', 'desarrolloit@meridian.com.co', '1011202252', 1, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(33, 'LUISA MARIA MELO RODRÍGUEZ', 'noemail+1018516821@meridian.com.co', '1018516821', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(34, 'LADY LORENA VINCHERY SOLANO', 'noemail+1019136436@meridian.com.co', '1019136436', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(35, 'CRISTIAN ANDRES MURILLO', 'noemail+1033703338@meridian.com.co', '1033703338', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(36, 'DARWIN YAMID GARZON RODRIGUEZ', 'noemail+1070750164@meridian.com.co', '1070750164', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(37, 'PAOLA ADRIANA GIL CHIPATECUA', 'cordinadorproyectos@meridian.com', '52786386', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(38, 'JESSICA ASTRID MAYORGA BARRERA', 'noemail+1026301759@meridian.com.co', '1026301759', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(39, 'JUAN ESTEBAN LOPEZ OSORIO', 'noemail+1089599089@meridian.com.co', '1089599089', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(40, 'JOSHUA ELIAS MENA VARGAS', 'noemail+1091966621@meridian.com.co', '1091966621', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(41, 'LAURA KARINA GAMEZ GOMEZ', 'noemail+1000987240@meridian.com.co', '1000987240', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(42, 'JULIAN ANDRES MORALES SEGURA', 'noemail+1012395152@meridian.com.co', '1012395152', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(43, 'LADY JOHANNA AGUIRRE ROMERO', 'noemail+1024491663@meridian.com.co', '1024491663', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(44, 'ALISON VANESA GONZALEZ OROZCO', 'noemail+1105465424@meridian.com.co', '1105465424', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24');
-
--- --------------------------------------------------------
 
 --
 -- Estructura de tabla para la tabla `user_areas`
@@ -380,7 +332,7 @@ ALTER TABLE `task_evidences`
 -- AUTO_INCREMENT de la tabla `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Restricciones para tablas volcadas
