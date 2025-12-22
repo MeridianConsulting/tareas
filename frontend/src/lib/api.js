@@ -116,10 +116,14 @@ export async function apiRequest(url, options = {}) {
     
     errorMessage = errorTranslations[errorMessage] || errorMessage;
     
-    // Solo mostrar en consola en desarrollo
-    if (process.env.NODE_ENV === 'development') {
-      console.error('API Error:', errorMessage);
-    }
+    // Mostrar error en consola siempre (para debugging)
+    console.error('API Error:', {
+      status: res.status,
+      statusText: res.statusText,
+      url: `${API_URL}${url}`,
+      error: error,
+      message: errorMessage,
+    });
     
     throw new Error(errorMessage);
   }

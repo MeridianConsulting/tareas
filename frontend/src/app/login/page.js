@@ -20,14 +20,21 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
+      console.log('Intentando login con:', { email, password: '***' });
       const data = await apiRequest('/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       });
 
+      console.log('Login exitoso:', data);
       login(data.data.access_token);
       router.push('/dashboard');
     } catch (e) {
+      console.error('Error en login:', e);
+      console.error('Detalles del error:', {
+        message: e.message,
+        stack: e.stack,
+      });
       setError(e.message || 'Error de autenticación. Por favor, verifica tus credenciales.');
     } finally {
       setLoading(false);

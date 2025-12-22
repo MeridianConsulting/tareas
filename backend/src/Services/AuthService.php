@@ -22,7 +22,28 @@ class AuthService
   {
     $user = $this->userRepository->findByEmail($email);
 
-    if (!$user || !password_verify($password, $user['password_hash'])) {
+    if (!$user) {
+      throw new \Exception('Invalid credentials');
+    }
+
+    // Verificar contraseña: primero intentar con password_verify (hash bcrypt)
+    // Si falla, verificar si es una contraseña en texto plano (para compatibilidad con datos existentes)
+    $passwordValid = false;
+    
+    // Intentar verificar con password_verify (para hashes bcrypt)
+    if (password_verify($password, $user['password_hash'])) {
+      $passwordValid = true;
+    } 
+    // Si password_verify falla, verificar si es texto plano (compatibilidad con datos antiguos)
+    elseif ($user['password_hash'] === $password) {
+      $passwordValid = true;
+      // Opcional: actualizar el hash a bcrypt para mejorar la seguridad
+      // $this->userRepository->update($user['id'], [
+      //   'password_hash' => password_hash($password, PASSWORD_DEFAULT)
+      // ]);
+    }
+
+    if (!$passwordValid) {
       throw new \Exception('Invalid credentials');
     }
 
