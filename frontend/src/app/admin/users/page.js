@@ -171,7 +171,7 @@ export default function UsersPage() {
   const filteredUsers = users.filter(u => 
     u.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.role_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    u.role?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     u.area_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -397,12 +397,12 @@ export default function UsersPage() {
                       <td className="px-5 py-3.5 text-sm text-slate-600">{u.email}</td>
                       <td className="px-5 py-3.5">
                         <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded ${
-                          u.role_name === 'admin' ? 'bg-purple-50 text-purple-700' :
-                          u.role_name === 'gerencia' ? 'bg-blue-50 text-blue-700' :
-                          u.role_name === 'lider_area' ? 'bg-amber-50 text-amber-700' :
+                          u.role === 'admin' ? 'bg-purple-50 text-purple-700' :
+                          u.role === 'gerencia' ? 'bg-blue-50 text-blue-700' :
+                          u.role === 'lider_area' ? 'bg-amber-50 text-amber-700' :
                           'bg-slate-100 text-slate-700'
                         }`}>
-                          {u.role_name || 'Sin rol'}
+                          {u.role || 'Sin rol'}
                         </span>
                       </td>
                       <td className="px-5 py-3.5 text-sm text-slate-600">{u.area_name || 'Sin área'}</td>
