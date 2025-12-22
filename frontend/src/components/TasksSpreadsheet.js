@@ -26,6 +26,7 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
   const inputRef = useRef(null);
   const [showPastePrompt, setShowPastePrompt] = useState(false);
   const [pastedLines, setPastedLines] = useState([]);
+  const isNavigatingRef = useRef(false);
 
   const tipos = ['Clave', 'Operativa', 'Mejora', 'Obligatoria'];
   const prioridades = ['Alta', 'Media', 'Baja'];
@@ -36,11 +37,25 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
   }, []);
 
   useEffect(() => {
-    if (editingCell && inputRef.current) {
-      inputRef.current.focus();
-      if (inputRef.current.select) {
-        inputRef.current.select();
-      }
+    if (editingCell) {
+      // Usar requestAnimationFrame para asegurar que el DOM se haya actualizado
+      requestAnimationFrame(() => {
+        // Buscar el input específico por su ID único
+        const inputId = `cell-${editingCell.id}-${editingCell.field}`;
+        const input = document.getElementById(inputId);
+        if (input) {
+          input.focus();
+          if (input.select) {
+            input.select();
+          }
+        } else if (inputRef.current) {
+          // Fallback al ref si no se encuentra por ID
+          inputRef.current.focus();
+          if (inputRef.current.select) {
+            inputRef.current.select();
+          }
+        }
+      });
     }
   }, [editingCell]);
 
@@ -183,21 +198,52 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
     // Tab: mover a la siguiente celda
     if (e.key === 'Tab') {
       e.preventDefault();
-      setEditingCell(null);
+      isNavigatingRef.current = true;
+      
       // Encontrar la siguiente celda editable
       const allRows = [...newRows, ...tasks];
       const currentRowIndex = allRows.findIndex(r => (isNew ? r._tempId : r.id) === taskId);
       const fields = ['title', 'type', 'priority', 'status', 'area_id', 'progress_percent', 'start_date', 'due_date'];
       const currentFieldIndex = fields.indexOf(field);
       
-      if (currentFieldIndex < fields.length - 1) {
-        // Siguiente campo en la misma fila
-        setEditingCell({ id: taskId, field: fields[currentFieldIndex + 1] });
-      } else if (currentRowIndex < allRows.length - 1) {
-        // Primera celda de la siguiente fila
-        const nextRow = allRows[currentRowIndex + 1];
-        const nextRowId = nextRow._tempId || nextRow.id;
-        setEditingCell({ id: nextRowId, field: 'title' });
+      let nextCell = null;
+      
+      if (e.shiftKey) {
+        // Shift+Tab: mover a la celda anterior
+        if (currentFieldIndex > 0) {
+          // Campo anterior en la misma fila
+          nextCell = { id: taskId, field: fields[currentFieldIndex - 1], isNew };
+        } else if (currentRowIndex > 0) {
+          // Última celda de la fila anterior
+          const prevRow = allRows[currentRowIndex - 1];
+          const prevRowId = prevRow._tempId || prevRow.id;
+          const prevRowIsNew = !!prevRow._tempId;
+          nextCell = { id: prevRowId, field: fields[fields.length - 1], isNew: prevRowIsNew };
+        }
+      } else {
+        // Tab normal: mover a la siguiente celda
+        if (currentFieldIndex < fields.length - 1) {
+          // Siguiente campo en la misma fila
+          nextCell = { id: taskId, field: fields[currentFieldIndex + 1], isNew };
+        } else if (currentRowIndex < allRows.length - 1) {
+          // Primera celda de la siguiente fila
+          const nextRow = allRows[currentRowIndex + 1];
+          const nextRowId = nextRow._tempId || nextRow.id;
+          const nextRowIsNew = !!nextRow._tempId;
+          nextCell = { id: nextRowId, field: 'title', isNew: nextRowIsNew };
+        }
+      }
+      
+      // Actualizar directamente a la siguiente celda sin cerrar primero
+      if (nextCell) {
+        setEditingCell({ id: nextCell.id, field: nextCell.field });
+        // Resetear el flag después de un breve delay
+        setTimeout(() => {
+          isNavigatingRef.current = false;
+        }, 100);
+      } else {
+        setEditingCell(null);
+        isNavigatingRef.current = false;
       }
       return;
     }
@@ -414,14 +460,21 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
 
     // Campos de texto (titulo, descripcion)
     if (isEditing) {
+      const inputId = `cell-${taskId}-${field}`;
       return (
         <td className={cellClass}>
           <input
+            id={inputId}
             ref={inputRef}
             type="text"
             value={value || ''}
             onChange={(e) => updateCell(taskId, field, e.target.value, isNew)}
-            onBlur={() => setEditingCell(null)}
+            onBlur={() => {
+              // No cerrar si estamos navegando con Tab
+              if (!isNavigatingRef.current) {
+                setEditingCell(null);
+              }
+            }}
             onKeyDown={(e) => handleKeyDown(e, taskId, field, isNew)}
             onPaste={(e) => handlePaste(e, taskId, field, isNew)}
             className="w-full bg-transparent border-0 text-sm focus:outline-none focus:ring-0 p-0"
