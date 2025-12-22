@@ -14,6 +14,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -27,7 +28,7 @@ export default function LoginPage() {
       });
 
       console.log('Login exitoso:', data);
-      login(data.data.access_token);
+      login(data.data.access_token, rememberMe);
       router.push('/dashboard');
     } catch (e) {
       console.error('Error en login:', e);
@@ -186,6 +187,8 @@ export default function LoginPage() {
               <label className="flex items-center gap-2.5 cursor-pointer">
                 <input
                   type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                   className="h-4.5 w-4.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600 focus:ring-offset-0 cursor-pointer"
                 />
                 <span className="text-sm text-slate-600">Recordarme</span>

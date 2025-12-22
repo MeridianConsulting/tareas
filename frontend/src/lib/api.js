@@ -5,44 +5,64 @@ const TOKEN_STORAGE_KEY = 'access_token';
 let accessToken = null;
 let refreshPromise = null; // Lock para evitar múltiples refreshes simultáneos
 
-// Inicializar token desde localStorage si existe
+// Inicializar token desde sessionStorage o localStorage si existe
 if (typeof window !== 'undefined') {
   try {
-    const storedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+    // Priorizar sessionStorage (sesión actual) sobre localStorage (recordarme)
+    let storedToken = sessionStorage.getItem(TOKEN_STORAGE_KEY);
+    if (!storedToken) {
+      storedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+    }
     if (storedToken) {
       accessToken = storedToken;
     }
   } catch (e) {
-    console.warn('Error al leer token de localStorage:', e);
+    console.warn('Error al leer token de storage:', e);
   }
 }
 
-export function setAccessToken(token) {
+export function setAccessToken(token, rememberMe = false) {
   accessToken = token;
-  // Guardar en localStorage para persistencia
+  // Guardar en localStorage (persistente) o sessionStorage (temporal) según rememberMe
   if (typeof window !== 'undefined') {
     try {
       if (token) {
-        localStorage.setItem(TOKEN_STORAGE_KEY, token);
+        if (rememberMe) {
+          // Guardar en localStorage para persistencia entre sesiones
+          localStorage.setItem(TOKEN_STORAGE_KEY, token);
+          // Limpiar sessionStorage si existe
+          sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+        } else {
+          // Guardar en sessionStorage (se borra al cerrar el navegador)
+          sessionStorage.setItem(TOKEN_STORAGE_KEY, token);
+          // Limpiar localStorage si existe
+          localStorage.removeItem(TOKEN_STORAGE_KEY);
+        }
       } else {
+        // Si no hay token, limpiar ambos
         localStorage.removeItem(TOKEN_STORAGE_KEY);
+        sessionStorage.removeItem(TOKEN_STORAGE_KEY);
       }
     } catch (e) {
-      console.warn('Error al guardar token en localStorage:', e);
+      console.warn('Error al guardar token en storage:', e);
     }
   }
 }
 
 export function getAccessToken() {
-  // Si no hay token en memoria, intentar obtenerlo de localStorage
+  // Si no hay token en memoria, intentar obtenerlo de sessionStorage o localStorage
   if (!accessToken && typeof window !== 'undefined') {
     try {
-      const storedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+      // Priorizar sessionStorage (sesión actual) sobre localStorage (recordarme)
+      let storedToken = sessionStorage.getItem(TOKEN_STORAGE_KEY);
+      if (!storedToken) {
+        storedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+      }
       if (storedToken) {
         accessToken = storedToken;
       }
     } catch (e) {
-      console.warn('Error al leer token de localStorage:', e);
+      console.warn('Error al leer token de storage:', e);
     }
   }
   return accessToken;
@@ -51,12 +71,13 @@ export function getAccessToken() {
 export function clearAccessToken() {
   accessToken = null;
   refreshPromise = null;
-  // Eliminar de localStorage
+  // Eliminar de ambos storages
   if (typeof window !== 'undefined') {
     try {
       localStorage.removeItem(TOKEN_STORAGE_KEY);
+      sessionStorage.removeItem(TOKEN_STORAGE_KEY);
     } catch (e) {
-      console.warn('Error al eliminar token de localStorage:', e);
+      console.warn('Error al eliminar token de storage:', e);
     }
   }
 }
@@ -79,7 +100,10 @@ async function refreshToken() {
       }
       
       const data = await res.json();
-      setAccessToken(data.data.access_token);
+      // Mantener la preferencia de "Recordarme" al refrescar el token
+      // Si el token estaba en localStorage, mantenerlo ahí; si estaba en sessionStorage, mantenerlo ahí
+      const isRemembered = typeof window !== 'undefined' && localStorage.getItem(TOKEN_STORAGE_KEY) !== null;
+      setAccessToken(data.data.access_token, isRemembered);
       return data.data.access_token;
     } catch (error) {
       clearAccessToken();

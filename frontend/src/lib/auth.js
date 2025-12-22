@@ -1,8 +1,8 @@
 // lib/auth.js
 import { setAccessToken, clearAccessToken } from './api';
 
-export function login(accessToken) {
-  setAccessToken(accessToken);
+export function login(accessToken, rememberMe = false) {
+  setAccessToken(accessToken, rememberMe);
 }
 
 export function logout() {
