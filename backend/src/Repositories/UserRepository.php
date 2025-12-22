@@ -133,5 +133,14 @@ class UserRepository
     $stmt->execute([':id' => $id, ':id2' => $id]);
     return (int)$stmt->fetchColumn() > 0;
   }
+
+  public function updatePasswordHash(int $id, string $passwordHash): bool
+  {
+    $stmt = $this->db->prepare("UPDATE users SET password_hash = :password_hash WHERE id = :id");
+    return $stmt->execute([
+      ':id' => $id,
+      ':password_hash' => $passwordHash,
+    ]);
+  }
 }
 

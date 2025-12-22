@@ -35,3 +35,12 @@ define('CORS_ORIGIN', $_ENV['CORS_ORIGIN'] ?? 'http://localhost:3000');
 // Timezone
 date_default_timezone_set('America/Bogota');
 
+// Configuración para recuperación de contraseña
+define('APP_KEY', $_ENV['APP_KEY'] ?? 'CAMBIA_ESTO_POR_UN_SECRETO_LARGO_MINIMO_32_BYTES_EN_PRODUCCION');
+
+define('OTP_TTL_MINUTES', (int)($_ENV['OTP_TTL_MINUTES'] ?? 10));
+define('OTP_MAX_ATTEMPTS', (int)($_ENV['OTP_MAX_ATTEMPTS'] ?? 5));
+define('OTP_REQUEST_LIMIT_15MIN', (int)($_ENV['OTP_REQUEST_LIMIT_15MIN'] ?? 3));
+
+define('RESET_TOKEN_TTL_MINUTES', (int)($_ENV['RESET_TOKEN_TTL_MINUTES'] ?? 15));
+

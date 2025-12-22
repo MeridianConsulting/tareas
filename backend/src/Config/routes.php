@@ -1,6 +1,7 @@
 <?php
 
 use App\Controllers\AuthController;
+use App\Controllers\PasswordResetController;
 use App\Controllers\TaskController;
 use App\Controllers\UserController;
 use App\Controllers\AreaController;
@@ -20,6 +21,10 @@ return [
   'routes' => [
     ['POST', '/api/v1/auth/login', [AuthController::class, 'login']],
     ['POST', '/api/v1/auth/refresh', [AuthController::class, 'refresh']],
+    // Password reset (públicas, sin JWT)
+    ['POST', '/api/v1/auth/password/forgot', [PasswordResetController::class, 'forgot']],
+    ['POST', '/api/v1/auth/password/verify-otp', [PasswordResetController::class, 'verifyOtp']],
+    ['POST', '/api/v1/auth/password/reset', [PasswordResetController::class, 'reset']],
   ],
 
   // Rutas protegidas
