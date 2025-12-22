@@ -22,6 +22,7 @@ class ComposerStaticInitd22dcfdd1422aad647b8d18038c22ab2
         'P' =>
         array (
             'PhpOption\\' => 10,
+            'PHPMailer\\PHPMailer\\' => 20,
         ),
         'G' =>
         array (
@@ -58,6 +59,10 @@ class ComposerStaticInitd22dcfdd1422aad647b8d18038c22ab2
         array (
             0 => __DIR__ . '/..' . '/phpoption/phpoption/src/PhpOption',
         ),
+        'PHPMailer\\PHPMailer\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
+        ),
         'GrahamCampbell\\ResultType\\' =>
         array (
             0 => __DIR__ . '/..' . '/graham-campbell/result-type/src',
@@ -79,7 +84,9 @@ class ComposerStaticInitd22dcfdd1422aad647b8d18038c22ab2
     public static $classMap = array (
         'App\\Controllers\\AreaController' => __DIR__ . '/../..' . '/src/Controllers/AreaController.php',
         'App\\Controllers\\AuthController' => __DIR__ . '/../..' . '/src/Controllers/AuthController.php',
+        'App\\Controllers\\PasswordResetController' => __DIR__ . '/../..' . '/src/Controllers/PasswordResetController.php',
         'App\\Controllers\\ReportController' => __DIR__ . '/../..' . '/src/Controllers/ReportController.php',
+        'App\\Controllers\\TaskAssignmentController' => __DIR__ . '/../..' . '/src/Controllers/TaskAssignmentController.php',
         'App\\Controllers\\TaskController' => __DIR__ . '/../..' . '/src/Controllers/TaskController.php',
         'App\\Controllers\\UserController' => __DIR__ . '/../..' . '/src/Controllers/UserController.php',
         'App\\Core\\Database' => __DIR__ . '/../..' . '/src/Core/Database.php',
@@ -91,8 +98,10 @@ class ComposerStaticInitd22dcfdd1422aad647b8d18038c22ab2
         'App\\Middleware\\JwtAuthMiddleware' => __DIR__ . '/../..' . '/src/Middleware/JwtAuthMiddleware.php',
         'App\\Middleware\\RoleMiddleware' => __DIR__ . '/../..' . '/src/Middleware/RoleMiddleware.php',
         'App\\Repositories\\AreaRepository' => __DIR__ . '/../..' . '/src/Repositories/AreaRepository.php',
+        'App\\Repositories\\PasswordResetRepository' => __DIR__ . '/../..' . '/src/Repositories/PasswordResetRepository.php',
         'App\\Repositories\\RefreshTokenRepository' => __DIR__ . '/../..' . '/src/Repositories/RefreshTokenRepository.php',
         'App\\Repositories\\RoleRepository' => __DIR__ . '/../..' . '/src/Repositories/RoleRepository.php',
+        'App\\Repositories\\TaskAssignmentRepository' => __DIR__ . '/../..' . '/src/Repositories/TaskAssignmentRepository.php',
         'App\\Repositories\\TaskRepository' => __DIR__ . '/../..' . '/src/Repositories/TaskRepository.php',
         'App\\Repositories\\UserRepository' => __DIR__ . '/../..' . '/src/Repositories/UserRepository.php',
         'App\\Resources\\AreaResource' => __DIR__ . '/../..' . '/src/Resources/AreaResource.php',
@@ -101,7 +110,10 @@ class ComposerStaticInitd22dcfdd1422aad647b8d18038c22ab2
         'App\\Services\\AreaService' => __DIR__ . '/../..' . '/src/Services/AreaService.php',
         'App\\Services\\AuthService' => __DIR__ . '/../..' . '/src/Services/AuthService.php',
         'App\\Services\\JwtService' => __DIR__ . '/../..' . '/src/Services/JwtService.php',
+        'App\\Services\\MailService' => __DIR__ . '/../..' . '/src/Services/MailService.php',
+        'App\\Services\\PasswordResetService' => __DIR__ . '/../..' . '/src/Services/PasswordResetService.php',
         'App\\Services\\ReportService' => __DIR__ . '/../..' . '/src/Services/ReportService.php',
+        'App\\Services\\TaskAssignmentService' => __DIR__ . '/../..' . '/src/Services/TaskAssignmentService.php',
         'App\\Services\\TaskService' => __DIR__ . '/../..' . '/src/Services/TaskService.php',
         'App\\Services\\UserService' => __DIR__ . '/../..' . '/src/Services/UserService.php',
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
@@ -158,6 +170,13 @@ class ComposerStaticInitd22dcfdd1422aad647b8d18038c22ab2
         'GrahamCampbell\\ResultType\\Error' => __DIR__ . '/..' . '/graham-campbell/result-type/src/Error.php',
         'GrahamCampbell\\ResultType\\Result' => __DIR__ . '/..' . '/graham-campbell/result-type/src/Result.php',
         'GrahamCampbell\\ResultType\\Success' => __DIR__ . '/..' . '/graham-campbell/result-type/src/Success.php',
+        'PHPMailer\\PHPMailer\\DSNConfigurator' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/DSNConfigurator.php',
+        'PHPMailer\\PHPMailer\\Exception' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/Exception.php',
+        'PHPMailer\\PHPMailer\\OAuth' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/OAuth.php',
+        'PHPMailer\\PHPMailer\\OAuthTokenProvider' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/OAuthTokenProvider.php',
+        'PHPMailer\\PHPMailer\\PHPMailer' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/PHPMailer.php',
+        'PHPMailer\\PHPMailer\\POP3' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/POP3.php',
+        'PHPMailer\\PHPMailer\\SMTP' => __DIR__ . '/..' . '/phpmailer/phpmailer/src/SMTP.php',
         'PhpOption\\LazyOption' => __DIR__ . '/..' . '/phpoption/phpoption/src/PhpOption/LazyOption.php',
         'PhpOption\\None' => __DIR__ . '/..' . '/phpoption/phpoption/src/PhpOption/None.php',
         'PhpOption\\Option' => __DIR__ . '/..' . '/phpoption/phpoption/src/PhpOption/Option.php',

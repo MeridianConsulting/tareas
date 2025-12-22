@@ -1,0 +1,31 @@
+# Variables de entorno (contiene credenciales sensibles)
+.env
+.env.local
+.env.*.local
+
+# Dependencias
+/vendor/
+
+# Logs
+/storage/logs/*
+!/storage/logs/.gitkeep
+
+# Archivos temporales
+*.log
+*.tmp
+*.cache
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Archivos de prueba (solo desarrollo)
+test_mail.php
+

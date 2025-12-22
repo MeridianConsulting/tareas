@@ -195,10 +195,31 @@ Puedes usar un servidor SMTP local como:
 ## 🐛 Solución de Problemas
 
 ### El correo no llega
-- Verifica la configuración SMTP
-- Revisa la carpeta de spam
-- En desarrollo, revisa los logs de PHP para ver el OTP
-- Verifica que `mail()` funcione en tu servidor (puede requerir configuración adicional)
+
+**📖 Guía completa de diagnóstico:** Ver `SMTP_TROUBLESHOOTING.md`
+
+**Diagnóstico rápido:**
+
+1. **Ejecuta el script de prueba:**
+   ```bash
+   cd backend
+   php test_mail.php tu-email@ejemplo.com
+   ```
+   Este script verifica la configuración SMTP de forma aislada.
+
+2. **Verifica que .env se carga:**
+   - Revisa los logs de PHP después de intentar enviar
+   - Busca mensajes como `SMTP_HOST=NULL` (indica que no se carga)
+
+3. **Problemas comunes:**
+   - **Variables no cargan:** Verifica que `.env` esté en `backend/.env`
+   - **Credenciales incorrectas:** Gmail/Outlook requieren App Password si tienes 2FA
+   - **Puerto bloqueado:** Algunos hostings bloquean 587/465
+   - **Encriptación incorrecta:** 587=tls, 465=ssl
+
+4. **En desarrollo:**
+   - Los OTP se loguean en `error_log` cuando `APP_DEBUG=true`
+   - Revisa: `C:\xampp\php\logs\php_error_log` (Windows/XAMPP)
 
 ### Error "Código inválido o expirado"
 - Verifica que el código tenga exactamente 6 dígitos
