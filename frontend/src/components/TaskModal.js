@@ -1,7 +1,7 @@
 // components/TaskModal.js
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { apiRequest } from '../lib/api';
 import { 
   X, 
@@ -32,6 +32,9 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [activeTab, setActiveTab] = useState('basic');
+  const titleInputRef = useRef(null);
+  const [showMultiTaskPrompt, setShowMultiTaskPrompt] = useState(false);
+  const [pastedTasks, setPastedTasks] = useState([]);
 
   useEffect(() => {
     if (task) {
@@ -84,8 +87,51 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
     loadData();
   }, [isOpen]);
 
+  // Auto-focus en el campo de título cuando se abre el modal
+  useEffect(() => {
+    if (isOpen && !task && titleInputRef.current && !loadingData) {
+      setTimeout(() => {
+        titleInputRef.current?.focus();
+      }, 100);
+    }
+  }, [isOpen, task, loadingData]);
+
+  // Atajos de teclado globales
+  useEffect(() => {
+    if (!isOpen) return;
+
+    function handleKeyDown(e) {
+      // Ctrl+Enter o Cmd+Enter: Guardar (solo en la pestaña de detalles)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        if (activeTab === 'details' && !loading) {
+          e.preventDefault();
+          const form = document.querySelector('form');
+          if (form) {
+            form.requestSubmit();
+          }
+        }
+      }
+      
+      // Esc: Cerrar modal
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, activeTab, loading, onClose]);
+
   async function handleSubmit(e) {
     e.preventDefault();
+    
+    // Si hay tareas múltiples pendientes, crear todas
+    if (pastedTasks.length > 0) {
+      await createMultipleTasks();
+      return;
+    }
+    
     setLoading(true);
     try {
       const url = task ? `/tasks/${task.id}` : '/tasks';
@@ -104,6 +150,54 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
       alert('Error al guardar tarea: ' + e.message);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function createMultipleTasks() {
+    if (pastedTasks.length === 0) return;
+    
+    setLoading(true);
+    try {
+      const tasksToCreate = pastedTasks.map(taskTitle => ({
+        ...formData,
+        title: taskTitle.trim(),
+      }));
+
+      // Crear todas las tareas en paralelo
+      await Promise.all(
+        tasksToCreate.map(taskData => 
+          apiRequest('/tasks', {
+            method: 'POST',
+            body: JSON.stringify(taskData),
+          })
+        )
+      );
+      
+      if (onSave) {
+        onSave();
+      }
+      
+      setShowMultiTaskPrompt(false);
+      setPastedTasks([]);
+      onClose();
+    } catch (e) {
+      alert('Error al crear tareas: ' + e.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleTitlePaste(e) {
+    const pastedText = e.clipboardData.getData('text');
+    const lines = pastedText.split(/\r?\n/).filter(line => line.trim().length > 0);
+    
+    // Si hay más de una línea, ofrecer crear múltiples tareas
+    if (lines.length > 1 && !task) {
+      e.preventDefault();
+      setPastedTasks(lines);
+      setShowMultiTaskPrompt(true);
+      // Mantener solo la primera línea en el campo
+      setFormData({ ...formData, title: lines[0].trim() });
     }
   }
 
@@ -180,6 +274,11 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
                 <p className="mt-1 text-sm text-slate-300">
                   {task ? 'Modifica los detalles de la tarea' : 'Crea una nueva tarea para tu equipo'}
                 </p>
+                {!task && (
+                  <p className="mt-2 text-xs text-slate-400">
+                    💡 Pega múltiples líneas en el título para crear varias tareas • <kbd className="px-1.5 py-0.5 bg-slate-800/50 rounded text-xs">Esc</kbd> para cerrar
+                  </p>
+                )}
               </div>
               <button
                 onClick={onClose}
@@ -230,15 +329,57 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
                         Titulo de la tarea <span className="text-rose-500">*</span>
+                        {!task && (
+                          <span className="ml-2 text-xs text-slate-500 font-normal">
+                            (Pega múltiples líneas para crear varias tareas)
+                          </span>
+                        )}
                       </label>
                       <input
+                        ref={titleInputRef}
                         type="text"
                         value={formData.title}
                         onChange={e => setFormData({ ...formData, title: e.target.value })}
+                        onPaste={handleTitlePaste}
                         required
                         placeholder="Ej: Revisar documentacion del proyecto"
                         className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow placeholder:text-slate-400"
                       />
+                      {showMultiTaskPrompt && (
+                        <div className="mt-3 p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
+                          <p className="text-sm font-medium text-indigo-900 mb-2">
+                            Se detectaron {pastedTasks.length} tareas para crear
+                          </p>
+                          <div className="max-h-32 overflow-y-auto mb-3 space-y-1">
+                            {pastedTasks.slice(0, 5).map((taskTitle, idx) => (
+                              <p key={idx} className="text-xs text-indigo-700">• {taskTitle.trim()}</p>
+                            ))}
+                            {pastedTasks.length > 5 && (
+                              <p className="text-xs text-indigo-600">... y {pastedTasks.length - 5} más</p>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={createMultipleTasks}
+                              disabled={loading}
+                              className="px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                            >
+                              {loading ? 'Creando...' : `Crear ${pastedTasks.length} tareas`}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowMultiTaskPrompt(false);
+                                setPastedTasks([]);
+                              }}
+                              className="px-3 py-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Descripcion */}
@@ -249,6 +390,18 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
                       <textarea
                         value={formData.description}
                         onChange={e => setFormData({ ...formData, description: e.target.value })}
+                        onKeyDown={(e) => {
+                          // Ctrl+Enter o Cmd+Enter en textarea: guardar (si estamos en detalles)
+                          if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                            if (activeTab === 'details') {
+                              e.preventDefault();
+                              const form = e.target.closest('form');
+                              if (form) {
+                                form.requestSubmit();
+                              }
+                            }
+                          }
+                        }}
                         rows={3}
                         placeholder="Describe los detalles de la tarea..."
                         className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow resize-none placeholder:text-slate-400"
@@ -435,13 +588,20 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
 
               {/* Footer */}
               <div className="flex items-center justify-between gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 rounded-b-2xl">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400"
-                >
-                  Cancelar
-                </button>
+                <div className="flex items-center gap-4">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400"
+                  >
+                    Cancelar
+                  </button>
+                  {activeTab === 'details' && (
+                    <span className="text-xs text-slate-500 hidden sm:inline">
+                      <kbd className="px-2 py-1 bg-white border border-slate-300 rounded text-xs font-mono">Ctrl</kbd> + <kbd className="px-2 py-1 bg-white border border-slate-300 rounded text-xs font-mono">Enter</kbd> para guardar
+                    </span>
+                  )}
+                </div>
                 <div className="flex gap-3">
                   {activeTab === 'basic' && (
                     <button

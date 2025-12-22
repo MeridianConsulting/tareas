@@ -24,6 +24,8 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
   const [pendingChanges, setPendingChanges] = useState({});
   const [newRows, setNewRows] = useState([]);
   const inputRef = useRef(null);
+  const [showPastePrompt, setShowPastePrompt] = useState(false);
+  const [pastedLines, setPastedLines] = useState([]);
 
   const tipos = ['Clave', 'Operativa', 'Mejora', 'Obligatoria'];
   const prioridades = ['Alta', 'Media', 'Baja'];
@@ -178,15 +180,164 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
   }
 
   function handleKeyDown(e, taskId, field, isNew) {
-    if (e.key === 'Enter') {
+    // Tab: mover a la siguiente celda
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      setEditingCell(null);
+      // Encontrar la siguiente celda editable
+      const allRows = [...newRows, ...tasks];
+      const currentRowIndex = allRows.findIndex(r => (isNew ? r._tempId : r.id) === taskId);
+      const fields = ['title', 'type', 'priority', 'status', 'area_id', 'progress_percent', 'start_date', 'due_date'];
+      const currentFieldIndex = fields.indexOf(field);
+      
+      if (currentFieldIndex < fields.length - 1) {
+        // Siguiente campo en la misma fila
+        setEditingCell({ id: taskId, field: fields[currentFieldIndex + 1] });
+      } else if (currentRowIndex < allRows.length - 1) {
+        // Primera celda de la siguiente fila
+        const nextRow = allRows[currentRowIndex + 1];
+        const nextRowId = nextRow._tempId || nextRow.id;
+        setEditingCell({ id: nextRowId, field: 'title' });
+      }
+      return;
+    }
+    
+    // Enter: confirmar y mover a la siguiente fila (solo en título)
+    if (e.key === 'Enter' && field === 'title') {
+      e.preventDefault();
       setEditingCell(null);
       if (isNew) {
-        // Mover al siguiente campo o guardar
+        // Si hay cambios, guardar y crear nueva fila
+        if (taskId && newRows.find(r => r._tempId === taskId)?.title?.trim()) {
+          const row = newRows.find(r => r._tempId === taskId);
+          if (row) {
+            saveNewRow(row).then(() => {
+              // Crear nueva fila y enfocar en título
+              addNewRow();
+              setTimeout(() => {
+                const newRow = newRows[newRows.length - 1];
+                if (newRow) {
+                  setEditingCell({ id: newRow._tempId, field: 'title' });
+                }
+              }, 100);
+            });
+          }
+        } else {
+          // Solo crear nueva fila
+          addNewRow();
+        }
+      } else if (pendingChanges[taskId]) {
+        saveChanges(taskId);
+      }
+      return;
+    }
+    
+    // Enter normal: confirmar edición
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      setEditingCell(null);
+      if (isNew) {
+        // Mover al siguiente campo
+        const fields = ['title', 'type', 'priority', 'status', 'area_id', 'progress_percent', 'start_date', 'due_date'];
+        const currentFieldIndex = fields.indexOf(field);
+        if (currentFieldIndex < fields.length - 1) {
+          setEditingCell({ id: taskId, field: fields[currentFieldIndex + 1] });
+        }
       } else if (pendingChanges[taskId]) {
         saveChanges(taskId);
       }
     } else if (e.key === 'Escape') {
       setEditingCell(null);
+    }
+  }
+
+  function handlePaste(e, taskId, field, isNew) {
+    // Solo procesar pegado múltiple en el campo de título
+    if (field !== 'title') return;
+    
+    const pastedText = e.clipboardData.getData('text');
+    const lines = pastedText.split(/\r?\n/).filter(line => line.trim().length > 0);
+    
+    // Si hay más de una línea, crear múltiples tareas
+    if (lines.length > 1) {
+      e.preventDefault();
+      setPastedLines(lines);
+      setShowPastePrompt(true);
+      
+      // Actualizar la primera fila con el primer título
+      if (isNew) {
+        updateCell(taskId, 'title', lines[0].trim(), true);
+      } else {
+        // Si no es nueva, actualizar el título actual y crear filas nuevas para el resto
+        updateCell(taskId, 'title', lines[0].trim(), false);
+        // Crear filas nuevas para las líneas restantes
+        const remainingLines = lines.slice(1);
+        const newRowsToAdd = remainingLines.map(title => ({
+          _tempId: Date.now() + Math.random(),
+          _isNew: true,
+          title: title.trim(),
+          description: '',
+          type: 'Operativa',
+          priority: 'Media',
+          status: 'No iniciada',
+          progress_percent: 0,
+          area_id: currentUser?.area_id || areas[0]?.id || '',
+          responsible_id: currentUser?.id || '',
+          start_date: new Date().toISOString().split('T')[0],
+          due_date: '',
+        }));
+        setNewRows([...newRows, ...newRowsToAdd]);
+      }
+    }
+  }
+
+  async function createMultipleTasksFromPaste() {
+    if (pastedLines.length === 0) return;
+    
+    setSaving(true);
+    try {
+      // Si hay una celda editándose, guardar su cambio primero
+      if (editingCell) {
+        const editingTask = tasks.find(t => t.id === editingCell.id);
+        if (editingTask && pendingChanges[editingCell.id]) {
+          await saveChanges(editingCell.id);
+        }
+      }
+
+      const tasksToCreate = pastedLines.map(title => ({
+        title: title.trim(),
+        description: '',
+        type: 'Operativa',
+        priority: 'Media',
+        status: 'No iniciada',
+        progress_percent: 0,
+        area_id: currentUser?.area_id || areas[0]?.id || '',
+        responsible_id: currentUser?.id || '',
+        start_date: new Date().toISOString().split('T')[0],
+        due_date: '',
+      }));
+
+      // Crear todas las tareas en paralelo
+      await Promise.all(
+        tasksToCreate.map(taskData => 
+          apiRequest('/tasks', {
+            method: 'POST',
+            body: JSON.stringify(taskData),
+          })
+        )
+      );
+      
+      // Limpiar filas nuevas temporales que se crearon
+      setNewRows([]);
+      setShowPastePrompt(false);
+      setPastedLines([]);
+      setEditingCell(null);
+      await loadData();
+      if (onTasksChange) onTasksChange();
+    } catch (e) {
+      alert('Error al crear tareas: ' + e.message);
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -272,6 +423,7 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
             onChange={(e) => updateCell(taskId, field, e.target.value, isNew)}
             onBlur={() => setEditingCell(null)}
             onKeyDown={(e) => handleKeyDown(e, taskId, field, isNew)}
+            onPaste={(e) => handlePaste(e, taskId, field, isNew)}
             className="w-full bg-transparent border-0 text-sm focus:outline-none focus:ring-0 p-0"
           />
         </td>
@@ -373,6 +525,29 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
               Sin guardar
             </span>
           )}
+          {showPastePrompt && (
+            <div className="flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-200 rounded-lg">
+              <span className="text-xs font-medium text-indigo-700">
+                {pastedLines.length} tareas detectadas
+              </span>
+              <button
+                onClick={createMultipleTasksFromPaste}
+                disabled={saving}
+                className="px-2 py-0.5 text-xs font-medium text-white bg-indigo-600 rounded hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+              >
+                {saving ? 'Creando...' : 'Crear todas'}
+              </button>
+              <button
+                onClick={() => {
+                  setShowPastePrompt(false);
+                  setPastedLines([]);
+                }}
+                className="px-2 py-0.5 text-xs font-medium text-slate-600 hover:text-slate-800 transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          )}
         </div>
         <button
           onClick={addNewRow}
@@ -445,7 +620,7 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
 
       {/* Footer minimalista */}
       <div className="px-4 py-2 border-t border-slate-100 bg-slate-50/50 text-xs text-slate-500">
-        Clic en celda para editar · Enter para confirmar · Esc para cancelar
+        Clic en celda para editar · <kbd className="px-1 py-0.5 bg-white border border-slate-300 rounded text-xs font-mono">Tab</kbd> siguiente celda · <kbd className="px-1 py-0.5 bg-white border border-slate-300 rounded text-xs font-mono">Enter</kbd> confirmar · <kbd className="px-1 py-0.5 bg-white border border-slate-300 rounded text-xs font-mono">Esc</kbd> cancelar · Pega múltiples líneas en título para crear varias tareas
       </div>
     </div>
   );
