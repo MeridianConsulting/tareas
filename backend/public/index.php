@@ -43,13 +43,6 @@ try {
 
     // Crear request y router
     $request = Request::fromGlobals();
-    
-    // Debug temporal (remover en producción)
-    if (defined('APP_DEBUG') && APP_DEBUG) {
-        error_log('Request Path: ' . $request->getPath());
-        error_log('Request Method: ' . $request->getMethod());
-    }
-    
     $routes = require __DIR__ . '/../src/Config/routes.php';
     $router = new Router($routes);
 

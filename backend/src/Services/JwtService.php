@@ -25,11 +25,6 @@ class JwtService
         throw new \Exception('JWT_SECRET is not configured. Please set it in .env file.');
       }
     }
-    
-    // Log para debugging (solo en modo debug)
-    if (APP_DEBUG) {
-      error_log('JwtService initialized with secret length: ' . strlen($this->secret));
-    }
   }
 
   public function generateAccessToken(int $userId, string $role, ?int $areaId = null): string

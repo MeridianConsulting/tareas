@@ -110,13 +110,6 @@ class Router
       // Convertir ruta con parámetros a regex
       $pattern = $this->pathToRegex($routePath);
       
-      // Debug temporal
-      if (defined('APP_DEBUG') && APP_DEBUG) {
-        error_log("Trying route: $routeMethod $routePath");
-        error_log("Pattern: $pattern");
-        error_log("Path to match: $path");
-      }
-      
       if (preg_match($pattern, $path, $matches)) {
         // Extraer parámetros
         array_shift($matches);

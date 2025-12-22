@@ -134,12 +134,9 @@ class AuthController
       }
 
       $userId = $userContext['id'];
-      error_log('AuthController::me - Looking for user ID: ' . $userId);
-      
       $user = $this->userRepository->findById($userId);
 
       if (!$user) {
-        error_log('AuthController::me - User not found with ID: ' . $userId);
         return Response::json([
           'error' => [
             'code' => 'NOT_FOUND',
@@ -148,8 +145,6 @@ class AuthController
         ], 404);
       }
 
-      error_log('AuthController::me - User found: ' . $user['email']);
-      
       $userData = UserResource::toArray($user);
       
       return Response::json([

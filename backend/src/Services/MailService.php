@@ -13,10 +13,6 @@ class MailService
       $this->sendViaSmtp($toEmail, $toName, $otp);
     } else {
       // Fallback a mail() nativo para desarrollo local
-      if (defined('APP_DEBUG') && APP_DEBUG) {
-        error_log("MailService: SMTP_HOST no configurado o PHPMailer no disponible. Usando mail() nativo.");
-        error_log("SMTP_HOST=" . ($smtpHost ?: 'NULL'));
-      }
       $this->sendViaNativeMail($toEmail, $toName, $otp);
     }
   }
@@ -26,9 +22,9 @@ class MailService
     try {
       $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
 
-      // DEBUG (solo en desarrollo)
+      // DEBUG (solo en desarrollo, nivel reducido para no saturar logs)
       if (defined('APP_DEBUG') && APP_DEBUG) {
-        $mail->SMTPDebug = 2; // 0=off, 1=client, 2=client+server
+        $mail->SMTPDebug = 1; // 0=off, 1=client, 2=client+server (1 es suficiente)
         $mail->Debugoutput = function($str, $level) {
           error_log("SMTP[$level] $str");
         };
@@ -79,17 +75,12 @@ class MailService
       $mail->AltBody = "Tu código para restablecer contraseña es: {$otp}. Expira en {$ttl} minutos.";
 
       $mail->send();
-      
-      if (defined('APP_DEBUG') && APP_DEBUG) {
-        error_log("MailService: Correo enviado exitosamente a {$toEmail}");
-      }
     } catch (\PHPMailer\PHPMailer\Exception $e) {
       error_log("MailService SMTP error: " . $e->getMessage());
-      error_log("PHPMailer ErrorInfo: " . ($mail->ErrorInfo ?? 'N/A'));
-      // Fallback a mail() nativo si SMTP falla
       if (defined('APP_DEBUG') && APP_DEBUG) {
-        error_log("MailService: Fallback a mail() nativo debido a error SMTP");
+        error_log("PHPMailer ErrorInfo: " . ($mail->ErrorInfo ?? 'N/A'));
       }
+      // Fallback a mail() nativo si SMTP falla
       $this->sendViaNativeMail($toEmail, $toName, $otp);
     } catch (\Throwable $e) {
       error_log("MailService error: " . $e->getMessage());
