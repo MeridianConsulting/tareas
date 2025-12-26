@@ -1,0 +1,18 @@
+# Redirigir todo a la carpeta public/
+# Este archivo debe estar en la raíz del backend
+
+# Establecer el índice por defecto
+DirectoryIndex public/index.php
+
+# Habilitar rewrite engine
+RewriteEngine On
+
+# Si la petición es exactamente la raíz, redirigir a public/index.php
+RewriteRule ^$ public/index.php [L]
+
+# Si la petición NO comienza con /public/ y NO es un archivo/directorio existente, redirigir a public/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/public/
+RewriteRule ^(.*)$ public/$1 [L,NC]
+

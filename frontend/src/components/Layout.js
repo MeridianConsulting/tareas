@@ -85,6 +85,14 @@ export default function Layout({ children }) {
         <main className="flex-1 overflow-y-auto overflow-x-hidden">
         {children}
         </main>
+        
+        {/* Footer discreto */}
+        <footer className="hidden lg:block h-8 bg-white border-t border-slate-200 flex items-center justify-center flex-shrink-0">
+          <p className="text-xs text-slate-400">
+            © {new Date().getFullYear()} Meridian Consulting · 
+            <span className="ml-1 text-slate-500">Desarrollado por <span className="font-medium">José Mateo López Cifuentes</span></span>
+          </p>
+        </footer>
       </div>
     </div>
   );

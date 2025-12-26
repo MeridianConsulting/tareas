@@ -1,8 +1,16 @@
 # Configuración básica para reconocimiento del dominio
-# No interfiere con backend ni frontend
+# Maneja redirección de API al backend y archivos estáticos del frontend
 
-# Habilitar motor de reescritura (opcional, solo si necesitas redirecciones)
-# RewriteEngine On
+# Habilitar motor de reescritura (necesario para redirigir API al backend)
+RewriteEngine On
+
+# Redirigir todas las peticiones de la API al backend
+# Las rutas /api/v1/* se redirigen a backend/public/index.php
+# Mantener el REQUEST_URI original para que el Router pueda procesarlo
+RewriteCond %{REQUEST_URI} ^/api/
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/(.*)$ backend/public/index.php [L,QSA]
 
 # Permitir acceso a archivos estáticos
 <FilesMatch "\.(jpg|jpeg|png|gif|ico|svg|css|js|pdf|txt|md)$">
@@ -16,6 +24,5 @@ DirectoryIndex index.html index.php
 # Prevenir listado de directorios
 Options -Indexes
 
-# Permitir que el backend maneje sus propias rutas
-# Las rutas /backend/* se manejan por el .htaccess en backend/public/
-
+# Nota: Las rutas /api/v1/* se redirigen automáticamente al backend/public/index.php
+# El Router del backend procesará el REQUEST_URI original (/api/v1/...)

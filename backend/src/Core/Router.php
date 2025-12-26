@@ -156,29 +156,39 @@ class Router
   private function applyMiddleware(Request $request, array $middlewares): Request|Response
   {
     foreach ($middlewares as $middleware) {
-      if (is_array($middleware)) {
-        // Middleware con configuración [MiddlewareClass => ['param1', 'param2']]
-        foreach ($middleware as $middlewareClass => $config) {
-          if (class_exists($middlewareClass)) {
-            $middlewareInstance = new $middlewareClass($config);
-            $result = $middlewareInstance->handle($request, function($req) {
-              return $req;
-            });
-            if ($result instanceof \App\Core\Response) {
-              return $result;
+      try {
+        if (is_array($middleware)) {
+          // Middleware con configuración [MiddlewareClass => ['param1', 'param2']]
+          foreach ($middleware as $middlewareClass => $config) {
+            if (class_exists($middlewareClass)) {
+              $middlewareInstance = new $middlewareClass($config);
+              $result = $middlewareInstance->handle($request, function($req) {
+                return $req;
+              });
+              if ($result instanceof \App\Core\Response) {
+                return $result;
+              }
+              $request = $result;
             }
-            $request = $result;
           }
+        } elseif (class_exists($middleware)) {
+          $middlewareInstance = new $middleware();
+          $result = $middlewareInstance->handle($request, function($req) {
+            return $req;
+          });
+          if ($result instanceof \App\Core\Response) {
+            return $result;
+          }
+          $request = $result;
         }
-      } elseif (class_exists($middleware)) {
-        $middlewareInstance = new $middleware();
-        $result = $middlewareInstance->handle($request, function($req) {
-          return $req;
-        });
-        if ($result instanceof \App\Core\Response) {
-          return $result;
+      } catch (\Exception $e) {
+        // Si un middleware falla, registrar el error pero continuar
+        // Esto previene que errores en middlewares no críticos bloqueen toda la aplicación
+        error_log('Middleware error (' . (is_string($middleware) ? $middleware : get_class($middleware)) . '): ' . $e->getMessage());
+        if (APP_DEBUG) {
+          error_log('Stack trace: ' . $e->getTraceAsString());
         }
-        $request = $result;
+        // Continuar con el siguiente middleware o la ruta
       }
     }
     return $request;

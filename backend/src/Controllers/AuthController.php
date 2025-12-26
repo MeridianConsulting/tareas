@@ -59,14 +59,24 @@ class AuthController
       );
 
       // Registrar intento exitoso
-      $this->loginAttemptRepository->recordAttempt($ip, $email, true, $userAgent);
+      try {
+        $this->loginAttemptRepository->recordAttempt($ip, $email, true, $userAgent);
+      } catch (\Exception $e) {
+        // Si falla el registro, continuar de todas formas
+        error_log('Failed to record login attempt: ' . $e->getMessage());
+      }
       
       // Log de seguridad
-      Logger::security('Login successful', [
-        'user_id' => $result['user']['id'],
-        'email' => $email,
-        'ip' => $ip
-      ]);
+      try {
+        Logger::security('Login successful', [
+          'user_id' => $result['user']['id'],
+          'email' => $email,
+          'ip' => $ip
+        ]);
+      } catch (\Exception $e) {
+        // Si falla el log, continuar de todas formas
+        error_log('Failed to log security event: ' . $e->getMessage());
+      }
 
       // Determinar si usar secure flag basado en el entorno
       $isSecure = (APP_ENV === 'production' || (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on'));
@@ -92,14 +102,24 @@ class AuthController
       ]);
     } catch (\Exception $e) {
       // Registrar intento fallido
-      $this->loginAttemptRepository->recordAttempt($ip, $email, false, $userAgent);
+      try {
+        $this->loginAttemptRepository->recordAttempt($ip, $email, false, $userAgent);
+      } catch (\Exception $recordError) {
+        // Si falla el registro, continuar de todas formas
+        error_log('Failed to record failed login attempt: ' . $recordError->getMessage());
+      }
       
       // Log de seguridad
-      Logger::security('Login failed', [
-        'email' => $email,
-        'ip' => $ip,
-        'reason' => $e->getMessage()
-      ]);
+      try {
+        Logger::security('Login failed', [
+          'email' => $email,
+          'ip' => $ip,
+          'reason' => $e->getMessage()
+        ]);
+      } catch (\Exception $logError) {
+        // Si falla el log, continuar de todas formas
+        error_log('Failed to log security event: ' . $logError->getMessage());
+      }
 
       return Response::json([
         'error' => [
@@ -254,13 +274,18 @@ class AuthController
       $dbStatus = 'error';
     }
 
-    return Response::json([
+    $response = Response::json([
       'status' => 'ok',
       'timestamp' => date('Y-m-d H:i:s'),
       'environment' => APP_ENV,
       'database' => $dbStatus,
       'version' => '1.0.0'
     ]);
+    
+    // Header discreto con créditos del desarrollador
+    $response->header('X-Developed-By', 'Jose Mateo Lopez Cifuentes');
+    
+    return $response;
   }
 }
 

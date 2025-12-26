@@ -32,7 +32,8 @@ class CorsMiddleware
         ->header('Access-Control-Allow-Origin', $origin)
         ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH')
         ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CSRF-Token, Accept')
-        ->header('Access-Control-Allow-Credentials', 'true');
+        ->header('Access-Control-Allow-Credentials', 'true')
+        ->header('X-Developed-By', 'Jose Mateo Lopez Cifuentes');
     }
 
     return $response;

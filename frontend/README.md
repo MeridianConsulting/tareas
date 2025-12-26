@@ -2,6 +2,8 @@
 
 Frontend desarrollado con Next.js 16 (App Router) + React + Tailwind CSS.
 
+> **Desarrollado por:** José Mateo López Cifuentes
+
 ## Estructura del Proyecto
 
 ```

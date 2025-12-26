@@ -16,7 +16,9 @@ class ExceptionHandler
     $message = 'Internal server error';
     $details = null;
 
-    if (APP_DEBUG) {
+    $isDebug = defined('APP_DEBUG') && APP_DEBUG;
+    
+    if ($isDebug) {
       $message = $exception->getMessage();
       $details = [
         'file' => $exception->getFile(),
@@ -37,7 +39,7 @@ class ExceptionHandler
     ));
 
     // Asegurar que los headers CORS estén establecidos antes de enviar la respuesta
-    $origin = $_SERVER['HTTP_ORIGIN'] ?? CORS_ORIGIN;
+    $origin = $_SERVER['HTTP_ORIGIN'] ?? (defined('CORS_ORIGIN') ? CORS_ORIGIN : '*');
     header("Access-Control-Allow-Origin: $origin");
     header('Access-Control-Allow-Credentials: true');
     header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, PATCH');

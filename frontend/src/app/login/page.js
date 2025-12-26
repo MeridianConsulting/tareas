@@ -103,8 +103,13 @@ export default function LoginPage() {
           </div>
           
           {/* Footer del panel */}
-          <div className="text-blue-300 text-sm">
-            © {new Date().getFullYear()} Meridian Consulting. Todos los derechos reservados.
+          <div className="text-blue-300 text-sm space-y-1">
+            <div>
+              © {new Date().getFullYear()} Meridian Consulting. Todos los derechos reservados.
+            </div>
+            <div className="text-xs text-blue-200/70 mt-1">
+              Desarrollado por <span className="font-medium">José Mateo López Cifuentes</span>
+            </div>
           </div>
         </div>
       </div>
@@ -235,9 +240,14 @@ export default function LoginPage() {
           </div>
 
           {/* Footer móvil */}
-          <p className="lg:hidden text-center text-xs text-slate-400 mt-8">
-            © {new Date().getFullYear()} Meridian Consulting
-          </p>
+          <div className="lg:hidden text-center mt-8 space-y-1">
+            <p className="text-xs text-slate-400">
+              © {new Date().getFullYear()} Meridian Consulting
+            </p>
+            <p className="text-xs text-slate-500/60">
+              Desarrollado por <span className="font-medium text-slate-400">José Mateo López Cifuentes</span>
+            </p>
+          </div>
         </div>
       </div>
     </div>

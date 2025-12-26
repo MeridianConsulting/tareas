@@ -2,6 +2,8 @@
 
 Backend API REST desarrollado con PHP siguiendo arquitectura MVC + JWT.
 
+> **Desarrollado por:** José Mateo López Cifuentes
+
 ## Estructura del Proyecto
 
 ```
