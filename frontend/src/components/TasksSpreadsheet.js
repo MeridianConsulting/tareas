@@ -32,6 +32,7 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
   const [alert, setAlert] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [selectedTasks, setSelectedTasks] = useState(new Set());
 
   const tipos = ['Clave', 'Operativa', 'Mejora', 'Obligatoria'];
   const prioridades = ['Alta', 'Media', 'Baja'];
@@ -200,6 +201,11 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
     try {
       await apiRequest(`/tasks/${deleteConfirm}`, { method: 'DELETE' });
       setTasks(tasks.filter(t => t.id !== deleteConfirm));
+      setSelectedTasks(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(deleteConfirm.toString());
+        return newSet;
+      });
       if (onTasksChange) onTasksChange();
       setAlert({ type: 'success', message: 'Tarea eliminada exitosamente', dismissible: true });
       setDeleteConfirm(null);
@@ -207,6 +213,98 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
       setAlert({ type: 'error', message: 'Error al eliminar: ' + e.message, dismissible: true });
     } finally {
       setDeleting(false);
+    }
+  }
+
+  function toggleTaskSelection(taskId) {
+    setSelectedTasks(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(taskId.toString())) {
+        newSet.delete(taskId.toString());
+      } else {
+        newSet.add(taskId.toString());
+      }
+      return newSet;
+    });
+  }
+
+  function toggleSelectAll() {
+    if (selectedTasks.size === tasks.length) {
+      setSelectedTasks(new Set());
+    } else {
+      setSelectedTasks(new Set(tasks.map(t => t.id.toString())));
+    }
+  }
+
+  async function deleteSelectedTasks() {
+    if (selectedTasks.size === 0) {
+      setAlert({ type: 'warning', message: 'No hay tareas seleccionadas', dismissible: true });
+      return;
+    }
+
+    setDeleteConfirm('multiple');
+  }
+
+  async function confirmDeleteMultiple() {
+    if (selectedTasks.size === 0) return;
+    
+    setDeleting(true);
+    try {
+      const taskIds = Array.from(selectedTasks).map(id => parseInt(id));
+      await Promise.all(
+        taskIds.map(id => apiRequest(`/tasks/${id}`, { method: 'DELETE' }))
+      );
+      setTasks(tasks.filter(t => !taskIds.includes(t.id)));
+      setSelectedTasks(new Set());
+      if (onTasksChange) onTasksChange();
+      setAlert({ type: 'success', message: `${taskIds.length} tarea(s) eliminada(s) exitosamente`, dismissible: true });
+      setDeleteConfirm(null);
+    } catch (e) {
+      setAlert({ type: 'error', message: 'Error al eliminar: ' + e.message, dismissible: true });
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  async function saveSelectedTasks() {
+    const selectedTaskIds = Array.from(selectedTasks).map(id => parseInt(id));
+    const tasksToSave = selectedTaskIds.filter(id => pendingChanges[id] && Object.keys(pendingChanges[id]).length > 0);
+    
+    if (tasksToSave.length === 0) {
+      setAlert({ type: 'warning', message: 'No hay cambios pendientes en las tareas seleccionadas', dismissible: true });
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await Promise.all(
+        tasksToSave.map(taskId => {
+          const task = tasks.find(t => t.id === taskId);
+          return apiRequest(`/tasks/${taskId}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+              ...task,
+              ...pendingChanges[taskId]
+            }),
+          });
+        })
+      );
+      
+      // Limpiar cambios guardados
+      setPendingChanges(prev => {
+        const newChanges = { ...prev };
+        tasksToSave.forEach(id => {
+          delete newChanges[id];
+        });
+        return newChanges;
+      });
+      
+      if (onTasksChange) onTasksChange();
+      setAlert({ type: 'success', message: `${tasksToSave.length} tarea(s) guardada(s) exitosamente`, dismissible: true });
+    } catch (e) {
+      setAlert({ type: 'error', message: 'Error al guardar: ' + e.message, dismissible: true });
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -515,9 +613,47 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
   function renderRow(task, isNew = false) {
     const taskId = isNew ? task._tempId : task.id;
     const hasChanges = !isNew && Object.keys(pendingChanges[taskId] || {}).length > 0;
+    const isSelected = !isNew && selectedTasks.has(taskId.toString());
 
     return (
-      <tr key={taskId} className="group border-b border-slate-100 last:border-b-0">
+      <tr key={taskId} className={`group border-b border-slate-100 last:border-b-0 ${isSelected ? 'bg-indigo-50/50' : ''}`}>
+        {/* Casilla de selección */}
+        {!isNew && (
+          <td className="px-4 py-2 text-center bg-slate-50/50 border-r border-slate-200">
+            <div className="flex items-center justify-center">
+              <label className="relative inline-flex items-center cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => toggleTaskSelection(taskId)}
+                  className="sr-only peer"
+                />
+                <div className={`relative w-5 h-5 rounded border-2 transition-all duration-200 ${
+                  isSelected 
+                    ? 'bg-indigo-600 border-indigo-600 shadow-sm shadow-indigo-200' 
+                    : 'bg-white border-slate-300 group-hover:border-indigo-400 group-hover:bg-indigo-50'
+                }`}>
+                  {isSelected && (
+                    <svg 
+                      className="absolute inset-0 w-full h-full text-white p-0.5" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={3} 
+                        d="M5 13l4 4L19 7" 
+                      />
+                    </svg>
+                  )}
+                </div>
+              </label>
+            </div>
+          </td>
+        )}
+        {isNew && <td className="px-4 py-2 bg-slate-50/50 border-r border-slate-200"></td>}
         {renderCell(task, 'title', isNew)}
         {renderCell(task, 'type', isNew)}
         {renderCell(task, 'priority', isNew)}
@@ -589,11 +725,36 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100">
         <div className="flex items-center gap-3">
           <span className="text-sm font-medium text-slate-600">{tasks.length} tareas</span>
+          {selectedTasks.size > 0 && (
+            <span className="text-sm font-medium text-indigo-600">
+              {selectedTasks.size} seleccionada(s)
+            </span>
+          )}
           {hasPendingChanges && (
             <span className="flex items-center gap-1 text-xs text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
               <AlertCircle className="w-3 h-3" />
               Sin guardar
             </span>
+          )}
+          {selectedTasks.size > 0 && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={saveSelectedTasks}
+                disabled={saving || !Array.from(selectedTasks).some(id => pendingChanges[parseInt(id)] && Object.keys(pendingChanges[parseInt(id)]).length > 0)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+              >
+                <Save className="w-4 h-4" strokeWidth={2} />
+                Guardar seleccionadas
+              </button>
+              <button
+                onClick={deleteSelectedTasks}
+                disabled={deleting}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-rose-600 rounded-lg hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+              >
+                <Trash2 className="w-4 h-4" strokeWidth={2} />
+                Eliminar seleccionadas
+              </button>
+            </div>
           )}
           {showPastePrompt && (
             <div className="flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-200 rounded-lg">
@@ -633,6 +794,40 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
         <table className="w-full border-collapse" style={{ minWidth: '900px' }}>
           <thead>
             <tr className="bg-slate-700 text-white">
+              <th className="px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wider border-r border-slate-600" style={{ width: '60px' }}>
+                <div className="flex items-center justify-center">
+                  <label className="relative inline-flex items-center cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={tasks.length > 0 && selectedTasks.size === tasks.length}
+                      onChange={toggleSelectAll}
+                      className="sr-only peer"
+                      title="Seleccionar todas"
+                    />
+                    <div className={`relative w-5 h-5 rounded border-2 transition-all duration-200 ${
+                      tasks.length > 0 && selectedTasks.size === tasks.length
+                        ? 'bg-indigo-600 border-indigo-600 shadow-sm shadow-indigo-200' 
+                        : 'bg-white/20 border-slate-400 group-hover:border-indigo-300 group-hover:bg-white/30'
+                    }`}>
+                      {tasks.length > 0 && selectedTasks.size === tasks.length && (
+                        <svg 
+                          className="absolute inset-0 w-full h-full text-white p-0.5" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            strokeWidth={3} 
+                            d="M5 13l4 4L19 7" 
+                          />
+                        </svg>
+                      )}
+                    </div>
+                  </label>
+                </div>
+              </th>
               <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wider border-r border-slate-600" style={{ width: '25%' }}>
                 Titulo
               </th>
@@ -672,7 +867,7 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
             {/* Fila para agregar si no hay nada */}
             {tasks.length === 0 && newRows.length === 0 && (
               <tr>
-                <td colSpan={9} className="px-4 py-8 text-center bg-slate-50">
+                <td colSpan={10} className="px-4 py-8 text-center bg-slate-50">
                   <p className="text-sm text-slate-500 mb-2">No tienes tareas asignadas</p>
                   <button
                     onClick={addNewRow}
@@ -709,13 +904,15 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
       {/* Diálogo de confirmación de eliminación */}
       <ConfirmDialog
         isOpen={!!deleteConfirm}
-        title="Eliminar Tarea"
-        message="¿Estás seguro de que deseas eliminar esta tarea? Esta acción no se puede deshacer."
+        title={deleteConfirm === 'multiple' ? 'Eliminar Tareas Seleccionadas' : 'Eliminar Tarea'}
+        message={deleteConfirm === 'multiple' 
+          ? `¿Estás seguro de que deseas eliminar ${selectedTasks.size} tarea(s) seleccionada(s)? Esta acción no se puede deshacer.`
+          : '¿Estás seguro de que deseas eliminar esta tarea? Esta acción no se puede deshacer.'}
         type="warning"
         confirmText="Eliminar"
         cancelText="Cancelar"
         loading={deleting}
-        onConfirm={confirmDelete}
+        onConfirm={deleteConfirm === 'multiple' ? confirmDeleteMultiple : confirmDelete}
         onCancel={() => setDeleteConfirm(null)}
       />
     </div>
