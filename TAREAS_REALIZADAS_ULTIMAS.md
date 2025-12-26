@@ -1,1 +1,0 @@
-# Tareas Realizadas - Último Período
