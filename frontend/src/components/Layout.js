@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import Sidebar from './Sidebar';
 import NotificationBell from './NotificationBell';
 import { apiRequest, bootstrapAuth, getAccessToken } from '../lib/api';
-import { Loader2, Menu } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 export default function Layout({ children }) {
   const router = useRouter();
@@ -62,13 +62,6 @@ export default function Layout({ children }) {
       <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
         {/* Header con campana de notificaciones */}
         <header className="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 flex-shrink-0">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors lg:hidden"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-          
           <div className="flex-1" />
           
           <div className="flex items-center gap-3">
