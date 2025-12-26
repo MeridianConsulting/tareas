@@ -10,6 +10,7 @@ use App\Controllers\TaskAssignmentController;
 use App\Middleware\CorsMiddleware;
 use App\Middleware\JwtAuthMiddleware;
 use App\Middleware\RoleMiddleware;
+use App\Middleware\RateLimitMiddleware;
 
 return [
   // Global middleware
@@ -19,7 +20,10 @@ return [
 
   // Rutas públicas
   'routes' => [
-    ['POST', '/api/v1/auth/login', [AuthController::class, 'login']],
+    // Health check (sin rate limiting)
+    ['GET', '/api/v1/health', [AuthController::class, 'health']],
+    // Login con rate limiting
+    ['POST', '/api/v1/auth/login', [AuthController::class, 'login'], [RateLimitMiddleware::class]],
     ['POST', '/api/v1/auth/refresh', [AuthController::class, 'refresh']],
     // Password reset (públicas, sin JWT)
     ['POST', '/api/v1/auth/password/forgot', [PasswordResetController::class, 'forgot']],

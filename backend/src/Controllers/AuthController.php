@@ -5,25 +5,32 @@ namespace App\Controllers;
 use App\Core\Request;
 use App\Core\Response;
 use App\Services\AuthService;
+use App\Services\Logger;
 use App\Repositories\UserRepository;
+use App\Repositories\LoginAttemptRepository;
 use App\Resources\UserResource;
 
 class AuthController
 {
   private $authService;
   private $userRepository;
+  private $loginAttemptRepository;
 
   public function __construct()
   {
     $this->authService = new AuthService();
     $this->userRepository = new UserRepository();
+    $this->loginAttemptRepository = new LoginAttemptRepository();
   }
 
   public function login(Request $request)
   {
     $email = $request->getBody('email');
     $password = $request->getBody('password');
+    $ip = $request->getIp();
+    $userAgent = $request->getUserAgent();
 
+    // Validación básica
     if (!$email || !$password) {
       return Response::json([
         'error' => [
@@ -33,13 +40,36 @@ class AuthController
       ], 400);
     }
 
+    // Validar formato de email
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+      return Response::json([
+        'error' => [
+          'code' => 'VALIDATION_ERROR',
+          'message' => 'Invalid email format'
+        ]
+      ], 400);
+    }
+
     try {
       $result = $this->authService->login(
         $email,
         $password,
-        $request->getIp(),
-        $request->getUserAgent()
+        $ip,
+        $userAgent
       );
+
+      // Registrar intento exitoso
+      $this->loginAttemptRepository->recordAttempt($ip, $email, true, $userAgent);
+      
+      // Log de seguridad
+      Logger::security('Login successful', [
+        'user_id' => $result['user']['id'],
+        'email' => $email,
+        'ip' => $ip
+      ]);
+
+      // Determinar si usar secure flag basado en el entorno
+      $isSecure = (APP_ENV === 'production' || (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on'));
 
       // Establecer refresh token en cookie HttpOnly
       setcookie(
@@ -49,7 +79,7 @@ class AuthController
           'expires' => time() + (JWT_REFRESH_TTL_DAYS * 24 * 60 * 60),
           'path' => '/',
           'httponly' => true,
-          'secure' => false, // Cambiar a true en producción con HTTPS
+          'secure' => $isSecure,
           'samesite' => 'Lax',
         ]
       );
@@ -61,6 +91,16 @@ class AuthController
         ]
       ]);
     } catch (\Exception $e) {
+      // Registrar intento fallido
+      $this->loginAttemptRepository->recordAttempt($ip, $email, false, $userAgent);
+      
+      // Log de seguridad
+      Logger::security('Login failed', [
+        'email' => $email,
+        'ip' => $ip,
+        'reason' => $e->getMessage()
+      ]);
+
       return Response::json([
         'error' => [
           'code' => 'AUTH_ERROR',
@@ -90,6 +130,9 @@ class AuthController
         $request->getUserAgent()
       );
 
+      // Determinar si usar secure flag basado en el entorno
+      $isSecure = (APP_ENV === 'production' || (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on'));
+
       // Establecer nuevo refresh token en cookie
       setcookie(
         'refresh_token',
@@ -98,7 +141,7 @@ class AuthController
           'expires' => time() + (JWT_REFRESH_TTL_DAYS * 24 * 60 * 60),
           'path' => '/',
           'httponly' => true,
-          'secure' => false,
+          'secure' => $isSecure,
           'samesite' => 'Lax',
         ]
       );
@@ -181,17 +224,42 @@ class AuthController
       }
     }
 
+    // Determinar si usar secure flag basado en el entorno
+    $isSecure = (APP_ENV === 'production' || (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on'));
+
     // Eliminar cookie
     setcookie('refresh_token', '', [
       'expires' => time() - 3600,
       'path' => '/',
       'httponly' => true,
-      'secure' => false,
+      'secure' => $isSecure,
       'samesite' => 'Lax',
     ]);
 
     return Response::json([
       'data' => ['message' => 'Logged out successfully']
+    ]);
+  }
+
+  /**
+   * Health check endpoint para monitoreo
+   */
+  public function health(Request $request)
+  {
+    try {
+      $db = \App\Core\Database::getInstance()->getConnection();
+      $db->query('SELECT 1');
+      $dbStatus = 'ok';
+    } catch (\Exception $e) {
+      $dbStatus = 'error';
+    }
+
+    return Response::json([
+      'status' => 'ok',
+      'timestamp' => date('Y-m-d H:i:s'),
+      'environment' => APP_ENV,
+      'database' => $dbStatus,
+      'version' => '1.0.0'
     ]);
   }
 }

@@ -93,16 +93,16 @@ class TaskController
     $userContext = $request->getAttribute('userContext');
     $body = $request->getBody();
 
-    $required = ['title', 'area_id', 'responsible_id'];
-    foreach ($required as $field) {
-      if (empty($body[$field])) {
-        return Response::json([
-          'error' => [
-            'code' => 'VALIDATION_ERROR',
-            'message' => "Field '$field' is required"
-          ]
-        ], 400);
-      }
+    // Validar datos
+    $errors = \App\Services\ValidationService::validateTaskData($body);
+    if (!empty($errors)) {
+      return Response::json([
+        'error' => [
+          'code' => 'VALIDATION_ERROR',
+          'message' => 'Validation failed',
+          'errors' => $errors
+        ]
+      ], 400);
     }
 
     try {
@@ -124,6 +124,18 @@ class TaskController
   {
     $userContext = $request->getAttribute('userContext');
     $body = $request->getBody();
+
+    // Validar datos (solo los campos presentes)
+    $errors = \App\Services\ValidationService::validateTaskData($body);
+    if (!empty($errors)) {
+      return Response::json([
+        'error' => [
+          'code' => 'VALIDATION_ERROR',
+          'message' => 'Validation failed',
+          'errors' => $errors
+        ]
+      ], 400);
+    }
 
     $task = $this->taskService->update((int)$id, $body, $userContext);
 

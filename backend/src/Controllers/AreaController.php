@@ -29,16 +29,16 @@ class AreaController
   {
     $body = $request->getBody();
 
-    $required = ['name', 'code'];
-    foreach ($required as $field) {
-      if (empty($body[$field])) {
-        return Response::json([
-          'error' => [
-            'code' => 'VALIDATION_ERROR',
-            'message' => "Field '$field' is required"
-          ]
-        ], 400);
-      }
+    // Validar datos
+    $errors = \App\Services\ValidationService::validateAreaData($body);
+    if (!empty($errors)) {
+      return Response::json([
+        'error' => [
+          'code' => 'VALIDATION_ERROR',
+          'message' => 'Validation failed',
+          'errors' => $errors
+        ]
+      ], 400);
     }
 
     try {
@@ -59,6 +59,19 @@ class AreaController
   public function update(Request $request, string $id)
   {
     $body = $request->getBody();
+    
+    // Validar datos
+    $errors = \App\Services\ValidationService::validateAreaData($body);
+    if (!empty($errors)) {
+      return Response::json([
+        'error' => [
+          'code' => 'VALIDATION_ERROR',
+          'message' => 'Validation failed',
+          'errors' => $errors
+        ]
+      ], 400);
+    }
+    
     $area = $this->areaService->update((int)$id, $body);
 
     if (!$area) {

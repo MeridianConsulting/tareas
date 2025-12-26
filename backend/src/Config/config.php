@@ -44,3 +44,14 @@ define('OTP_REQUEST_LIMIT_15MIN', (int)($_ENV['OTP_REQUEST_LIMIT_15MIN'] ?? 3));
 
 define('RESET_TOKEN_TTL_MINUTES', (int)($_ENV['RESET_TOKEN_TTL_MINUTES'] ?? 15));
 
+// Rate Limiting
+define('RATE_LIMIT_LOGIN_ATTEMPTS', (int)($_ENV['RATE_LIMIT_LOGIN_ATTEMPTS'] ?? 5));
+define('RATE_LIMIT_LOGIN_WINDOW', (int)($_ENV['RATE_LIMIT_LOGIN_WINDOW'] ?? 15));
+
+// Logging
+define('LOG_LEVEL', $_ENV['LOG_LEVEL'] ?? 'INFO');
+define('LOG_PATH', $_ENV['LOG_PATH'] ?? __DIR__ . '/../../storage/logs');
+
+// Inicializar logger
+\App\Services\Logger::init();
+

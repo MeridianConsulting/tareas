@@ -37,16 +37,16 @@ class UserController
   {
     $body = $request->getBody();
 
-    $required = ['name', 'email', 'password', 'role_id'];
-    foreach ($required as $field) {
-      if (empty($body[$field])) {
-        return Response::json([
-          'error' => [
-            'code' => 'VALIDATION_ERROR',
-            'message' => "Field '$field' is required"
-          ]
-        ], 400);
-      }
+    // Validar datos
+    $errors = \App\Services\ValidationService::validateUserData($body, false);
+    if (!empty($errors)) {
+      return Response::json([
+        'error' => [
+          'code' => 'VALIDATION_ERROR',
+          'message' => 'Validation failed',
+          'errors' => $errors
+        ]
+      ], 400);
     }
 
     try {
@@ -67,6 +67,19 @@ class UserController
   public function update(Request $request, string $id)
   {
     $body = $request->getBody();
+    
+    // Validar datos (solo los campos presentes)
+    $errors = \App\Services\ValidationService::validateUserData($body, true);
+    if (!empty($errors)) {
+      return Response::json([
+        'error' => [
+          'code' => 'VALIDATION_ERROR',
+          'message' => 'Validation failed',
+          'errors' => $errors
+        ]
+      ], 400);
+    }
+    
     $user = $this->userService->update((int)$id, $body);
 
     if (!$user) {
