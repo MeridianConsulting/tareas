@@ -47,7 +47,7 @@ export default function ReportsDownload() {
     async function loadUser() {
       try {
         const data = await apiRequest('/auth/me');
-        if (!['admin', 'gerencia', 'lider_area'].includes(data.data.role)) {
+        if (!['admin', 'lider_area'].includes(data.data.role)) {
           router.push('/dashboard');
           return;
         }

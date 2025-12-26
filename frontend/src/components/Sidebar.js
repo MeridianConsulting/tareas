@@ -49,7 +49,7 @@ export default function Sidebar({ user, isOpen, onToggle }) {
     },
   ];
 
-  if (user?.role === 'admin' || user?.role === 'gerencia' || user?.role === 'lider_area') {
+  if (user?.role === 'admin' || user?.role === 'lider_area') {
     menuItems.push({ 
       href: '/reports/daily', 
       label: 'Reportes Diarios', 
@@ -67,7 +67,7 @@ export default function Sidebar({ user, isOpen, onToggle }) {
     });
   }
 
-  if (user?.role === 'admin' || user?.role === 'gerencia') {
+  if (user?.role === 'admin') {
     menuItems.push({ 
       href: '/reports/management', 
       label: 'Dashboard General', 

@@ -70,8 +70,8 @@ La aplicación estará disponible en `http://localhost:3000`
 ### Páginas
 - **Login**: Autenticación de usuarios
 - **Dashboard**: Lista de tareas con filtros
-- **Reportes Diarios**: Reporte por área (lider_area, admin, gerencia)
-- **Dashboard Gerencial**: Vista consolidada (admin, gerencia)
+- **Reportes Diarios**: Reporte por área (lider_area, admin)
+- **Dashboard Gerencial**: Vista consolidada (solo admin)
 - **Administración de Áreas**: CRUD de áreas (solo admin)
 - **Administración de Usuarios**: CRUD de usuarios (solo admin)
 
@@ -84,7 +84,6 @@ La aplicación estará disponible en `http://localhost:3000`
 
 ### Permisos por Rol
 - **Admin**: Acceso completo
-- **Gerencia**: Dashboard gerencial y reportes
 - **Líder de área**: Reportes de su área
 - **Colaborador**: Solo sus tareas
 

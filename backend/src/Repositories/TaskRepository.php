@@ -37,7 +37,7 @@ class TaskRepository
       $sql .= " AND t.responsible_id = :user_id";
       $params[':user_id'] = $userId;
     }
-    // admin y gerencia ven todo, no se agrega restricción
+    // admin ven todo, no se agrega restricción
 
     // Filtros opcionales
     if (isset($filters['status'])) {

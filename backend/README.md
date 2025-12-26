@@ -106,12 +106,11 @@ O simplemente accede a: `http://localhost/tareas/backend/public/`
 ### Reportes
 
 - `GET /api/v1/reports/daily?date=YYYY-MM-DD` - Reporte diario
-- `GET /api/v1/reports/management` - Dashboard gerencial (admin/gerencia)
+- `GET /api/v1/reports/management` - Dashboard gerencial (solo admin)
 
 ## Permisos por Rol
 
 - **admin**: Acceso completo
-- **gerencia**: Dashboard gerencial y reportes
 - **lider_area**: Reportes de su área
 - **colaborador**: Solo sus tareas
 

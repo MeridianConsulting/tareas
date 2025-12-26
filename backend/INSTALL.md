@@ -45,7 +45,6 @@ Ejecuta este SQL en phpMyAdmin o desde la línea de comandos:
 -- Insertar roles
 INSERT INTO roles (name, description) VALUES
 ('admin', 'Administrador del sistema'),
-('gerencia', 'Gerencia'),
 ('lider_area', 'Líder de área'),
 ('colaborador', 'Colaborador');
 

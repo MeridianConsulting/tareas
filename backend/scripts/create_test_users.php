@@ -12,13 +12,6 @@ try {
 
     $usuarios = [
         [
-            'name' => 'Gerente General',
-            'email' => 'gerente@empresa.com',
-            'password' => 'gerente123',
-            'role_id' => 2,  // gerencia
-            'area_id' => 9   // GERENCIA
-        ],
-        [
             'name' => 'Lider IT',
             'email' => 'lider@empresa.com',
             'password' => 'lider123',
@@ -61,7 +54,6 @@ try {
     echo "========================================\n\n";
     
     echo "Credenciales:\n";
-    echo "- gerente@empresa.com / gerente123 (Gerencia)\n";
     echo "- lider@empresa.com / lider123 (Lider de Area)\n";
     echo "- colaborador@empresa.com / colab123 (Colaborador)\n";
 

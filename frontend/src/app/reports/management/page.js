@@ -60,7 +60,7 @@ export default function ManagementDashboard() {
     async function loadUser() {
       try {
         const data = await apiRequest('/auth/me');
-        if (!['admin', 'gerencia'].includes(data.data.role)) {
+        if (data.data.role !== 'admin') {
           router.push('/dashboard');
           return;
         }
