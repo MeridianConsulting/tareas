@@ -5,7 +5,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { login } from '../../lib/auth';
 import { apiRequest } from '../../lib/api';
-import { Loader2, Mail, Lock, AlertCircle, Eye, EyeOff, Shield, BarChart3, Users, CheckCircle } from 'lucide-react';
+import { Loader2, Mail, Lock, Eye, EyeOff, Shield, BarChart3, Users, CheckCircle } from 'lucide-react';
+import Alert from '../../components/Alert';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -196,10 +197,9 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="flex items-start gap-3 p-4 bg-rose-50 border border-rose-200 rounded-xl animate-in fade-in slide-in-from-top-1 duration-200">
-                <AlertCircle className="w-5 h-5 text-rose-500 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-rose-700">{error}</p>
-              </div>
+              <Alert type="error" dismissible onDismiss={() => setError('')}>
+                {error}
+              </Alert>
             )}
 
             <button

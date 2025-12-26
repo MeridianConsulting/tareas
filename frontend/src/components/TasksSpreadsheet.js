@@ -12,6 +12,8 @@ import {
   X,
   AlertCircle
 } from 'lucide-react';
+import Alert from './Alert';
+import ConfirmDialog from './ConfirmDialog';
 
 export default function TasksSpreadsheet({ userId, onTasksChange }) {
   const [tasks, setTasks] = useState([]);
@@ -27,6 +29,9 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
   const [showPastePrompt, setShowPastePrompt] = useState(false);
   const [pastedLines, setPastedLines] = useState([]);
   const isNavigatingRef = useRef(false);
+  const [alert, setAlert] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const tipos = ['Clave', 'Operativa', 'Mejora', 'Obligatoria'];
   const prioridades = ['Alta', 'Media', 'Baja'];
@@ -129,11 +134,11 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
 
   async function saveNewRow(row) {
     if (!row.title.trim()) {
-      alert('El titulo es obligatorio');
+      setAlert({ type: 'warning', message: 'El título es obligatorio', dismissible: true });
       return;
     }
     if (!row.area_id) {
-      alert('El area es obligatoria');
+      setAlert({ type: 'warning', message: 'El área es obligatoria', dismissible: true });
       return;
     }
 
@@ -150,8 +155,9 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
       setNewRows(newRows.filter(r => r._tempId !== row._tempId));
       await loadData();
       if (onTasksChange) onTasksChange();
+      setAlert({ type: 'success', message: 'Tarea guardada exitosamente', dismissible: true });
     } catch (e) {
-      alert('Error al guardar: ' + e.message);
+      setAlert({ type: 'error', message: 'Error al guardar: ' + e.message, dismissible: true });
     } finally {
       setSaving(false);
     }
@@ -175,22 +181,32 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
         return rest;
       });
       if (onTasksChange) onTasksChange();
+      setAlert({ type: 'success', message: 'Cambios guardados exitosamente', dismissible: true });
     } catch (e) {
-      alert('Error al guardar: ' + e.message);
+      setAlert({ type: 'error', message: 'Error al guardar: ' + e.message, dismissible: true });
     } finally {
       setSaving(false);
     }
   }
 
-  async function deleteTask(taskId) {
-    if (!confirm('¿Eliminar esta tarea?')) return;
+  function handleDeleteClick(taskId) {
+    setDeleteConfirm(taskId);
+  }
+
+  async function confirmDelete() {
+    if (!deleteConfirm) return;
     
+    setDeleting(true);
     try {
-      await apiRequest(`/tasks/${taskId}`, { method: 'DELETE' });
-      setTasks(tasks.filter(t => t.id !== taskId));
+      await apiRequest(`/tasks/${deleteConfirm}`, { method: 'DELETE' });
+      setTasks(tasks.filter(t => t.id !== deleteConfirm));
       if (onTasksChange) onTasksChange();
+      setAlert({ type: 'success', message: 'Tarea eliminada exitosamente', dismissible: true });
+      setDeleteConfirm(null);
     } catch (e) {
-      alert('Error al eliminar: ' + e.message);
+      setAlert({ type: 'error', message: 'Error al eliminar: ' + e.message, dismissible: true });
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -380,8 +396,9 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
       setEditingCell(null);
       await loadData();
       if (onTasksChange) onTasksChange();
+      setAlert({ type: 'success', message: `${pastedLines.length} tareas creadas exitosamente`, dismissible: true });
     } catch (e) {
-      alert('Error al crear tareas: ' + e.message);
+      setAlert({ type: 'error', message: 'Error al crear tareas: ' + e.message, dismissible: true });
     } finally {
       setSaving(false);
     }
@@ -542,7 +559,7 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
                   </button>
                 )}
                 <button
-                  onClick={() => deleteTask(taskId)}
+                  onClick={() => handleDeleteClick(taskId)}
                   className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md opacity-0 group-hover:opacity-100 transition-all"
                   title="Eliminar"
                 >
@@ -675,6 +692,32 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
       <div className="px-4 py-2 border-t border-slate-100 bg-slate-50/50 text-xs text-slate-500">
         Clic en celda para editar · <kbd className="px-1 py-0.5 bg-white border border-slate-300 rounded text-xs font-mono">Tab</kbd> siguiente celda · <kbd className="px-1 py-0.5 bg-white border border-slate-300 rounded text-xs font-mono">Enter</kbd> confirmar · <kbd className="px-1 py-0.5 bg-white border border-slate-300 rounded text-xs font-mono">Esc</kbd> cancelar · Pega múltiples líneas en título para crear varias tareas
       </div>
+
+      {/* Alertas */}
+      {alert && (
+        <div className="fixed top-4 right-4 z-50 max-w-md animate-in slide-in-from-right">
+          <Alert
+            type={alert.type}
+            dismissible
+            onDismiss={() => setAlert(null)}
+          >
+            {alert.message}
+          </Alert>
+        </div>
+      )}
+
+      {/* Diálogo de confirmación de eliminación */}
+      <ConfirmDialog
+        isOpen={!!deleteConfirm}
+        title="Eliminar Tarea"
+        message="¿Estás seguro de que deseas eliminar esta tarea? Esta acción no se puede deshacer."
+        type="warning"
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        loading={deleting}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteConfirm(null)}
+      />
     </div>
   );
 }

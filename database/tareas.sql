@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 26-12-2025 a las 14:48:36
+-- Tiempo de generación: 26-12-2025 a las 15:23:54
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 
@@ -151,7 +151,10 @@ INSERT INTO `refresh_tokens` (`id`, `user_id`, `token_hash`, `expires_at`, `revo
 (20, 32, '9f64f27db53c31b57b1513e25972521ecc15202d91ea944faf124af4d8547ca2', '2026-01-05 16:17:11', '2025-12-22 16:32:11', '2025-12-22 21:17:11', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
 (21, 32, '9914f6ee1f94e38e900af77631dab6b95782fee27f63994c0a032d67354d099d', '2026-01-05 16:32:11', '2025-12-26 08:13:51', '2025-12-22 21:32:11', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
 (22, 32, 'a77c64f12585eb23a7657441c09d17b9772e7075fb3f7a48ba7737d0f178d845', '2026-01-09 08:13:51', '2025-12-26 08:29:01', '2025-12-26 13:13:51', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
-(23, 32, '57d565d67cf7dc1aa55ca372995b680bbb1500f1fc451de371b3dd0498df5e69', '2026-01-09 08:29:01', NULL, '2025-12-26 13:29:01', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36');
+(23, 32, '57d565d67cf7dc1aa55ca372995b680bbb1500f1fc451de371b3dd0498df5e69', '2026-01-09 08:29:01', NULL, '2025-12-26 13:29:01', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(24, 32, '9cd5b265e211f6e1fc20a71cbdebd69dadb4ef52dcfc089e755e5d96e0f97342', '2026-01-09 08:51:25', '2025-12-26 09:10:33', '2025-12-26 13:51:25', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(25, 32, 'a1bb66c6df57a4133c2c4321e1ccd2fa3076bae8d60d3d0e040466e8bba61bdc', '2026-01-09 09:10:33', '2025-12-26 09:10:33', '2025-12-26 14:10:33', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(26, 32, 'a1bb66c6df57a4133c2c4321e1ccd2fa3076bae8d60d3d0e040466e8bba61bdc', '2026-01-09 09:10:33', NULL, '2025-12-26 14:10:33', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36');
 
 -- --------------------------------------------------------
 
@@ -198,6 +201,23 @@ CREATE TABLE `tasks` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `tasks`
+--
+
+INSERT INTO `tasks` (`id`, `area_id`, `title`, `description`, `type`, `priority`, `status`, `progress_percent`, `responsible_id`, `created_by`, `start_date`, `due_date`, `closed_date`, `deleted_at`, `created_at`, `updated_at`) VALUES
+(11, 2, '`token_hash` varchar(255) NOT NULL,', '', 'Operativa', 'Media', 'No iniciada', 100, 32, 32, '2025-12-26', '0000-00-00', NULL, NULL, '2025-12-26 13:51:56', '2025-12-26 13:52:27'),
+(12, 2, '`user_id` int(11) NOT NULL,', '', 'Operativa', 'Media', 'No iniciada', 100, 32, 32, '2025-12-26', '0000-00-00', NULL, NULL, '2025-12-26 13:51:56', '2025-12-26 13:52:27'),
+(13, 2, 'CREATE TABLE `refresh_tokens` (', '', 'Operativa', 'Media', 'No iniciada', 100, 32, 32, '2025-12-26', '0000-00-00', NULL, NULL, '2025-12-26 13:51:56', '2025-12-26 13:52:28'),
+(14, 2, '`id` bigint(20) NOT NULL,', '', 'Operativa', 'Media', 'No iniciada', 100, 32, 32, '2025-12-26', '0000-00-00', NULL, NULL, '2025-12-26 13:51:56', '2025-12-26 14:13:44'),
+(15, 2, '`expires_at` datetime NOT NULL,', '', 'Operativa', 'Media', 'No iniciada', 0, 32, 32, '2025-12-26', '0000-00-00', NULL, NULL, '2025-12-26 13:51:56', '2025-12-26 13:51:56'),
+(16, 2, '`revoked_at` datetime DEFAULT NULL,', '', 'Operativa', 'Media', 'No iniciada', 0, 32, 32, '2025-12-26', '0000-00-00', NULL, NULL, '2025-12-26 13:51:56', '2025-12-26 13:51:56'),
+(17, 2, '`created_at` timestamp NOT NULL DEFAULT current_timestamp(),', '', 'Operativa', 'Media', 'No iniciada', 0, 32, 32, '2025-12-26', '0000-00-00', NULL, NULL, '2025-12-26 13:51:56', '2025-12-26 13:51:56'),
+(18, 2, '`user_agent` varchar(255) DEFAULT NULL', '', 'Operativa', 'Media', 'No iniciada', 0, 32, 32, '2025-12-26', '0000-00-00', NULL, NULL, '2025-12-26 13:51:56', '2025-12-26 13:51:56'),
+(19, 2, ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;', '', 'Operativa', 'Media', 'No iniciada', 0, 32, 32, '2025-12-26', '0000-00-00', NULL, NULL, '2025-12-26 13:51:56', '2025-12-26 13:51:56'),
+(20, 2, '-- ------------------------------------', '', 'Operativa', 'Media', 'No iniciada', 0, 32, 32, '2025-12-26', '0000-00-00', NULL, NULL, '2025-12-26 13:51:56', '2025-12-26 13:51:56'),
+(21, 2, '`ip` varchar(45) DEFAULT NULL,', '', 'Operativa', 'Media', 'No iniciada', 0, 32, 32, '2025-12-26', '0000-00-00', NULL, NULL, '2025-12-26 13:51:56', '2025-12-26 13:51:56');
 
 -- --------------------------------------------------------
 
@@ -283,46 +303,46 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `name`, `email`, `password_hash`, `role_id`, `area_id`, `is_active`, `created_at`, `updated_at`) VALUES
 (3, 'NORA GISELL MORENO MORENO', 'nmoreno@meridian.com.co', '52030991', 1, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(4, 'WILLIAM AUGUSTO FRANCO CASTELLANOS', 'wfranco@meridian.com.co', '79613401', 1, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(5, 'CESAR AUGUSTO URREGO AVENDAÑO', 'currego@meridian.com.co', '79490148', 1, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
+(4, 'WILLIAM AUGUSTO FRANCO CASTELLANOS', 'wfranco@meridian.com.co', '79613401', 1, 9, 1, '2025-12-22 15:43:24', '2025-12-26 14:15:09'),
+(5, 'CESAR AUGUSTO URREGO AVENDAÑO', 'currego@meridian.com.co', '79490148', 1, 9, 1, '2025-12-22 15:43:24', '2025-12-26 14:15:12'),
 (6, 'RUTH MUÑOZ CASTILLO', 'rmunoz@meridian.com.co', '52147279', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(7, 'ZANDRA PATRICIA MAYORGA GOMEZ', 'coordinadoracontable@meridian.com.co', '52005033', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(8, 'GUSTAVO ADOLFO GIRALDO CORREA', 'ggiraldo@meridian.com.co', '1053788938', 2, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
+(7, 'ZANDRA PATRICIA MAYORGA GOMEZ', 'coordinadoracontable@meridian.com.co', '52005033', 3, 7, 1, '2025-12-22 15:43:24', '2025-12-26 14:15:28'),
+(8, 'GUSTAVO ADOLFO GIRALDO CORREA', 'ggiraldo@meridian.com.co', '1053788938', 2, 4, 1, '2025-12-22 15:43:24', '2025-12-26 14:15:37'),
 (9, 'AURA ALEJANDRA CONTRERAS TORRES', 'asistenteadministrativo1@meridian.com.co', '1014251428', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(10, 'MICHAEL STIVEN RUIZ CARO', 'soportehseqproyectos@meridian.com.co', '1007493802', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(11, 'LUIS MIGUEL GUEVARA MARLES', 'hseq@meridian.com.co', '1119211830', 2, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
+(10, 'MICHAEL STIVEN RUIZ CARO', 'soportehseqproyectos@meridian.com.co', '1007493802', 3, 3, 1, '2025-12-22 15:43:24', '2025-12-26 14:15:46'),
+(11, 'LUIS MIGUEL GUEVARA MARLES', 'hseq@meridian.com.co', '1119211830', 2, 3, 1, '2025-12-22 15:43:24', '2025-12-26 14:15:49'),
 (12, 'SANDRA MILENA FLOREZ PRADO', 'asistenteadministrativo2@meridian.com.co', '1014180459', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(13, 'ELOY GABRIEL GOMEZ REYES', 'coordinaciongestionhumana@meridian.com.co', '1020733194', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(14, 'DIANA MARCELA JACOBO MANCERA', 'soportehseq@meridian.com.co', '1031145571', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(15, 'LAURA DANIELA SEGURA MORERA', 'profesionalhseq@meridian.com.co', '1121936876', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(16, 'ANDRES CAMILO CARDENAS REYES', 'soporteit.nivel1@meridian.com.co', '1007627524', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(17, 'SONIA STEPHANIA FONSECA LOPEZ', 'asistentegestionhumana2@meridian.com.co', '1007647736', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(18, 'FABRYZCIO ANDRES ORTIZ GARCIA', 'noemail+1102580512@meridian.com.co', '1102580512', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
+(13, 'ELOY GABRIEL GOMEZ REYES', 'coordinaciongestionhumana@meridian.com.co', '1020733194', 3, 8, 1, '2025-12-22 15:43:24', '2025-12-26 14:15:59'),
+(14, 'DIANA MARCELA JACOBO MANCERA', 'soportehseq@meridian.com.co', '1031145571', 3, 3, 1, '2025-12-22 15:43:24', '2025-12-26 14:16:05'),
+(15, 'LAURA DANIELA SEGURA MORERA', 'profesionalhseq@meridian.com.co', '1121936876', 3, 3, 1, '2025-12-22 15:43:24', '2025-12-26 14:16:10'),
+(16, 'ANDRES CAMILO CARDENAS REYES', 'soporteit.nivel1@meridian.com.co', '1007627524', 3, 1, 1, '2025-12-22 15:43:24', '2025-12-26 14:16:15'),
+(17, 'SONIA STEPHANIA FONSECA LOPEZ', 'asistentegestionhumana2@meridian.com.co', '1007647736', 3, 8, 1, '2025-12-22 15:43:24', '2025-12-26 14:16:19'),
+(18, 'FABRYZCIO ANDRES ORTIZ GARCIA', 'noemail+1102580512@meridian.com.co', '1102580512', 3, 4, 1, '2025-12-22 15:43:24', '2025-12-26 14:16:28'),
 (19, 'EYMER SANTIAGO MENDEZ HERRERA', 'noemail+1031649053@meridian.com.co', '1031649053', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(20, 'ELIANA IVETH ALARCON RONDON', 'proyectos6@meridian.com.co', '1032446831', 2, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(21, 'KAREN JULIETH CARRANZA RODRIGUEZ', 'analistacontable@meridian.com.co', '1000931984', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(22, 'VIVIANA DEL PILAR ALFONSO AVENDAÑO', 'noemail+1022344726@meridian.com.co', '1022344726', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
+(20, 'ELIANA IVETH ALARCON RONDON', 'proyectos6@meridian.com.co', '1032446831', 2, 6, 1, '2025-12-22 15:43:24', '2025-12-26 14:16:45'),
+(21, 'KAREN JULIETH CARRANZA RODRIGUEZ', 'analistacontable@meridian.com.co', '1000931984', 3, 7, 1, '2025-12-22 15:43:24', '2025-12-26 14:16:52'),
+(22, 'VIVIANA DEL PILAR ALFONSO AVENDAÑO', 'noemail+1022344726@meridian.com.co', '1022344726', 3, 5, 1, '2025-12-22 15:43:24', '2025-12-26 14:17:14'),
 (23, 'KAROL DANIELA SALCEDO ROMERO', 'noemail+1024478397@meridian.com.co', '1024478397', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(24, 'RONALD VASQUEZ ZARATE', 'nominas@meridian.com.co', '79954907', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(25, 'DANIEL ANDRES JOYA SAAVEDRA', 'proyectos2@meridian.com.co', '1136888916', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(26, 'LUISA FERNANDA PACHECO RUBIO', 'asistentegestionhumana@meridian.com.co', '1000588440', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(27, 'MIGUEL LEONARDO MARTINEZ SOTO', 'lidergh@meridian.com.co', '1022347823', 1, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(28, 'DIEGO ALEJANDRO BARRETO HERNANDEZ', 'auxiliarit@meridian.com.co', '1140916030', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(29, 'JORGE ARMANDO PACHECO COLLAZOS', 'asistentelogistica@meridian.com.co', '1010174163', 3, NULL, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(30, 'JESSICA ALEXANDRA ALAVA CHAVEZ', 'noemail+1010222610@meridian.com.co', '1010222610', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(31, 'ANA EBELIA GAMEZ FIGUEREDO', 'contador@meridian.com.co', '39949703', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(32, 'JOSE MATEO LOPEZ CIFUENTES', 'desarrolloit@meridian.com.co', '$argon2id$v=19$m=65536,t=4,p=1$TlVmTHMuOXR2Mkd2dEJLdg$vINBmjTupl56XOVAwIe8pDot015Ip3PaN1XXTV58r9A', 2, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(33, 'LUISA MARIA MELO RODRÍGUEZ', 'noemail+1018516821@meridian.com.co', '1018516821', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(34, 'LADY LORENA VINCHERY SOLANO', 'noemail+1019136436@meridian.com.co', '1019136436', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
+(24, 'RONALD VASQUEZ ZARATE', 'nominas@meridian.com.co', '79954907', 3, 7, 1, '2025-12-22 15:43:24', '2025-12-26 14:17:24'),
+(25, 'DANIEL ANDRES JOYA SAAVEDRA', 'proyectos2@meridian.com.co', '1136888916', 3, 4, 1, '2025-12-22 15:43:24', '2025-12-26 14:17:29'),
+(26, 'LUISA FERNANDA PACHECO RUBIO', 'asistentegestionhumana@meridian.com.co', '1000588440', 3, 8, 1, '2025-12-22 15:43:24', '2025-12-26 14:17:35'),
+(27, 'MIGUEL LEONARDO MARTINEZ SOTO', 'lidergh@meridian.com.co', '1022347823', 1, 8, 1, '2025-12-22 15:43:24', '2025-12-26 14:17:40'),
+(28, 'DIEGO ALEJANDRO BARRETO HERNANDEZ', 'auxiliarit@meridian.com.co', '1140916030', 3, 1, 1, '2025-12-22 15:43:24', '2025-12-26 14:17:44'),
+(29, 'JORGE ARMANDO PACHECO COLLAZOS', 'asistentelogistica@meridian.com.co', '1010174163', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 14:14:43'),
+(30, 'JESSICA ALEXANDRA ALAVA CHAVEZ', 'noemail+1010222610@meridian.com.co', '1010222610', 3, 7, 1, '2025-12-22 15:43:24', '2025-12-26 14:19:32'),
+(31, 'ANA EBELIA GAMEZ FIGUEREDO', 'contador@meridian.com.co', '39949703', 2, 2, 1, '2025-12-22 15:43:24', '2025-12-26 14:18:06'),
+(32, 'JOSE MATEO LOPEZ CIFUENTES', 'desarrolloit@meridian.com.co', '$argon2id$v=19$m=65536,t=4,p=1$TlVmTHMuOXR2Mkd2dEJLdg$vINBmjTupl56XOVAwIe8pDot015Ip3PaN1XXTV58r9A', 1, 1, 1, '2025-12-22 15:43:24', '2025-12-26 14:18:13'),
+(33, 'LUISA MARIA MELO RODRÍGUEZ', 'noemail+1018516821@meridian.com.co', '1018516821', 3, 7, 1, '2025-12-22 15:43:24', '2025-12-26 14:18:22'),
+(34, 'LADY LORENA VINCHERY SOLANO', 'noemail+1019136436@meridian.com.co', '1019136436', 3, 8, 1, '2025-12-22 15:43:24', '2025-12-26 14:18:29'),
 (35, 'CRISTIAN ANDRES MURILLO', 'noemail+1033703338@meridian.com.co', '1033703338', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
 (36, 'DARWIN YAMID GARZON RODRIGUEZ', 'noemail+1070750164@meridian.com.co', '1070750164', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(37, 'PAOLA ADRIANA GIL CHIPATECUA', 'cordinadorproyectos@meridian.com', '52786386', 2, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(38, 'JESSICA ASTRID MAYORGA BARRERA', 'noemail+1026301759@meridian.com.co', '1026301759', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
+(37, 'PAOLA ADRIANA GIL CHIPATECUA', 'cordinadorproyectos@meridian.com', '52786386', 2, 5, 1, '2025-12-22 15:43:24', '2025-12-26 14:18:44'),
+(38, 'JESSICA ASTRID MAYORGA BARRERA', 'noemail+1026301759@meridian.com.co', '1026301759', 3, 5, 1, '2025-12-22 15:43:24', '2025-12-26 14:19:09'),
 (39, 'JUAN ESTEBAN LOPEZ OSORIO', 'noemail+1089599089@meridian.com.co', '1089599089', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(40, 'JOSHUA ELIAS MENA VARGAS', 'noemail+1091966621@meridian.com.co', '1091966621', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
+(40, 'JOSHUA ELIAS MENA VARGAS', 'noemail+1091966621@meridian.com.co', '1091966621', 3, 3, 1, '2025-12-22 15:43:24', '2025-12-26 14:19:49'),
 (41, 'LAURA KARINA GAMEZ GOMEZ', 'noemail+1000987240@meridian.com.co', '1000987240', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(42, 'JULIAN ANDRES MORALES SEGURA', 'noemail+1012395152@meridian.com.co', '1012395152', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
-(43, 'LADY JOHANNA AGUIRRE ROMERO', 'noemail+1024491663@meridian.com.co', '1024491663', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15'),
+(42, 'JULIAN ANDRES MORALES SEGURA', 'noemail+1012395152@meridian.com.co', '1012395152', 3, 7, 1, '2025-12-22 15:43:24', '2025-12-26 14:21:27'),
+(43, 'LADY JOHANNA AGUIRRE ROMERO', 'noemail+1024491663@meridian.com.co', '1024491663', 3, 7, 1, '2025-12-22 15:43:24', '2025-12-26 14:21:34'),
 (44, 'ALISON VANESA GONZALEZ OROZCO', 'noemail+1105465424@meridian.com.co', '1105465424', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-26 13:47:15');
 
 -- --------------------------------------------------------
@@ -481,7 +501,7 @@ ALTER TABLE `password_reset_tokens`
 -- AUTO_INCREMENT de la tabla `refresh_tokens`
 --
 ALTER TABLE `refresh_tokens`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT de la tabla `roles`
@@ -493,7 +513,7 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT de la tabla `tasks`
 --
 ALTER TABLE `tasks`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT de la tabla `task_assignments`

@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { apiRequest } from '../lib/api';
+import Alert from './Alert';
 import { 
   X, 
   Send, 
@@ -28,6 +29,7 @@ export default function AssignTaskModal({ isOpen, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(null);
   
   // Datos de la tarea
   const [taskData, setTaskData] = useState({
@@ -66,6 +68,7 @@ export default function AssignTaskModal({ isOpen, onClose, onSuccess }) {
     setSelectedUser(null);
     setSearchTerm('');
     setSuccess(false);
+    setError(null);
     setTaskData({
       title: '',
       description: '',
@@ -137,7 +140,7 @@ export default function AssignTaskModal({ isOpen, onClose, onSuccess }) {
         onClose();
       }, 1500);
     } catch (e) {
-      alert('Error al crear y asignar tarea: ' + e.message);
+      setError('Error al crear y asignar tarea: ' + e.message);
     } finally {
       setSubmitting(false);
     }
@@ -193,6 +196,18 @@ export default function AssignTaskModal({ isOpen, onClose, onSuccess }) {
         ) : step === 1 ? (
           /* PASO 1: Seleccionar Usuario */
           <div className="p-6 overflow-y-auto flex-1">
+            {/* Alert de error */}
+            {error && (
+              <div className="mb-4">
+                <Alert
+                  type="error"
+                  dismissible
+                  onDismiss={() => setError(null)}
+                >
+                  {error}
+                </Alert>
+              </div>
+            )}
             {/* Buscador */}
             <div className="mb-4">
               <div className="relative">
@@ -265,6 +280,19 @@ export default function AssignTaskModal({ isOpen, onClose, onSuccess }) {
         ) : (
           /* PASO 2: Crear Tarea */
           <form onSubmit={handleSubmit} className="p-6 overflow-y-auto flex-1">
+            {/* Alert de error */}
+            {error && (
+              <div className="mb-4">
+                <Alert
+                  type="error"
+                  dismissible
+                  onDismiss={() => setError(null)}
+                >
+                  {error}
+                </Alert>
+              </div>
+            )}
+
             {/* Usuario seleccionado */}
             <div className="bg-indigo-50 rounded-lg p-3 mb-5 flex items-center gap-3">
               <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-medium">

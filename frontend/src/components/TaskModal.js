@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   Loader2
 } from 'lucide-react';
+import Alert from './Alert';
 
 export default function TaskModal({ isOpen, onClose, task, onSave }) {
   const [formData, setFormData] = useState({
@@ -145,9 +146,12 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
       if (onSave) {
         onSave();
       }
-      onClose();
+      setAlert({ type: 'success', message: 'Tarea guardada exitosamente', dismissible: true });
+      setTimeout(() => {
+        onClose();
+      }, 1000);
     } catch (e) {
-      alert('Error al guardar tarea: ' + e.message);
+      setAlert({ type: 'error', message: 'Error al guardar tarea: ' + e.message, dismissible: true });
     } finally {
       setLoading(false);
     }
@@ -179,9 +183,12 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
       
       setShowMultiTaskPrompt(false);
       setPastedTasks([]);
-      onClose();
+      setAlert({ type: 'success', message: `${tasksToCreate.length} tareas creadas exitosamente`, dismissible: true });
+      setTimeout(() => {
+        onClose();
+      }, 1000);
     } catch (e) {
-      alert('Error al crear tareas: ' + e.message);
+      setAlert({ type: 'error', message: 'Error al crear tareas: ' + e.message, dismissible: true });
     } finally {
       setLoading(false);
     }
@@ -645,6 +652,19 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
           )}
         </div>
       </div>
+
+      {/* Alertas */}
+      {alert && (
+        <div className="fixed top-4 right-4 z-[60] max-w-md animate-in slide-in-from-right">
+          <Alert
+            type={alert.type}
+            dismissible
+            onDismiss={() => setAlert(null)}
+          >
+            {alert.message}
+          </Alert>
+        </div>
+      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { apiRequest } from '../lib/api';
+import Alert from './Alert';
 
 export default function TaskForm({ task, onSave, onCancel }) {
   const [formData, setFormData] = useState({
@@ -20,6 +21,7 @@ export default function TaskForm({ task, onSave, onCancel }) {
   const [areas, setAreas] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState(null);
 
   useEffect(() => {
     if (task) {
@@ -69,8 +71,9 @@ export default function TaskForm({ task, onSave, onCancel }) {
       if (onSave) {
         onSave();
       }
+      setAlert({ type: 'success', message: 'Tarea guardada exitosamente', dismissible: true });
     } catch (e) {
-      alert('Error al guardar tarea: ' + e.message);
+      setAlert({ type: 'error', message: 'Error al guardar tarea: ' + e.message, dismissible: true });
     } finally {
       setLoading(false);
     }
@@ -232,6 +235,19 @@ export default function TaskForm({ task, onSave, onCancel }) {
           {loading ? 'Guardando...' : task ? 'Actualizar' : 'Crear'}
         </button>
       </div>
+
+      {/* Alertas */}
+      {alert && (
+        <div className="mt-4">
+          <Alert
+            type={alert.type}
+            dismissible
+            onDismiss={() => setAlert(null)}
+          >
+            {alert.message}
+          </Alert>
+        </div>
+      )}
     </form>
   );
 }
