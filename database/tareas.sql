@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 26-12-2025 a las 15:23:54
+-- Tiempo de generación: 26-12-2025 a las 15:56:57
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 
@@ -51,6 +51,21 @@ INSERT INTO `areas` (`id`, `name`, `code`, `type`, `parent_id`, `is_active`, `cr
 (7, 'CONTABILIDAD', 'CONTABILIDAD', 'AREA', NULL, 1, '2025-12-15 13:16:00'),
 (8, 'GESTIÓN HUMANA', 'GESTION_HUMANA', 'AREA', NULL, 1, '2025-12-15 13:16:00'),
 (9, 'GERENCIA', 'GERENCIA', 'AREA', NULL, 1, '2025-12-15 13:16:00');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `login_attempts`
+--
+
+CREATE TABLE `login_attempts` (
+  `id` bigint(20) NOT NULL,
+  `ip_address` varchar(45) NOT NULL,
+  `email` varchar(150) DEFAULT NULL,
+  `success` tinyint(1) NOT NULL DEFAULT 0,
+  `user_agent` varchar(255) DEFAULT NULL,
+  `attempted_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -153,8 +168,10 @@ INSERT INTO `refresh_tokens` (`id`, `user_id`, `token_hash`, `expires_at`, `revo
 (22, 32, 'a77c64f12585eb23a7657441c09d17b9772e7075fb3f7a48ba7737d0f178d845', '2026-01-09 08:13:51', '2025-12-26 08:29:01', '2025-12-26 13:13:51', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
 (23, 32, '57d565d67cf7dc1aa55ca372995b680bbb1500f1fc451de371b3dd0498df5e69', '2026-01-09 08:29:01', NULL, '2025-12-26 13:29:01', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
 (24, 32, '9cd5b265e211f6e1fc20a71cbdebd69dadb4ef52dcfc089e755e5d96e0f97342', '2026-01-09 08:51:25', '2025-12-26 09:10:33', '2025-12-26 13:51:25', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
-(25, 32, 'a1bb66c6df57a4133c2c4321e1ccd2fa3076bae8d60d3d0e040466e8bba61bdc', '2026-01-09 09:10:33', '2025-12-26 09:10:33', '2025-12-26 14:10:33', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
-(26, 32, 'a1bb66c6df57a4133c2c4321e1ccd2fa3076bae8d60d3d0e040466e8bba61bdc', '2026-01-09 09:10:33', NULL, '2025-12-26 14:10:33', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36');
+(25, 32, 'a1bb66c6df57a4133c2c4321e1ccd2fa3076bae8d60d3d0e040466e8bba61bdc', '2026-01-09 09:10:33', '2025-12-26 09:25:46', '2025-12-26 14:10:33', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(26, 32, 'a1bb66c6df57a4133c2c4321e1ccd2fa3076bae8d60d3d0e040466e8bba61bdc', '2026-01-09 09:10:33', '2025-12-26 09:25:46', '2025-12-26 14:10:33', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(27, 32, '7a1087d9c4f25558738ccac9f2f1f81fb3bcd5753f9cb20299055f191b4746d1', '2026-01-09 09:25:46', '2025-12-26 09:40:59', '2025-12-26 14:25:46', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(28, 32, 'fa54d5fcfd56806aa311e50cc35e6698f60ca4fc92db878441a8ac144a964623', '2026-01-09 09:40:59', NULL, '2025-12-26 14:40:59', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36');
 
 -- --------------------------------------------------------
 
@@ -201,23 +218,6 @@ CREATE TABLE `tasks` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Volcado de datos para la tabla `tasks`
---
-
-INSERT INTO `tasks` (`id`, `area_id`, `title`, `description`, `type`, `priority`, `status`, `progress_percent`, `responsible_id`, `created_by`, `start_date`, `due_date`, `closed_date`, `deleted_at`, `created_at`, `updated_at`) VALUES
-(11, 2, '`token_hash` varchar(255) NOT NULL,', '', 'Operativa', 'Media', 'No iniciada', 100, 32, 32, '2025-12-26', '0000-00-00', NULL, NULL, '2025-12-26 13:51:56', '2025-12-26 13:52:27'),
-(12, 2, '`user_id` int(11) NOT NULL,', '', 'Operativa', 'Media', 'No iniciada', 100, 32, 32, '2025-12-26', '0000-00-00', NULL, NULL, '2025-12-26 13:51:56', '2025-12-26 13:52:27'),
-(13, 2, 'CREATE TABLE `refresh_tokens` (', '', 'Operativa', 'Media', 'No iniciada', 100, 32, 32, '2025-12-26', '0000-00-00', NULL, NULL, '2025-12-26 13:51:56', '2025-12-26 13:52:28'),
-(14, 2, '`id` bigint(20) NOT NULL,', '', 'Operativa', 'Media', 'No iniciada', 100, 32, 32, '2025-12-26', '0000-00-00', NULL, NULL, '2025-12-26 13:51:56', '2025-12-26 14:13:44'),
-(15, 2, '`expires_at` datetime NOT NULL,', '', 'Operativa', 'Media', 'No iniciada', 0, 32, 32, '2025-12-26', '0000-00-00', NULL, NULL, '2025-12-26 13:51:56', '2025-12-26 13:51:56'),
-(16, 2, '`revoked_at` datetime DEFAULT NULL,', '', 'Operativa', 'Media', 'No iniciada', 0, 32, 32, '2025-12-26', '0000-00-00', NULL, NULL, '2025-12-26 13:51:56', '2025-12-26 13:51:56'),
-(17, 2, '`created_at` timestamp NOT NULL DEFAULT current_timestamp(),', '', 'Operativa', 'Media', 'No iniciada', 0, 32, 32, '2025-12-26', '0000-00-00', NULL, NULL, '2025-12-26 13:51:56', '2025-12-26 13:51:56'),
-(18, 2, '`user_agent` varchar(255) DEFAULT NULL', '', 'Operativa', 'Media', 'No iniciada', 0, 32, 32, '2025-12-26', '0000-00-00', NULL, NULL, '2025-12-26 13:51:56', '2025-12-26 13:51:56'),
-(19, 2, ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;', '', 'Operativa', 'Media', 'No iniciada', 0, 32, 32, '2025-12-26', '0000-00-00', NULL, NULL, '2025-12-26 13:51:56', '2025-12-26 13:51:56'),
-(20, 2, '-- ------------------------------------', '', 'Operativa', 'Media', 'No iniciada', 0, 32, 32, '2025-12-26', '0000-00-00', NULL, NULL, '2025-12-26 13:51:56', '2025-12-26 13:51:56'),
-(21, 2, '`ip` varchar(45) DEFAULT NULL,', '', 'Operativa', 'Media', 'No iniciada', 0, 32, 32, '2025-12-26', '0000-00-00', NULL, NULL, '2025-12-26 13:51:56', '2025-12-26 13:51:56');
 
 -- --------------------------------------------------------
 
@@ -372,6 +372,14 @@ ALTER TABLE `areas`
   ADD KEY `idx_areas_type` (`type`);
 
 --
+-- Indices de la tabla `login_attempts`
+--
+ALTER TABLE `login_attempts`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_ip_attempted` (`ip_address`,`attempted_at`),
+  ADD KEY `idx_attempted_at` (`attempted_at`);
+
+--
 -- Indices de la tabla `password_reset_otps`
 --
 ALTER TABLE `password_reset_otps`
@@ -486,6 +494,12 @@ ALTER TABLE `areas`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
+-- AUTO_INCREMENT de la tabla `login_attempts`
+--
+ALTER TABLE `login_attempts`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `password_reset_otps`
 --
 ALTER TABLE `password_reset_otps`
@@ -501,7 +515,7 @@ ALTER TABLE `password_reset_tokens`
 -- AUTO_INCREMENT de la tabla `refresh_tokens`
 --
 ALTER TABLE `refresh_tokens`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT de la tabla `roles`
