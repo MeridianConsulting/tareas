@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 22-12-2025 a las 16:58:23
+-- Tiempo de generación: 26-12-2025 a las 14:40:41
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.0.30
 
@@ -55,6 +55,61 @@ INSERT INTO `areas` (`id`, `name`, `code`, `type`, `parent_id`, `is_active`, `cr
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `password_reset_otps`
+--
+
+CREATE TABLE `password_reset_otps` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `otp_hash` char(64) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `used_at` datetime DEFAULT NULL,
+  `attempts` int(10) UNSIGNED NOT NULL DEFAULT 0,
+  `created_ip` varchar(45) DEFAULT NULL,
+  `user_agent` varchar(255) DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `password_reset_otps`
+--
+
+INSERT INTO `password_reset_otps` (`id`, `user_id`, `otp_hash`, `expires_at`, `used_at`, `attempts`, `created_ip`, `user_agent`, `created_at`) VALUES
+(1, 32, 'c70720248b790f5973ad3f8940ab3715a8ca84305c9db9e0588a8bf99deb8f67', '2025-12-22 12:57:28', '2025-12-22 12:48:42', 0, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2025-12-22 12:47:28'),
+(2, 32, 'f5a271cff0b27c304cb52592ecac96d98a44186e8e7a1d447cc4ec955418c3b6', '2025-12-22 12:58:42', '2025-12-22 12:53:01', 0, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2025-12-22 12:48:42'),
+(3, 32, '745b103c288911c11d84572a64fba3aa6d95c5d8587845a6b6c9edf91bcc6790', '2025-12-22 13:03:01', NULL, 0, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2025-12-22 12:53:01'),
+(4, 32, '0d53642902b51938b68cf3c72ac66ef35ed18b5a109dd83820e53c725f627153', '2025-12-22 14:36:48', NULL, 0, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2025-12-22 14:26:48'),
+(5, 32, 'd9071055301b0131364a45479b1c72000c1369a4eee0c07c63d91ff9b3eb8a6b', '2025-12-22 15:02:08', '2025-12-22 14:52:31', 0, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2025-12-22 14:52:08'),
+(6, 32, 'fd39a211eaca466432ded61b4148e42ede9fae49c44249c9ff4fec3cadd0e5d1', '2025-12-22 15:03:39', '2025-12-22 14:53:52', 0, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2025-12-22 14:53:39'),
+(7, 32, '6e286972f8f0453eb35e48a0601379c6101aaf3b10cbbd8e4bbec585f749dcc2', '2025-12-22 15:09:07', '2025-12-22 14:59:24', 0, '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', '2025-12-22 14:59:07');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `password_reset_tokens`
+--
+
+CREATE TABLE `password_reset_tokens` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `token_hash` char(64) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `used_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `password_reset_tokens`
+--
+
+INSERT INTO `password_reset_tokens` (`id`, `user_id`, `token_hash`, `expires_at`, `used_at`, `created_at`) VALUES
+(1, 32, '0d930c8dd2caefe896d75fa95c1df15405fffebe1656eae4da15d448719033d5', '2025-12-22 15:07:31', '2025-12-22 14:52:49', '2025-12-22 14:52:31'),
+(2, 32, '3c8fa1e1629b89dbd8b115d1d42574cd17d99df4131ca47de5a20e7d182c1aeb', '2025-12-22 15:08:52', '2025-12-22 14:54:03', '2025-12-22 14:53:52'),
+(3, 32, 'eabd36bc6e306b23dfa93bdf1458b3d85ab5e176c23007c9548d6d1fb0aefa9a', '2025-12-22 15:14:24', '2025-12-22 14:59:43', '2025-12-22 14:59:24');
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `refresh_tokens`
 --
 
@@ -76,7 +131,27 @@ CREATE TABLE `refresh_tokens` (
 INSERT INTO `refresh_tokens` (`id`, `user_id`, `token_hash`, `expires_at`, `revoked_at`, `created_at`, `ip`, `user_agent`) VALUES
 (1, 32, 'e83eab1b6cf584e0466b1f2e903426dd95be406be26c4a45e6c11e97afd8596e', '2026-01-05 10:50:49', '2025-12-22 10:53:00', '2025-12-22 15:50:49', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
 (2, 32, '7f0b68ccf746d7f0c044cd693ea19889c2b133a3edf48e763fd098444601ceb8', '2026-01-05 10:53:00', '2025-12-22 10:54:40', '2025-12-22 15:53:00', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
-(3, 32, '6578f58aace1a764621b4c5eaa5a91a82db91c5eb5941d9fced0fa62d920a341', '2026-01-05 10:54:40', NULL, '2025-12-22 15:54:40', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36');
+(3, 32, '6578f58aace1a764621b4c5eaa5a91a82db91c5eb5941d9fced0fa62d920a341', '2026-01-05 10:54:40', '2025-12-22 11:09:57', '2025-12-22 15:54:40', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(4, 32, 'f4cde21846fa7c7b282891ceacec86f2539fcb9f32d9ed77d574e1a5c7684ad2', '2026-01-05 11:09:57', '2025-12-22 11:25:03', '2025-12-22 16:09:57', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(5, 32, '87ad5fccc727f7e337395dd60d7dd8c7b63724c5fbf4362bad5987f6ebcbc33b', '2026-01-05 11:25:03', '2025-12-22 11:40:03', '2025-12-22 16:25:03', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(6, 32, 'e2965afe16459ab8776d2b83effaf365fd1810f70e6f0bddfbfa9a65e1434e46', '2026-01-05 11:40:03', '2025-12-22 11:55:33', '2025-12-22 16:40:03', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(7, 32, 'b5c5edebf61ba362f44adffc6bea7b308d14a4b9ffa7949533cee06c51a2b7c7', '2026-01-05 11:55:33', '2025-12-22 12:11:02', '2025-12-22 16:55:33', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(8, 32, '83c2ce9651b3becfd15334e573420a07d5c9bbc4a1b977c24543376cc1aa9c3f', '2026-01-05 12:11:02', NULL, '2025-12-22 17:11:02', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(9, 32, 'dce4c95c8ba7581ef0744b60b58024f35065e8374e0db18d406bb0474a886cd3', '2026-01-05 12:20:08', NULL, '2025-12-22 17:20:08', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(10, 32, '6b4137d836f7501a6b3c562dda72126eaabf82164125e331528579627bcde5c3', '2026-01-05 12:20:29', '2025-12-22 12:20:38', '2025-12-22 17:20:29', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(11, 32, '64824471b9af731d1982d824b69e4189e7f3121ab008fa2fea4918c742a626ab', '2026-01-05 12:20:38', '2025-12-22 12:20:38', '2025-12-22 17:20:38', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(12, 32, '64824471b9af731d1982d824b69e4189e7f3121ab008fa2fea4918c742a626ab', '2026-01-05 12:20:38', NULL, '2025-12-22 17:20:38', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(13, 32, '8cc33fc422af09785f5ee47aa5d31a6adef729bc88ffb4ced4fee8271846a96d', '2026-01-05 14:53:03', NULL, '2025-12-22 19:53:03', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(14, 32, 'e205a2bd1a9fd9427885223a99c89a143edeb378366d3c6b3cd855aad7d0f23f', '2026-01-05 14:54:20', NULL, '2025-12-22 19:54:20', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(15, 32, '92a308bc9a2e41b116fb8056723c0366a93b23b57b9b5807b22abb07d41a5cdc', '2026-01-05 15:01:09', '2025-12-22 15:17:01', '2025-12-22 20:01:09', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(16, 32, '2d81047c6c82992e29204df66722274cfc9517aa6c9ee4d4ead5784570367d0d', '2026-01-05 15:17:01', '2025-12-22 15:32:01', '2025-12-22 20:17:01', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(17, 32, '78203ffe653fbaf8572b274e8fbc9773da4908834bae2d3692add77a1bf89115', '2026-01-05 15:32:01', '2025-12-22 15:47:01', '2025-12-22 20:32:01', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(18, 32, '53797f1c3e4d0b80c6e3722370eb1efb3411865bf6f504ac41e8bed0959ace21', '2026-01-05 15:47:01', '2025-12-22 16:02:01', '2025-12-22 20:47:01', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(19, 32, '54380eeb9075262565c88a0c092181e833c9a76761c338bc13f553610fb951e9', '2026-01-05 16:02:01', '2025-12-22 16:17:11', '2025-12-22 21:02:01', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(20, 32, '9f64f27db53c31b57b1513e25972521ecc15202d91ea944faf124af4d8547ca2', '2026-01-05 16:17:11', '2025-12-22 16:32:11', '2025-12-22 21:17:11', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(21, 32, '9914f6ee1f94e38e900af77631dab6b95782fee27f63994c0a032d67354d099d', '2026-01-05 16:32:11', '2025-12-26 08:13:51', '2025-12-22 21:32:11', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(22, 32, 'a77c64f12585eb23a7657441c09d17b9772e7075fb3f7a48ba7737d0f178d845', '2026-01-09 08:13:51', '2025-12-26 08:29:01', '2025-12-26 13:13:51', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'),
+(23, 32, '57d565d67cf7dc1aa55ca372995b680bbb1500f1fc451de371b3dd0498df5e69', '2026-01-09 08:29:01', NULL, '2025-12-26 13:29:01', '::1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36');
 
 -- --------------------------------------------------------
 
@@ -96,7 +171,6 @@ CREATE TABLE `roles` (
 
 INSERT INTO `roles` (`id`, `name`, `description`) VALUES
 (1, 'admin', 'Administrador del sistema'),
-(2, 'gerencia', 'Gerencia'),
 (3, 'lider_area', 'Líder de área'),
 (4, 'colaborador', 'Colaborador');
 
@@ -237,7 +311,7 @@ INSERT INTO `users` (`id`, `name`, `email`, `password_hash`, `role_id`, `area_id
 (29, 'JORGE ARMANDO PACHECO COLLAZOS', 'asistentelogistica@meridian.com.co', '1010174163', 4, NULL, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
 (30, 'JESSICA ALEXANDRA ALAVA CHAVEZ', 'noemail+1010222610@meridian.com.co', '1010222610', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
 (31, 'ANA EBELIA GAMEZ FIGUEREDO', 'contador@meridian.com.co', '39949703', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
-(32, 'JOSE MATEO LOPEZ CIFUENTES', 'desarrolloit@meridian.com.co', '1011202252', 1, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
+(32, 'JOSE MATEO LOPEZ CIFUENTES', 'desarrolloit@meridian.com.co', '$argon2id$v=19$m=65536,t=4,p=1$TlVmTHMuOXR2Mkd2dEJLdg$vINBmjTupl56XOVAwIe8pDot015Ip3PaN1XXTV58r9A', 3, 2, 1, '2025-12-22 15:43:24', '2025-12-22 19:59:43'),
 (33, 'LUISA MARIA MELO RODRÍGUEZ', 'noemail+1018516821@meridian.com.co', '1018516821', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
 (34, 'LADY LORENA VINCHERY SOLANO', 'noemail+1019136436@meridian.com.co', '1019136436', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
 (35, 'CRISTIAN ANDRES MURILLO', 'noemail+1033703338@meridian.com.co', '1033703338', 4, 2, 1, '2025-12-22 15:43:24', '2025-12-22 15:43:24'),
@@ -276,6 +350,21 @@ ALTER TABLE `areas`
   ADD UNIQUE KEY `code` (`code`),
   ADD KEY `idx_areas_parent` (`parent_id`),
   ADD KEY `idx_areas_type` (`type`);
+
+--
+-- Indices de la tabla `password_reset_otps`
+--
+ALTER TABLE `password_reset_otps`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_user_active` (`user_id`,`used_at`,`expires_at`);
+
+--
+-- Indices de la tabla `password_reset_tokens`
+--
+ALTER TABLE `password_reset_tokens`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `token_hash` (`token_hash`),
+  ADD KEY `idx_user_active` (`user_id`,`used_at`,`expires_at`);
 
 --
 -- Indices de la tabla `refresh_tokens`
@@ -377,10 +466,22 @@ ALTER TABLE `areas`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
+-- AUTO_INCREMENT de la tabla `password_reset_otps`
+--
+ALTER TABLE `password_reset_otps`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT de la tabla `password_reset_tokens`
+--
+ALTER TABLE `password_reset_tokens`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT de la tabla `refresh_tokens`
 --
 ALTER TABLE `refresh_tokens`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT de la tabla `roles`
@@ -392,7 +493,7 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT de la tabla `tasks`
 --
 ALTER TABLE `tasks`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `task_assignments`
@@ -433,6 +534,18 @@ ALTER TABLE `users`
 --
 ALTER TABLE `areas`
   ADD CONSTRAINT `fk_areas_parent` FOREIGN KEY (`parent_id`) REFERENCES `areas` (`id`) ON DELETE SET NULL;
+
+--
+-- Filtros para la tabla `password_reset_otps`
+--
+ALTER TABLE `password_reset_otps`
+  ADD CONSTRAINT `fk_pro_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `password_reset_tokens`
+--
+ALTER TABLE `password_reset_tokens`
+  ADD CONSTRAINT `fk_prt_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `refresh_tokens`

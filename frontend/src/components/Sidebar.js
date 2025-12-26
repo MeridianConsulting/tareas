@@ -33,11 +33,6 @@ export default function Sidebar({ user, isOpen, onToggle }) {
 
   const menuItems = [
     { 
-      href: '/dashboard', 
-      label: 'Todas las Tareas', 
-      icon: ListTodo
-    },
-    { 
       href: '/my-tasks', 
       label: 'Mis Tareas', 
       icon: Table2
@@ -49,16 +44,30 @@ export default function Sidebar({ user, isOpen, onToggle }) {
     },
   ];
 
+  // Dashboard principal solo para admin y lider_area
+  if (user?.role === 'admin' || user?.role === 'lider_area') {
+    menuItems.unshift({ 
+      href: '/dashboard', 
+      label: 'Todas las Tareas', 
+      icon: ListTodo
+    });
+  }
+
+  // Dashboard por área para admin, lider_area y colaborador
+  if (user?.role === 'admin' || user?.role === 'lider_area' || user?.role === 'colaborador') {
+    menuItems.push({ 
+      href: '/reports/areas', 
+      label: 'Dashboard por Area', 
+      icon: Layers
+    });
+  }
+
+  // Reportes adicionales solo para admin y lider_area
   if (user?.role === 'admin' || user?.role === 'lider_area') {
     menuItems.push({ 
       href: '/reports/daily', 
       label: 'Reportes Diarios', 
       icon: Calendar
-    });
-    menuItems.push({ 
-      href: '/reports/areas', 
-      label: 'Dashboard por Area', 
-      icon: Layers
     });
     menuItems.push({ 
       href: '/reports/download', 

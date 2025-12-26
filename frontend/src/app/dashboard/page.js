@@ -25,6 +25,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showTaskModal, setShowTaskModal] = useState(false);
+  const [user, setUser] = useState(null);
   const [filters, setFilters] = useState({
     status: '',
     priority: '',
@@ -35,6 +36,24 @@ export default function Dashboard() {
   const [dateFrom, setDateFrom] = useState(today);
   const [dateTo, setDateTo] = useState(today);
   const [currentPeriod, setCurrentPeriod] = useState('today');
+
+  // Verificar rol del usuario al cargar
+  useEffect(() => {
+    async function checkUser() {
+      try {
+        const data = await apiRequest('/auth/me');
+        setUser(data.data);
+        // Colaboradores no deben ver el dashboard principal
+        if (data.data.role === 'colaborador') {
+          router.push('/my-tasks');
+          return;
+        }
+      } catch (e) {
+        router.push('/login');
+      }
+    }
+    checkUser();
+  }, [router]);
 
   const loadTasks = useCallback(async (isRefresh = false) => {
     if (isRefresh) {
@@ -64,8 +83,11 @@ export default function Dashboard() {
   }, [filters, dateFrom, dateTo]);
 
   useEffect(() => {
-    loadTasks();
-  }, [filters, dateFrom, dateTo, loadTasks]);
+    // Solo cargar tareas si el usuario no es colaborador
+    if (user && user.role !== 'colaborador') {
+      loadTasks();
+    }
+  }, [filters, dateFrom, dateTo, loadTasks, user]);
 
   const handleDateChange = (from, to, period) => {
     setDateFrom(from || '');

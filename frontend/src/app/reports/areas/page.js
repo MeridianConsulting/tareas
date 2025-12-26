@@ -47,7 +47,7 @@ export default function AreasDashboard() {
     async function loadUser() {
       try {
         const data = await apiRequest('/auth/me');
-        if (!['admin', 'lider_area'].includes(data.data.role)) {
+        if (!['admin', 'lider_area', 'colaborador'].includes(data.data.role)) {
           router.push('/dashboard');
           return;
         }
@@ -80,7 +80,16 @@ export default function AreasDashboard() {
         apiRequest(tasksUrl),
         apiRequest('/users')
       ]);
-      setAreas(areasData.data || []);
+      
+      // Filtrar áreas según el rol del usuario
+      let filteredAreas = areasData.data || [];
+      if (user.role === 'colaborador' || user.role === 'lider_area') {
+        // Solo mostrar el área del usuario
+        filteredAreas = filteredAreas.filter(area => area.id === user.area_id);
+      }
+      // Admin ve todas las áreas (sin filtrar)
+      
+      setAreas(filteredAreas);
       setAllTasks(tasksData.data || []);
       setUsers(usersData.data || []);
     } catch (e) {
@@ -213,8 +222,16 @@ export default function AreasDashboard() {
       <div className="p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto overflow-hidden">
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold text-slate-900">Dashboard por Area</h1>
-            <p className="text-slate-500 mt-0.5 text-sm">KPIs y graficos {getPeriodLabel()} para cada area</p>
+            <h1 className="text-2xl font-semibold text-slate-900">
+              {user?.role === 'colaborador' || user?.role === 'lider_area' 
+                ? 'Dashboard de mi Area' 
+                : 'Dashboard por Area'}
+            </h1>
+            <p className="text-slate-500 mt-0.5 text-sm">
+              {user?.role === 'colaborador' || user?.role === 'lider_area'
+                ? `KPIs y gráficos ${getPeriodLabel()} de tu área`
+                : `KPIs y graficos ${getPeriodLabel()} para cada area`}
+            </p>
           </div>
           
           {/* Filtros de fecha */}
