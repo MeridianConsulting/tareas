@@ -48,12 +48,12 @@ export default function ReportsDownload() {
       try {
         const data = await apiRequest('/auth/me');
         if (!['admin', 'lider_area'].includes(data.data.role)) {
-          router.push('/dashboard');
+          router.push('/dashboard/');
           return;
         }
         setUser(data.data);
       } catch (e) {
-        router.push('/login');
+        router.push('/login/');
       }
     }
     loadUser();

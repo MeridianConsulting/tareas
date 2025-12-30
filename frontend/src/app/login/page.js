@@ -28,7 +28,7 @@ export default function LoginPage() {
       });
 
       login(data.data.access_token, rememberMe);
-      router.push('/dashboard');
+      router.push('/dashboard/');
     } catch (e) {
       setError(e.message || 'Error de autenticación. Por favor, verifica tus credenciales.');
     } finally {

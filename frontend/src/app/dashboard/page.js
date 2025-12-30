@@ -45,11 +45,11 @@ export default function Dashboard() {
         setUser(data.data);
         // Colaboradores no deben ver el dashboard principal
         if (data.data.role === 'colaborador') {
-          router.push('/my-tasks');
+          router.push('/my-tasks/');
           return;
         }
       } catch (e) {
-        router.push('/login');
+        router.push('/login/');
       }
     }
     checkUser();

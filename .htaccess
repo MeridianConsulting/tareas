@@ -1,28 +1,38 @@
-# Configuración básica para reconocimiento del dominio
+# Configuración para Next.js estático + Backend API
 # Maneja redirección de API al backend y archivos estáticos del frontend
 
-# Habilitar motor de reescritura (necesario para redirigir API al backend)
+# Habilitar motor de reescritura
 RewriteEngine On
 
 # Redirigir todas las peticiones de la API al backend
-# Las rutas /api/v1/* se redirigen a backend/public/index.php
-# Mantener el REQUEST_URI original para que el Router pueda procesarlo
 RewriteCond %{REQUEST_URI} ^/api/
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^api/(.*)$ backend/public/index.php [L,QSA]
 
-# Permitir acceso a archivos estáticos
-<FilesMatch "\.(jpg|jpeg|png|gif|ico|svg|css|js|pdf|txt|md)$">
-    Order Allow,Deny
-    Allow from all
-</FilesMatch>
+# No reescribir archivos/carpetas reales (incluye /_next/ y assets)
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
 
-# Configuración de índices (opcional)
+# Fallback SPA - redirigir todo a index.html
+RewriteRule ^ index.html [L]
+
+# Configuración de índices
 DirectoryIndex index.html index.php
-
-# Prevenir listado de directorios
 Options -Indexes
 
-# Nota: Las rutas /api/v1/* se redirigen automáticamente al backend/public/index.php
-# El Router del backend procesará el REQUEST_URI original (/api/v1/...)
+# Control de caché
+<IfModule mod_headers.c>
+  # No cachear HTML (evita pantallas blancas por mismatch de chunks)
+  <FilesMatch "\.(html)$">
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+
+  # Cache largo para assets de Next.js
+  <FilesMatch "^.*\.(js|css|woff|woff2|png|jpg|jpeg|svg|gif|ico|webp|avif)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>

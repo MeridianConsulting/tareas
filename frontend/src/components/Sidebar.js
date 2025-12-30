@@ -33,12 +33,12 @@ export default function Sidebar({ user, isOpen, onToggle }) {
 
   const menuItems = [
     { 
-      href: '/my-tasks', 
+      href: '/my-tasks/', 
       label: 'Mis Tareas', 
       icon: Table2
     },
     { 
-      href: '/assignments', 
+      href: '/assignments/', 
       label: 'Asignaciones', 
       icon: Send
     },
@@ -47,7 +47,7 @@ export default function Sidebar({ user, isOpen, onToggle }) {
   // Dashboard principal solo para admin y lider_area
   if (user?.role === 'admin' || user?.role === 'lider_area') {
     menuItems.unshift({ 
-      href: '/dashboard', 
+      href: '/dashboard/', 
       label: 'Todas las Tareas', 
       icon: ListTodo
     });
@@ -56,7 +56,7 @@ export default function Sidebar({ user, isOpen, onToggle }) {
   // Dashboard por área para admin, lider_area y colaborador
   if (user?.role === 'admin' || user?.role === 'lider_area' || user?.role === 'colaborador') {
     menuItems.push({ 
-      href: '/reports/areas', 
+      href: '/reports/areas/', 
       label: 'Dashboard por Area', 
       icon: Layers
     });
@@ -65,12 +65,12 @@ export default function Sidebar({ user, isOpen, onToggle }) {
   // Reportes adicionales solo para admin y lider_area
   if (user?.role === 'admin' || user?.role === 'lider_area') {
     menuItems.push({ 
-      href: '/reports/daily', 
+      href: '/reports/daily/', 
       label: 'Reportes Diarios', 
       icon: Calendar
     });
     menuItems.push({ 
-      href: '/reports/download', 
+      href: '/reports/download/', 
       label: 'Descargar Reportes', 
       icon: FileDown
     });
@@ -78,7 +78,7 @@ export default function Sidebar({ user, isOpen, onToggle }) {
 
   if (user?.role === 'admin') {
     menuItems.push({ 
-      href: '/reports/management', 
+      href: '/reports/management/', 
       label: 'Dashboard General', 
       icon: PieChart
     });
@@ -87,12 +87,12 @@ export default function Sidebar({ user, isOpen, onToggle }) {
   if (user?.role === 'admin') {
     menuItems.push(
       { 
-        href: '/admin/areas', 
+        href: '/admin/areas/', 
         label: 'Areas', 
         icon: Building2
       },
       { 
-        href: '/admin/users', 
+        href: '/admin/users/', 
         label: 'Usuarios', 
         icon: Users
       }

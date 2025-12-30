@@ -155,7 +155,7 @@ export default function ForgotPasswordPage() {
       });
 
       setInfo('Contraseña actualizada. Redirigiendo al login...');
-      setTimeout(() => router.push('/login'), 800);
+      setTimeout(() => router.push('/login/'), 800);
     } catch (e) {
       setError(e.message || 'No se pudo actualizar la contraseña.');
     } finally {
@@ -168,7 +168,7 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-sm p-6 sm:p-8">
         <button
           type="button"
-          onClick={() => router.push('/login')}
+          onClick={() => router.push('/login/')}
           className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 mb-4"
         >
           <ArrowLeft className="w-4 h-4" />

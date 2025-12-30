@@ -61,12 +61,12 @@ export default function ManagementDashboard() {
       try {
         const data = await apiRequest('/auth/me');
         if (data.data.role !== 'admin') {
-          router.push('/dashboard');
+          router.push('/dashboard/');
           return;
         }
         setUser(data.data);
       } catch (e) {
-        router.push('/login');
+        router.push('/login/');
       }
     }
     loadUser();

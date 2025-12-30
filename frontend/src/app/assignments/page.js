@@ -42,7 +42,7 @@ export default function AssignmentsPage() {
         const data = await apiRequest('/auth/me');
         setUser(data.data);
       } catch (e) {
-        router.push('/login');
+        router.push('/login/');
       }
     }
     loadUser();

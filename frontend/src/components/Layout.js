@@ -32,7 +32,7 @@ export default function Layout({ children }) {
         const data = await apiRequest('/auth/me');
         setUser(data.data);
       } catch (e) {
-        router.push('/login');
+        router.push('/login/');
       } finally {
         setIsBootstrapping(false);
       }
