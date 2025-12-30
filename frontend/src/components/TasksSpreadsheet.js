@@ -33,6 +33,7 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [selectedTasks, setSelectedTasks] = useState(new Set());
+  const savingRowRef = useRef(new Set()); // Lock para evitar doble guardado
 
   const tipos = ['Clave', 'Operativa', 'Mejora', 'Obligatoria'];
   const prioridades = ['Alta', 'Media', 'Baja'];
@@ -82,7 +83,12 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
       const allTasks = tasksData.data || [];
       const myTasks = allTasks.filter(t => t.responsible_id == user.id);
       
-      setTasks(myTasks);
+      // Deduplicar y normalizar
+      setTasks(dedupById(myTasks));
+      
+      // Normalizar newRows para evitar duplicados de filas vacías
+      setNewRows(prev => normalizeRows(prev));
+      
       setAreas(areasData.data || []);
       setUsers(usersData.data || []);
     } catch (e) {
@@ -92,29 +98,56 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
     }
   }
 
+  // Normalizar filas: solo una fila vacía/draft al inicio
+  function normalizeRows(rows) {
+    const isDraft = (r) => !r.id && (r.title ?? '').trim() === '';
+    const drafts = rows.filter(isDraft);
+    const nonDrafts = rows.filter(r => !isDraft(r));
+    return drafts.length ? [drafts[0], ...nonDrafts] : nonDrafts;
+  }
+
+  // Deduplicar por ID
+  function dedupById(rows) {
+    const seen = new Set();
+    const out = [];
+    for (const r of rows) {
+      const id = r.id ?? r._tempId;
+      if (id && seen.has(id)) continue;
+      if (id) seen.add(id);
+      out.push(r);
+    }
+    return out;
+  }
+
   function addNewRow() {
-    const newRow = {
-      _tempId: Date.now(),
-      _isNew: true,
-      title: '',
-      description: '',
-      type: 'Operativa',
-      priority: 'Media',
-      status: 'No iniciada',
-      progress_percent: 0,
-      area_id: currentUser?.area_id || areas[0]?.id || '',
-      responsible_id: currentUser?.id || '',
-      start_date: new Date().toISOString().split('T')[0],
-      due_date: '',
-    };
-    setNewRows([...newRows, newRow]);
+    setNewRows(prev => {
+      // Verificar que no exista ya una fila vacía (usando estado actual)
+      const hasEmptyRow = prev.some(r => !r.id && (r.title ?? '').trim() === '');
+      if (hasEmptyRow) return prev; // Ya hay una fila vacía, no agregar otra
+      
+      const newRow = {
+        _tempId: Date.now(),
+        _isNew: true,
+        title: '',
+        description: '',
+        type: 'Operativa',
+        priority: 'Media',
+        status: 'No iniciada',
+        progress_percent: 0,
+        area_id: currentUser?.area_id || areas[0]?.id || '',
+        responsible_id: currentUser?.id || '',
+        start_date: new Date().toISOString().split('T')[0],
+        due_date: '',
+      };
+      return normalizeRows([...prev, newRow]);
+    });
   }
 
   function updateCell(taskId, field, value, isNew = false) {
     if (isNew) {
-      setNewRows(newRows.map(row => 
-        row._tempId === taskId ? { ...row, [field]: value } : row
-      ));
+      setNewRows(prev =>
+        prev.map(row => row._tempId === taskId ? { ...row, [field]: value } : row)
+      );
     } else {
       setPendingChanges(prev => ({
         ...prev,
@@ -123,14 +156,14 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
           [field]: value
         }
       }));
-      setTasks(tasks.map(t => 
+      setTasks(prev => prev.map(t => 
         t.id === taskId ? { ...t, [field]: value } : t
       ));
     }
   }
 
   function removeNewRow(tempId) {
-    setNewRows(newRows.filter(row => row._tempId !== tempId));
+    setNewRows(prev => prev.filter(row => row._tempId !== tempId));
   }
 
   // Normalizar fechas: convertir vacías a null
@@ -146,16 +179,25 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
   }
 
   async function saveNewRow(row) {
-    if (!row.title.trim()) {
+    const key = row._tempId || row.id;
+    
+    // Lock: evitar doble guardado
+    if (savingRowRef.current.has(key)) {
+      return false;
+    }
+    
+    if (!row.title?.trim()) {
       setAlert({ type: 'warning', message: 'El título es obligatorio', dismissible: true });
-      return;
+      return false;
     }
     if (!row.area_id) {
       setAlert({ type: 'warning', message: 'El área es obligatoria', dismissible: true });
-      return;
+      return false;
     }
 
+    savingRowRef.current.add(key);
     setSaving(true);
+    
     try {
       const { _tempId, _isNew, ...taskData } = row;
       // Asegurar que el responsable sea el usuario actual
@@ -165,13 +207,21 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
         method: 'POST',
         body: JSON.stringify(normalizeDates(taskData)),
       });
-      setNewRows(newRows.filter(r => r._tempId !== row._tempId));
+      
+      // Remover la fila de newRows antes de recargar
+      setNewRows(prev => prev.filter(r => r._tempId !== row._tempId));
+      
+      // Recargar datos y deduplicar
       await loadData();
       if (onTasksChange) onTasksChange();
       setAlert({ type: 'success', message: 'Tarea guardada exitosamente', dismissible: true });
+      
+      return true;
     } catch (e) {
       setAlert({ type: 'error', message: 'Error al guardar: ' + e.message, dismissible: true });
+      return false;
     } finally {
+      savingRowRef.current.delete(key);
       setSaving(false);
     }
   }
@@ -377,29 +427,61 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
     // Enter: confirmar y mover a la siguiente fila (solo en título)
     if (e.key === 'Enter' && field === 'title') {
       e.preventDefault();
-      setEditingCell(null);
+      e.stopPropagation(); // Evitar que se propague a otros handlers
+      
       if (isNew) {
-        // Si hay cambios, guardar y crear nueva fila
-        if (taskId && newRows.find(r => r._tempId === taskId)?.title?.trim()) {
-          const row = newRows.find(r => r._tempId === taskId);
-          if (row) {
-            saveNewRow(row).then(() => {
-              // Crear nueva fila y enfocar en título
-              addNewRow();
-              setTimeout(() => {
-                const newRow = newRows[newRows.length - 1];
-                if (newRow) {
-                  setEditingCell({ id: newRow._tempId, field: 'title' });
-                }
-              }, 100);
-            });
-          }
-        } else {
-          // Solo crear nueva fila
-          addNewRow();
+        const row = newRows.find(r => r._tempId === taskId);
+
+        if (!row || !row.title?.trim()) {
+          setEditingCell(null);
+          return;
         }
+
+        setEditingCell(null);
+
+        (async () => {
+          const ok = await saveNewRow(row);
+          if (!ok) return;
+
+          setNewRows(prev => {
+            const hasEmpty = prev.some(r => !r.id && (r.title ?? '').trim() === '');
+            if (hasEmpty) return prev;
+
+            const draft = {
+              _tempId: Date.now(),
+              _isNew: true,
+              title: '',
+              description: '',
+              type: 'Operativa',
+              priority: 'Media',
+              status: 'No iniciada',
+              progress_percent: 0,
+              area_id: currentUser?.area_id || areas[0]?.id || '',
+              responsible_id: currentUser?.id || '',
+              start_date: new Date().toISOString().split('T')[0],
+              due_date: '',
+            };
+
+            const normalized = normalizeRows([...prev, draft]);
+            
+            // Enfocar en la nueva fila después de un breve delay
+            setTimeout(() => {
+              const emptyRow = normalized.find(r => !r.id && (r.title ?? '').trim() === '');
+              if (emptyRow) {
+                setEditingCell({ id: emptyRow._tempId, field: 'title' });
+              }
+            }, 150);
+
+            return normalized;
+          });
+        })();
+
+        return;
       } else if (pendingChanges[taskId]) {
+        setEditingCell(null);
         saveChanges(taskId);
+      } else {
+        setEditingCell(null);
       }
       return;
     }
@@ -458,7 +540,7 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
           start_date: new Date().toISOString().split('T')[0],
           due_date: '',
         }));
-        setNewRows([...newRows, ...newRowsToAdd]);
+        setNewRows(prev => normalizeRows([...prev, ...newRowsToAdd]));
       }
     }
   }
@@ -598,7 +680,8 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
             onChange={(e) => updateCell(taskId, field, e.target.value, isNew)}
             onBlur={() => {
               // No cerrar si estamos navegando con Tab
-              if (!isNavigatingRef.current) {
+              // No cerrar si estamos guardando (evitar conflictos con Enter)
+              if (!isNavigatingRef.current && !savingRowRef.current.has(taskId)) {
                 setEditingCell(null);
               }
             }}
