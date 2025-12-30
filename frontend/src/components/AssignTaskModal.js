@@ -129,6 +129,28 @@ export default function AssignTaskModal({ isOpen, onClose, onSuccess }) {
       return;
     }
 
+    // Validar que las fechas no sean pasadas
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (taskData.start_date) {
+      const startDate = new Date(taskData.start_date);
+      startDate.setHours(0, 0, 0, 0);
+      if (startDate < today) {
+        setError('La fecha de inicio no puede ser una fecha pasada');
+        return;
+      }
+    }
+    
+    if (taskData.due_date) {
+      const dueDate = new Date(taskData.due_date);
+      dueDate.setHours(0, 0, 0, 0);
+      if (dueDate < today) {
+        setError('La fecha de vencimiento no puede ser una fecha pasada');
+        return;
+      }
+    }
+
     setSubmitting(true);
     setError(null);
     try {

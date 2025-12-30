@@ -82,7 +82,24 @@ class ValidationService
   }
 
   /**
-   * Validar que una fecha sea posterior a otra
+   * Validar que una fecha no sea pasada (puede ser hoy o futura)
+   */
+  public static function validateDateNotPast(string $date): bool
+  {
+    $dateObj = \DateTime::createFromFormat('Y-m-d', $date);
+    if (!$dateObj) {
+      return false;
+    }
+    
+    $today = new \DateTime();
+    $today->setTime(0, 0, 0);
+    $dateObj->setTime(0, 0, 0);
+    
+    return $dateObj >= $today;
+  }
+
+  /**
+   * Validar que una fecha sea posterior o igual a otra
    */
   public static function validateDateAfter(string $date, string $afterDate): bool
   {
@@ -93,7 +110,7 @@ class ValidationService
       return false;
     }
     
-    return $date1 > $date2;
+    return $date1 >= $date2;
   }
 
   /**
@@ -176,20 +193,28 @@ class ValidationService
     }
 
     // Fechas (opcionales, pero si están deben ser válidas)
-    if (isset($data['start_date']) && $data['start_date'] !== '' && !self::validateDate($data['start_date'])) {
-      $errors['start_date'] = 'La fecha de inicio debe estar en formato YYYY-MM-DD';
+    if (isset($data['start_date']) && $data['start_date'] !== '' && $data['start_date'] !== null) {
+      if (!self::validateDate($data['start_date'])) {
+        $errors['start_date'] = 'La fecha de inicio debe estar en formato YYYY-MM-DD';
+      } elseif (!self::validateDateNotPast($data['start_date'])) {
+        $errors['start_date'] = 'La fecha de inicio no puede ser una fecha pasada';
+      }
     }
 
-    if (isset($data['due_date']) && $data['due_date'] !== '' && !self::validateDate($data['due_date'])) {
-      $errors['due_date'] = 'La fecha de vencimiento debe estar en formato YYYY-MM-DD';
+    if (isset($data['due_date']) && $data['due_date'] !== '' && $data['due_date'] !== null) {
+      if (!self::validateDate($data['due_date'])) {
+        $errors['due_date'] = 'La fecha de vencimiento debe estar en formato YYYY-MM-DD';
+      } elseif (!self::validateDateNotPast($data['due_date'])) {
+        $errors['due_date'] = 'La fecha de vencimiento no puede ser una fecha pasada';
+      }
     }
 
-    // Validar que due_date sea posterior a start_date si ambas están presentes
+    // Validar que due_date sea posterior o igual a start_date si ambas están presentes
     if (isset($data['start_date']) && isset($data['due_date']) && 
         $data['start_date'] !== '' && $data['due_date'] !== '' &&
         self::validateDate($data['start_date']) && self::validateDate($data['due_date'])) {
       if (!self::validateDateAfter($data['due_date'], $data['start_date'])) {
-        $errors['due_date'] = 'La fecha de vencimiento debe ser posterior a la fecha de inicio';
+        $errors['due_date'] = 'La fecha de vencimiento debe ser igual o posterior a la fecha de inicio';
       }
     }
 
