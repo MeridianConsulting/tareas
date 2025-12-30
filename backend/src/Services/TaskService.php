@@ -43,6 +43,10 @@ class TaskService
 
   public function create(array $data, array $userContext): array
   {
+    if (!isset($userContext['id'])) {
+      throw new \Exception('User context no válido: falta el ID del usuario');
+    }
+    
     $data['created_by'] = $userContext['id'];
     
     // Normalizar fechas vacías o inválidas
@@ -53,8 +57,24 @@ class TaskService
       $data['due_date'] = $this->normalizeDate($data['due_date']);
     }
     
-    $id = $this->taskRepository->create($data);
-    return $this->taskRepository->findById($id, $userContext);
+    try {
+      $id = $this->taskRepository->create($data);
+      if (!$id || $id <= 0) {
+        throw new \Exception('No se pudo crear la tarea: el ID retornado no es válido');
+      }
+      
+      $task = $this->taskRepository->findById($id, $userContext);
+      if (!$task) {
+        error_log('TaskService::create - Tarea creada con ID ' . $id . ' pero no se pudo recuperar con userContext: ' . json_encode($userContext));
+        throw new \Exception('La tarea se creó pero no se pudo recuperar. Verifica los permisos.');
+      }
+      
+      return $task;
+    } catch (\PDOException $e) {
+      error_log('TaskService::create PDO error: ' . $e->getMessage());
+      error_log('Data: ' . json_encode($data));
+      throw new \Exception('Error de base de datos: ' . $e->getMessage());
+    }
   }
 
   public function update(int $id, array $data, array $userContext): ?array

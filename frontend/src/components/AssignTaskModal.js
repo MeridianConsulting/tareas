@@ -123,17 +123,43 @@ export default function AssignTaskModal({ isOpen, onClose, onSuccess }) {
     e.preventDefault();
     if (!selectedUser || !taskData.title) return;
 
+    // Validar que area_id esté presente y sea válido
+    if (!taskData.area_id || taskData.area_id === '') {
+      setError('Debes seleccionar un área para la tarea');
+      return;
+    }
+
     setSubmitting(true);
+    setError(null);
     try {
+      // Preparar datos: asegurar que area_id y responsible_id sean números válidos
+      const areaId = parseInt(taskData.area_id, 10);
+      const responsibleId = parseInt(selectedUser.id, 10);
+      
+      if (isNaN(areaId) || areaId <= 0) {
+        setError('El área seleccionada no es válida');
+        setSubmitting(false);
+        return;
+      }
+      
+      if (isNaN(responsibleId) || responsibleId <= 0) {
+        setError('El usuario seleccionado no es válido');
+        setSubmitting(false);
+        return;
+      }
+      
+      const taskPayload = normalizeDates({
+        ...taskData,
+        area_id: areaId,
+        responsible_id: responsibleId,
+        status: 'No iniciada',
+        progress_percent: 0
+      });
+
       // 1. Crear la tarea asignada al usuario seleccionado
       const newTask = await apiRequest('/tasks', {
         method: 'POST',
-        body: JSON.stringify(normalizeDates({
-          ...taskData,
-          responsible_id: selectedUser.id,
-          status: 'No iniciada',
-          progress_percent: 0
-        }))
+        body: JSON.stringify(taskPayload)
       });
 
       // 2. Crear la asignación/notificación
@@ -152,7 +178,19 @@ export default function AssignTaskModal({ isOpen, onClose, onSuccess }) {
         onClose();
       }, 1500);
     } catch (e) {
-      setError('Error al crear y asignar tarea: ' + e.message);
+      // Mostrar errores de validación específicos si están disponibles
+      if (e.error) {
+        if (e.error.errors) {
+          const errorMessages = Object.values(e.error.errors).join(', ');
+          setError('Error de validación: ' + errorMessages);
+        } else if (e.error.message) {
+          setError('Error: ' + e.error.message + (e.error.details ? ' (' + e.error.details + ')' : ''));
+        } else {
+          setError('Error al crear y asignar tarea: ' + (e.message || 'Error desconocido'));
+        }
+      } else {
+        setError('Error al crear y asignar tarea: ' + (e.message || 'Error desconocido'));
+      }
     } finally {
       setSubmitting(false);
     }
@@ -381,11 +419,12 @@ export default function AssignTaskModal({ isOpen, onClose, onSuccess }) {
             {/* Área */}
             <div className="mb-4">
               <label className="block text-xs font-medium text-slate-600 mb-1.5 uppercase tracking-wide">
-                Área
+                Área <span className="text-rose-500">*</span>
               </label>
               <select
                 value={taskData.area_id}
                 onChange={e => setTaskData({ ...taskData, area_id: e.target.value })}
+                required
                 className="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
               >
                 <option value="">Seleccionar área</option>

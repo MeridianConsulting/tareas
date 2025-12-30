@@ -122,7 +122,8 @@ class TaskRepository
       $sql .= " AND t.area_id = :user_area_id";
       $params[':user_area_id'] = $areaId;
     } elseif ($role === 'colaborador' && $userId) {
-      $sql .= " AND t.responsible_id = :user_id";
+      // Los colaboradores pueden ver tareas donde son responsables O donde son creadores
+      $sql .= " AND (t.responsible_id = :user_id OR t.created_by = :user_id)";
       $params[':user_id'] = $userId;
     }
 
@@ -154,22 +155,29 @@ class TaskRepository
       )
     ";
 
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute([
-      ':area_id' => $data['area_id'],
-      ':title' => $data['title'],
-      ':description' => $data['description'] ?? null,
-      ':type' => $data['type'] ?? 'Operativa',
-      ':priority' => $data['priority'] ?? 'Media',
-      ':status' => $data['status'] ?? 'No iniciada',
-      ':progress_percent' => $data['progress_percent'] ?? 0,
-      ':responsible_id' => $data['responsible_id'],
-      ':created_by' => $data['created_by'],
-      ':start_date' => $data['start_date'] ?? null,
-      ':due_date' => $data['due_date'] ?? null,
-    ]);
+    try {
+      $stmt = $this->db->prepare($sql);
+      $stmt->execute([
+        ':area_id' => $data['area_id'],
+        ':title' => $data['title'],
+        ':description' => $data['description'] ?? null,
+        ':type' => $data['type'] ?? 'Operativa',
+        ':priority' => $data['priority'] ?? 'Media',
+        ':status' => $data['status'] ?? 'No iniciada',
+        ':progress_percent' => $data['progress_percent'] ?? 0,
+        ':responsible_id' => $data['responsible_id'] ?? null,
+        ':created_by' => $data['created_by'],
+        ':start_date' => $data['start_date'] ?? null,
+        ':due_date' => $data['due_date'] ?? null,
+      ]);
 
-    return (int) $this->db->lastInsertId();
+      return (int) $this->db->lastInsertId();
+    } catch (\PDOException $e) {
+      error_log('TaskRepository::create error: ' . $e->getMessage());
+      error_log('SQL: ' . $sql);
+      error_log('Data: ' . json_encode($data));
+      throw new \Exception('Database error: ' . $e->getMessage());
+    }
   }
 
   public function update(int $id, array $data): bool

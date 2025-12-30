@@ -107,14 +107,41 @@ class TaskController
 
     try {
       $task = $this->taskService->create($body, $userContext);
+      if (!$task) {
+        error_log('TaskController::store - Tarea creada pero no se pudo recuperar. UserContext: ' . json_encode($userContext));
+        return Response::json([
+          'error' => [
+            'code' => 'CREATE_ERROR',
+            'message' => 'No se pudo crear la tarea o no tienes permisos para verla'
+          ]
+        ], 400);
+      }
       return Response::json([
         'data' => TaskResource::toArray($task)
       ], 201);
-    } catch (\Exception $e) {
+    } catch (\PDOException $e) {
+      error_log('TaskController::store PDO error: ' . $e->getMessage());
+      error_log('Stack trace: ' . $e->getTraceAsString());
+      error_log('Request body: ' . json_encode($body));
       return Response::json([
         'error' => [
           'code' => 'CREATE_ERROR',
-          'message' => $e->getMessage()
+          'message' => 'Error de base de datos al crear la tarea',
+          'details' => APP_DEBUG ? $e->getMessage() : null
+        ]
+      ], 400);
+    } catch (\Exception $e) {
+      error_log('TaskController::store error: ' . $e->getMessage());
+      error_log('Stack trace: ' . $e->getTraceAsString());
+      error_log('Request body: ' . json_encode($body));
+      return Response::json([
+        'error' => [
+          'code' => 'CREATE_ERROR',
+          'message' => $e->getMessage() ?: 'Error al crear la tarea',
+          'details' => APP_DEBUG ? [
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+          ] : null
         ]
       ], 400);
     }
