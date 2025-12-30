@@ -149,6 +149,16 @@ export default function AssignTaskModal({ isOpen, onClose, onSuccess }) {
         setError('La fecha de vencimiento no puede ser una fecha pasada');
         return;
       }
+      
+      // Validar que due_date sea igual o posterior a start_date
+      if (taskData.start_date) {
+        const startDate = new Date(taskData.start_date);
+        startDate.setHours(0, 0, 0, 0);
+        if (dueDate < startDate) {
+          setError('La fecha de vencimiento debe ser igual o posterior a la fecha de inicio');
+          return;
+        }
+      }
     }
 
     setSubmitting(true);
