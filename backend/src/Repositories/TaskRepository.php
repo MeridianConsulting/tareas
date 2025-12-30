@@ -156,19 +156,35 @@ class TaskRepository
     ";
 
     try {
+      // Asegurar que los valores numéricos sean enteros o null
+      $areaId = isset($data['area_id']) ? (int)$data['area_id'] : null;
+      $responsibleId = isset($data['responsible_id']) && $data['responsible_id'] !== '' && $data['responsible_id'] !== null 
+        ? (int)$data['responsible_id'] 
+        : null;
+      $createdBy = isset($data['created_by']) ? (int)$data['created_by'] : null;
+      $progressPercent = isset($data['progress_percent']) ? (int)$data['progress_percent'] : 0;
+      
+      if (!$areaId) {
+        throw new \Exception('El área es requerida');
+      }
+      
+      if (!$createdBy) {
+        throw new \Exception('El creador es requerido');
+      }
+      
       $stmt = $this->db->prepare($sql);
       $stmt->execute([
-        ':area_id' => $data['area_id'],
-        ':title' => $data['title'],
-        ':description' => $data['description'] ?? null,
+        ':area_id' => $areaId,
+        ':title' => $data['title'] ?? '',
+        ':description' => !empty($data['description']) ? $data['description'] : null,
         ':type' => $data['type'] ?? 'Operativa',
         ':priority' => $data['priority'] ?? 'Media',
         ':status' => $data['status'] ?? 'No iniciada',
-        ':progress_percent' => $data['progress_percent'] ?? 0,
-        ':responsible_id' => $data['responsible_id'] ?? null,
-        ':created_by' => $data['created_by'],
-        ':start_date' => $data['start_date'] ?? null,
-        ':due_date' => $data['due_date'] ?? null,
+        ':progress_percent' => $progressPercent,
+        ':responsible_id' => $responsibleId,
+        ':created_by' => $createdBy,
+        ':start_date' => !empty($data['start_date']) ? $data['start_date'] : null,
+        ':due_date' => !empty($data['due_date']) ? $data['due_date'] : null,
       ]);
 
       return (int) $this->db->lastInsertId();
