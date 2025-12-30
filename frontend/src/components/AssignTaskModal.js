@@ -130,31 +130,28 @@ export default function AssignTaskModal({ isOpen, onClose, onSuccess }) {
     }
 
     // Validar que las fechas no sean pasadas
+    // Usar comparación de strings para evitar problemas de zona horaria
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const todayStr = today.toISOString().split('T')[0]; // YYYY-MM-DD
     
     if (taskData.start_date) {
-      const startDate = new Date(taskData.start_date);
-      startDate.setHours(0, 0, 0, 0);
-      if (startDate < today) {
+      // Comparar strings de fecha directamente (YYYY-MM-DD)
+      if (taskData.start_date < todayStr) {
         setError('La fecha de inicio no puede ser una fecha pasada');
         return;
       }
     }
     
     if (taskData.due_date) {
-      const dueDate = new Date(taskData.due_date);
-      dueDate.setHours(0, 0, 0, 0);
-      if (dueDate < today) {
+      // Comparar strings de fecha directamente (YYYY-MM-DD)
+      if (taskData.due_date < todayStr) {
         setError('La fecha de vencimiento no puede ser una fecha pasada');
         return;
       }
       
       // Validar que due_date sea igual o posterior a start_date
       if (taskData.start_date) {
-        const startDate = new Date(taskData.start_date);
-        startDate.setHours(0, 0, 0, 0);
-        if (dueDate < startDate) {
+        if (taskData.due_date < taskData.start_date) {
           setError('La fecha de vencimiento debe ser igual o posterior a la fecha de inicio');
           return;
         }
