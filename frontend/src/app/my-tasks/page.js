@@ -34,7 +34,9 @@ export default function MyTasksPage() {
         atRisk: myTasks.filter(t => t.status === 'En riesgo').length,
       });
     } catch (e) {
-      // Error loading tasks
+      // Si falla auth/me, el Layout ya maneja la redirección a login
+      // No hacer nada aquí para evitar loops
+      console.error('Error loading stats:', e);
     }
   }
 

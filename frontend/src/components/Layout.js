@@ -16,10 +16,12 @@ export default function Layout({ children }) {
   const [isBootstrapping, setIsBootstrapping] = useState(true);
 
   useEffect(() => {
-    if (pathname === '/login') {
+    if (pathname === '/login' || pathname === '/login/') {
       setIsBootstrapping(false);
       return;
     }
+    
+    let isMounted = true;
     
     async function bootstrap() {
       try {
@@ -30,15 +32,26 @@ export default function Layout({ children }) {
         
         // 2. Obtener informacion del usuario
         const data = await apiRequest('/auth/me');
-        setUser(data.data);
+        if (isMounted) {
+          setUser(data.data);
+        }
       } catch (e) {
-        router.push('/login/');
+        // Solo redirigir si el componente sigue montado y no estamos ya en login
+        if (isMounted && pathname !== '/login' && pathname !== '/login/') {
+          router.push('/login/');
+        }
       } finally {
-        setIsBootstrapping(false);
+        if (isMounted) {
+          setIsBootstrapping(false);
+        }
       }
     }
     
     bootstrap();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [pathname, router]);
 
   if (pathname === '/login') {

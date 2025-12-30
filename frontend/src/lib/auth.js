@@ -8,7 +8,7 @@ export function login(accessToken, rememberMe = false) {
 export function logout() {
   clearAccessToken();
   if (typeof window !== 'undefined') {
-    window.location.href = '/login';
+    window.location.href = '/login/';
   }
 }
 

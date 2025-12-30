@@ -108,7 +108,7 @@ async function refreshToken() {
     } catch (error) {
       clearAccessToken();
       if (typeof window !== 'undefined') {
-        window.location.href = '/login';
+        window.location.href = '/login/';
       }
       throw error;
     } finally {
