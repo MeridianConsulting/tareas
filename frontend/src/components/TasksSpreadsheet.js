@@ -133,6 +133,18 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
     setNewRows(newRows.filter(row => row._tempId !== tempId));
   }
 
+  // Normalizar fechas: convertir vacías a null
+  function normalizeDates(data) {
+    const normalized = { ...data };
+    if (!normalized.start_date || normalized.start_date === '') {
+      normalized.start_date = null;
+    }
+    if (!normalized.due_date || normalized.due_date === '') {
+      normalized.due_date = null;
+    }
+    return normalized;
+  }
+
   async function saveNewRow(row) {
     if (!row.title.trim()) {
       setAlert({ type: 'warning', message: 'El título es obligatorio', dismissible: true });
@@ -151,7 +163,7 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
       
       await apiRequest('/tasks', {
         method: 'POST',
-        body: JSON.stringify(taskData),
+        body: JSON.stringify(normalizeDates(taskData)),
       });
       setNewRows(newRows.filter(r => r._tempId !== row._tempId));
       await loadData();
@@ -172,10 +184,10 @@ export default function TasksSpreadsheet({ userId, onTasksChange }) {
       const task = tasks.find(t => t.id === taskId);
       await apiRequest(`/tasks/${taskId}`, {
         method: 'PUT',
-        body: JSON.stringify({
+        body: JSON.stringify(normalizeDates({
           ...task,
           ...pendingChanges[taskId]
-        }),
+        })),
       });
       setPendingChanges(prev => {
         const { [taskId]: _, ...rest } = prev;

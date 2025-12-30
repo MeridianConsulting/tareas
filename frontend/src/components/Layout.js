@@ -87,10 +87,14 @@ export default function Layout({ children }) {
         </main>
         
         {/* Footer discreto */}
-        <footer className="hidden lg:block h-8 bg-white border-t border-slate-200 flex items-center justify-center flex-shrink-0">
-          <p className="text-xs text-slate-400">
-            © {new Date().getFullYear()} Meridian Consulting · 
-            <span className="ml-1 text-slate-500">Desarrollado por <span className="font-medium">José Mateo López Cifuentes</span></span>
+        <footer className="hidden lg:flex h-7 items-center justify-center flex-shrink-0 bg-gradient-to-t from-slate-50/80 to-transparent backdrop-blur-sm border-t border-slate-100/50">
+          <p className="text-[10px] text-slate-400/70 tracking-wide">
+            <span className="text-slate-400/60">© {new Date().getFullYear()}</span>
+            <span className="mx-1.5 text-slate-300">·</span>
+            <span className="text-slate-400/60">Meridian Consulting</span>
+            <span className="mx-1.5 text-slate-300">·</span>
+            <span className="text-slate-400/50">Desarrollado por</span>
+            <span className="ml-0.5 text-slate-400/60 font-normal">José Mateo López Cifuentes</span>
           </p>
         </footer>
       </div>

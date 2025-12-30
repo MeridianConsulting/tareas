@@ -124,6 +124,18 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, activeTab, loading, onClose]);
 
+  // Normalizar fechas: convertir vacías a null
+  function normalizeDates(data) {
+    const normalized = { ...data };
+    if (!normalized.start_date || normalized.start_date === '') {
+      normalized.start_date = null;
+    }
+    if (!normalized.due_date || normalized.due_date === '') {
+      normalized.due_date = null;
+    }
+    return normalized;
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     
@@ -140,7 +152,7 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
       
       await apiRequest(url, {
         method,
-        body: JSON.stringify(formData),
+        body: JSON.stringify(normalizeDates(formData)),
       });
       
       if (onSave) {
@@ -162,10 +174,12 @@ export default function TaskModal({ isOpen, onClose, task, onSave }) {
     
     setLoading(true);
     try {
-      const tasksToCreate = pastedTasks.map(taskTitle => ({
-        ...formData,
-        title: taskTitle.trim(),
-      }));
+      const tasksToCreate = pastedTasks.map(taskTitle => 
+        normalizeDates({
+          ...formData,
+          title: taskTitle.trim(),
+        })
+      );
 
       // Crear todas las tareas en paralelo
       await Promise.all(

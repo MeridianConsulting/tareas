@@ -63,9 +63,18 @@ export default function TaskForm({ task, onSave, onCancel }) {
       const url = task ? `/tasks/${task.id}` : '/tasks';
       const method = task ? 'PUT' : 'POST';
       
+      // Preparar datos: convertir fechas vacías a null
+      const dataToSend = { ...formData };
+      if (!dataToSend.start_date || dataToSend.start_date === '') {
+        dataToSend.start_date = null;
+      }
+      if (!dataToSend.due_date || dataToSend.due_date === '') {
+        dataToSend.due_date = null;
+      }
+      
       await apiRequest(url, {
         method,
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSend),
       });
       
       if (onSave) {

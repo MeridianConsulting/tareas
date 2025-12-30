@@ -107,6 +107,18 @@ export default function AssignTaskModal({ isOpen, onClose, onSuccess }) {
     setStep(2);
   }
 
+  // Normalizar fechas: convertir vacías a null
+  function normalizeDates(data) {
+    const normalized = { ...data };
+    if (!normalized.start_date || normalized.start_date === '') {
+      normalized.start_date = null;
+    }
+    if (!normalized.due_date || normalized.due_date === '') {
+      normalized.due_date = null;
+    }
+    return normalized;
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     if (!selectedUser || !taskData.title) return;
@@ -116,12 +128,12 @@ export default function AssignTaskModal({ isOpen, onClose, onSuccess }) {
       // 1. Crear la tarea asignada al usuario seleccionado
       const newTask = await apiRequest('/tasks', {
         method: 'POST',
-        body: JSON.stringify({
+        body: JSON.stringify(normalizeDates({
           ...taskData,
           responsible_id: selectedUser.id,
           status: 'No iniciada',
           progress_percent: 0
-        })
+        }))
       });
 
       // 2. Crear la asignación/notificación

@@ -52,16 +52,13 @@ class TaskAssignmentService
             throw new \Exception('La tarea no existe');
         }
 
-        // Validar que el usuario destino existe
-        $user = $this->userRepository->findById($data['assigned_to']);
-        if (!$user) {
-            throw new \Exception('El usuario destino no existe');
-        }
+    // Validar que el usuario destino existe
+    $user = $this->userRepository->findById($data['assigned_to']);
+    if (!$user) {
+      throw new \Exception('El usuario destino no existe');
+    }
 
-        // No permitir asignarse a uno mismo
-        if ($data['assigned_to'] == $assignedBy) {
-            throw new \Exception('No puedes asignarte una tarea a ti mismo');
-        }
+    // Permitir auto-asignación: los colaboradores pueden asignarse tareas a sí mismos
 
         $assignmentData = [
             'task_id' => $data['task_id'],

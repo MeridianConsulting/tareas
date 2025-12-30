@@ -240,12 +240,16 @@ export default function LoginPage() {
           </div>
 
           {/* Footer móvil */}
-          <div className="lg:hidden text-center mt-8 space-y-1">
-            <p className="text-xs text-slate-400">
-              © {new Date().getFullYear()} Meridian Consulting
-            </p>
-            <p className="text-xs text-slate-500/60">
-              Desarrollado por <span className="font-medium text-slate-400">José Mateo López Cifuentes</span>
+          <div className="lg:hidden text-center mt-8 pt-6 border-t border-slate-100/50">
+            <p className="text-[10px] text-slate-400/60 tracking-wide space-y-0.5">
+              <span className="block">
+                <span className="text-slate-400/50">© {new Date().getFullYear()}</span>
+                <span className="mx-1.5 text-slate-300/50">·</span>
+                <span className="text-slate-400/50">Meridian Consulting</span>
+              </span>
+              <span className="block text-slate-400/50">
+                Desarrollado por <span className="text-slate-400/60 font-normal">José Mateo López Cifuentes</span>
+              </span>
             </p>
           </div>
         </div>
