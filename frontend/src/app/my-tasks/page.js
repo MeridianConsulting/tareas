@@ -80,8 +80,14 @@ export default function MyTasksPage() {
           </div>
         </div>
 
-        {/* Spreadsheet component */}
-        <TasksSpreadsheet userId={currentUser?.id} onTasksChange={loadStats} />
+        {/* Spreadsheet component - solo renderizar cuando tengamos userId */}
+        {currentUser?.id ? (
+          <TasksSpreadsheet userId={currentUser.id} onTasksChange={loadStats} />
+        ) : (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-sm text-slate-500">Cargando usuario...</div>
+          </div>
+        )}
       </div>
     </Layout>
   );

@@ -114,8 +114,8 @@ export default function Sidebar({ user, isOpen, onToggle }) {
 
   function handleTaskSaved() {
     setShowTaskModal(false);
-    router.refresh();
-    window.location.reload();
+    // No usar router.refresh() ni window.location.reload() en Next.js estático
+    // La navegación se maneja mediante callbacks (onTasksChange) en los componentes
   }
 
   return (
@@ -173,7 +173,9 @@ export default function Sidebar({ user, isOpen, onToggle }) {
           <ul className="space-y-1">
             {menuItems.map(item => {
               const Icon = item.icon;
-              const isActive = pathname === item.href;
+              // Normalizar pathname y href para comparar (con/sin trailing slash)
+              const normalize = (p) => (p.endsWith('/') ? p.slice(0, -1) : p);
+              const isActive = normalize(pathname) === normalize(item.href);
               
               return (
                 <li key={item.href}>
