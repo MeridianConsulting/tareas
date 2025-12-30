@@ -34,8 +34,10 @@ class TaskRepository
       $sql .= " AND t.area_id = :user_area_id";
       $params[':user_area_id'] = $areaId;
     } elseif ($role === 'colaborador' && $userId) {
-      $sql .= " AND t.responsible_id = :user_id";
-      $params[':user_id'] = $userId;
+      // Los colaboradores pueden ver tareas donde son responsables O donde son creadores
+      $sql .= " AND (t.responsible_id = :user_id_responsible OR t.created_by = :user_id_creator)";
+      $params[':user_id_responsible'] = $userId;
+      $params[':user_id_creator'] = $userId;
     }
     // admin ven todo, no se agrega restricción
 
@@ -123,8 +125,10 @@ class TaskRepository
       $params[':user_area_id'] = $areaId;
     } elseif ($role === 'colaborador' && $userId) {
       // Los colaboradores pueden ver tareas donde son responsables O donde son creadores
-      $sql .= " AND (t.responsible_id = :user_id OR t.created_by = :user_id)";
-      $params[':user_id'] = $userId;
+      // Usar parámetros separados para evitar problemas con PDO
+      $sql .= " AND (t.responsible_id = :user_id_responsible OR t.created_by = :user_id_creator)";
+      $params[':user_id_responsible'] = $userId;
+      $params[':user_id_creator'] = $userId;
     }
 
     try {
