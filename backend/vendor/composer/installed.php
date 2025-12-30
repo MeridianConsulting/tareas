@@ -3,11 +3,11 @@
         'name' => 'tareas/backend',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'f5073e524f7e1bad22d6435a8c6d0af391b9c836',
+        'reference' => '5356d0ee604ea402de857406d74e0f7461377c02',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'dev' => true,
+        'dev' => false,
     ),
     'versions' => array(
         'firebase/php-jwt' => array(
@@ -76,7 +76,7 @@
         'tareas/backend' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'f5073e524f7e1bad22d6435a8c6d0af391b9c836',
+            'reference' => '5356d0ee604ea402de857406d74e0f7461377c02',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
