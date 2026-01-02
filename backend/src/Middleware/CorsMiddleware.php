@@ -9,7 +9,22 @@ class CorsMiddleware
 {
   public function handle(Request $request, callable $next)
   {
+    // Obtener el origen de la petición
+    $requestOrigin = $request->getHeader('Origin');
+    
+    // Determinar el origen permitido
     $origin = CORS_ORIGIN;
+    
+    // En desarrollo, permitir localhost con cualquier puerto o path
+    if (defined('APP_ENV') && APP_ENV === 'local') {
+      if ($requestOrigin && (
+        strpos($requestOrigin, 'http://localhost') === 0 ||
+        strpos($requestOrigin, 'http://127.0.0.1') === 0
+      )) {
+        $origin = $requestOrigin;
+      }
+    }
+    
     $method = $request->getMethod();
 
     // Handle preflight OPTIONS request

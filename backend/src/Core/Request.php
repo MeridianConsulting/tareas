@@ -35,6 +35,11 @@ class Request
     // Extraer solo el path de la URI (sin query string)
     $path = parse_url($requestUri, PHP_URL_PATH);
     
+    // Si el path comienza con /api/, mantenerlo tal cual (viene de reescritura .htaccess)
+    if (strpos($path, '/api/') === 0) {
+      return $path;
+    }
+    
     // Obtener el directorio base del script
     // Si SCRIPT_NAME es /tareas/backend/public/index.php
     // entonces scriptDir será /tareas/backend/public

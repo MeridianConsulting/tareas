@@ -18,7 +18,8 @@ import {
   TrendingUp,
   Users,
   ChevronDown,
-  RefreshCw
+  RefreshCw,
+  ClipboardList
 } from 'lucide-react';
 
 // Importar Pie chart dinámicamente
@@ -115,6 +116,42 @@ export default function AreasDashboard() {
   const handleRefresh = () => {
     loadData(dateFrom, dateTo, true);
   };
+
+  // Obtener tareas del día para un área específica
+  function getAreaDayTasks(areaId) {
+    const areaTasks = allTasks.filter(t => t.area_id == areaId);
+    
+    // Filtrar por rango de fechas si están definidas
+    // Incluir tareas creadas o actualizadas en el período
+    let filteredTasks = areaTasks;
+    if (dateFrom && dateTo) {
+      filteredTasks = areaTasks.filter(t => {
+        const createdDate = t.created_at ? new Date(t.created_at).toISOString().split('T')[0] : null;
+        const updatedDate = t.updated_at ? new Date(t.updated_at).toISOString().split('T')[0] : null;
+        
+        const createdInRange = createdDate && createdDate >= dateFrom && createdDate <= dateTo;
+        const updatedInRange = updatedDate && updatedDate >= dateFrom && updatedDate <= dateTo;
+        
+        return createdInRange || updatedInRange;
+      });
+    } else if (dateFrom) {
+      filteredTasks = areaTasks.filter(t => {
+        const createdDate = t.created_at ? new Date(t.created_at).toISOString().split('T')[0] : null;
+        const updatedDate = t.updated_at ? new Date(t.updated_at).toISOString().split('T')[0] : null;
+        
+        return createdDate === dateFrom || updatedDate === dateFrom;
+      });
+    }
+    
+    // Ordenar: prioridad Alta primero, luego las demás
+    filteredTasks.sort((a, b) => {
+      if (a.priority === 'Alta' && b.priority !== 'Alta') return -1;
+      if (a.priority !== 'Alta' && b.priority === 'Alta') return 1;
+      return 0;
+    });
+    
+    return filteredTasks;
+  }
 
   // Obtener datos de un área específica
   function getAreaData(areaId) {
@@ -437,6 +474,96 @@ export default function AreasDashboard() {
                             </div>
                           )}
                         </div>
+                      </div>
+                    </div>
+
+                    {/* Lista de tareas del día */}
+                    <div className="border-t border-slate-200">
+                      <div className="px-5 py-4 border-b border-slate-200 bg-slate-50/50">
+                        <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                          <ClipboardList className="w-4 h-4" />
+                          Tareas {getPeriodLabel() ? ` ${getPeriodLabel()}` : ' del período seleccionado'}
+                        </h3>
+                      </div>
+                      <div className="overflow-x-auto">
+                        {(() => {
+                          const dayTasks = getAreaDayTasks(area.id);
+                          return dayTasks.length > 0 ? (
+                            <table className="min-w-full">
+                              <thead>
+                                <tr className="border-b border-slate-200 bg-slate-50/80">
+                                  <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Título</th>
+                                  <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Tipo</th>
+                                  <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Prioridad</th>
+                                  <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Estado</th>
+                                  <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Progreso</th>
+                                  <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Responsable</th>
+                                  <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Fecha actualización</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100">
+                                {dayTasks.map(task => (
+                                  <tr key={task.id} className="hover:bg-slate-50 transition-colors">
+                                    <td className="px-5 py-3.5 text-sm font-medium text-slate-900">{task.title}</td>
+                                    <td className="px-5 py-3.5 text-sm text-slate-600">{task.type}</td>
+                                    <td className="px-5 py-3.5">
+                                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                                        task.priority === 'Alta' ? 'bg-rose-50 text-rose-700' :
+                                        task.priority === 'Media' ? 'bg-amber-50 text-amber-700' :
+                                        'bg-emerald-50 text-emerald-700'
+                                      }`}>
+                                        {task.priority}
+                                      </span>
+                                    </td>
+                                    <td className="px-5 py-3.5">
+                                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                                        task.status === 'Completada' ? 'bg-emerald-50 text-emerald-700' :
+                                        task.status === 'En progreso' ? 'bg-blue-50 text-blue-700' :
+                                        task.status === 'En riesgo' ? 'bg-rose-50 text-rose-700' :
+                                        task.status === 'En revision' ? 'bg-violet-50 text-violet-700' :
+                                        'bg-slate-100 text-slate-600'
+                                      }`}>
+                                        {task.status}
+                                      </span>
+                                    </td>
+                                    <td className="px-5 py-3.5">
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-16 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                          <div
+                                            className={`h-full rounded-full ${
+                                              task.progress_percent >= 100 ? 'bg-emerald-500' :
+                                              task.progress_percent >= 50 ? 'bg-indigo-500' : 'bg-amber-500'
+                                            }`}
+                                            style={{ width: `${task.progress_percent || 0}%` }}
+                                          ></div>
+                                        </div>
+                                        <span className="text-xs font-medium text-slate-500 tabular-nums">{task.progress_percent || 0}%</span>
+                                      </div>
+                                    </td>
+                                    <td className="px-5 py-3.5 text-sm text-slate-600">{task.responsible_name || 'Sin asignar'}</td>
+                                    <td className="px-5 py-3.5 text-sm text-slate-500">
+                                      {task.updated_at ? new Date(task.updated_at).toLocaleDateString('es-ES', { 
+                                        day: '2-digit', 
+                                        month: '2-digit', 
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      }) : '—'}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          ) : (
+                            <div className="px-5 py-12 text-center">
+                              <div className="flex flex-col items-center">
+                                <ClipboardList className="w-10 h-10 text-slate-300 mb-3" strokeWidth={1.5} />
+                                <p className="text-sm font-medium text-slate-900 mb-1">No hay tareas para este período</p>
+                                <p className="text-sm text-slate-500">Selecciona otro rango de fechas para ver las actividades</p>
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
 

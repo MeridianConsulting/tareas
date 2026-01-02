@@ -3,7 +3,7 @@
         'name' => 'tareas/backend',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'bd0aceb6f925d6bde21549ed9857949b37f3a761',
+        'reference' => 'f5fd3f535f9024590896c108b588784e55816117',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -76,7 +76,7 @@
         'tareas/backend' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'bd0aceb6f925d6bde21549ed9857949b37f3a761',
+            'reference' => 'f5fd3f535f9024590896c108b588784e55816117',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
